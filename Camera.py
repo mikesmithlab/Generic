@@ -30,13 +30,14 @@ class Camera:
         ---------------------------------------------------------------------
         '''
         if camtype == 'logitechHD1080p':
-            frame_sizes,framerates = readLogitech()
+            self.frame_sizes,self.framerates = readLogitech()
             #Format (W,H,colourdepth). Default value 1st
             #framerates. Default value 1st
         elif camtype == 'philips 3':
-            frame_sizes,framerates = readPhilips()
+            self.frame_sizes,self.framerates = readPhilips()
         else:
             print('camera not supported. Update camconfig.py with info')
+        
         '''------------------------------------------------------------------
         ------------------------------------------------------------------'''
         self.default_frame_size = self.frame_sizes[0]
