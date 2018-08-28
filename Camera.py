@@ -7,8 +7,10 @@ from camconfig import*
 
 
 
+
+
 class Camera:
-    def __init__(self,camtype = 'logitechHD1080p',camnum=0,framesize = -1,fps=-1):
+    def __init__(self,cam_type = 'logitechHD1080p',cam_num=0,frame_size = -1,fps=-1):
         '''
         initialisation creates the camera object.
         
@@ -20,49 +22,37 @@ class Camera:
         
         framesize is a tuple (W,H,Color Depth) or if -1 specifies default
         '''
-        self.camtype = camtype   
+        self.cam_type = cam_type   
         #Create camera object
-        self.cam = cv2.VideoCapture(camnum)
+        self.cam = cv2.VideoCapture(cam_num)
         
-        '''------------------------------------------------------------------
-                List all camera types here with params
-                If adding a camera please test thoroughly
-        ---------------------------------------------------------------------
-        '''
-        if camtype == 'logitechHD1080p':
-            self.frame_sizes,self.framerates = readLogitech()
-            #Format (W,H,colourdepth). Default value 1st
-            #framerates. Default value 1st
-        elif camtype == 'philips 3':
-            self.frame_sizes,self.framerates = readPhilips()
-        else:
-            print('camera not supported. Update camconfig.py with info')
-        
-        '''------------------------------------------------------------------
-        ------------------------------------------------------------------'''
+        '''All camera frame sizes and frame rates are defined in CameraDetailsList'''
+        cam_details = CameraDetailsList()
+        self.frame_sizes, self.frame_rates = cam_details.search(cam_type)
+
         self.default_frame_size = self.frame_sizes[0]
-        self.defaultfps = self.framerates[0]
+        self.default_fps = self.frame_rates[0]
        
         #Set framerate
         if fps == -1:
-            self.fps = self.defaultfps
-        elif fps in self.framerates:
+            self.fps = self.default_fps
+        elif fps in self.frame_rates:
             self.fps = fps
         else:
             print('fps not possible')
         
         
         #Set framesize
-        if framesize == -1:
-            self.framesize = self.default_frame_size
-        elif framesize in self.frame_sizes:
-            self.framesize = framesize
+        if frame_size == -1:
+            self.frame_size = self.default_frame_size
+        elif frame_size in self.frame_sizes:
+            self.frame_size = frame_size
         else:
             print('frame size not possible')           
             
         #Set resolution
-        self.cam.set(cv2.CAP_PROP_FRAME_WIDTH,self.framesize[0])
-        self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT,self.framesize[1]) 
+        self.cam.set(cv2.CAP_PROP_FRAME_WIDTH,self.frame_size[0])
+        self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT,self.frame_size[1]) 
         self.cam.set(cv2.CAP_PROP_FPS,self.fps)
         
         try:
@@ -72,7 +62,7 @@ class Camera:
             print('error reading test frame')
              
 
-    def previewCam(self):
+    def preview_cam(self):
         '''This produces a live preview window to enable you to optimise camera settings
         If you have more than one camera you need to change the number of the camera which is 
         linked to the usb port being used
@@ -90,18 +80,19 @@ class Camera:
                 cv2.destroyAllWindows()
                 loopvar = False
                 
-    def createWriteVid(self,filename,fps=30.0):
+    def create_write_vid(self,filename,fps=30.0):
         try:
             self.vid.close()
         except:
             pass
-        self.vid = WriteVideo(filename,framesize=self.framesize,fps=self.fps)
+        print(self.frame_size)
+        self.vid = WriteVideo(filename=filename,frame_size=self.frame_size,fps=self.fps)
         
         
-    def closeWriteVid(self):
+    def close_write_vid(self):
         self.vid.close()
 
-    def startRecord(self,numframes = -1,fps=-1,showPic=False,timelapse=-1):
+    def start_record(self,num_frames = -1,fps=-1,show_pic=False,time_lapse=-1):
         '''
         To avoid delay in recording you must call createWriteVid prior to startRecord
         starts recording video for numframes. If numframes set to -1 the recording is
@@ -120,14 +111,14 @@ class Camera:
             # Capture frame from camera
             ret, frame = self.cam.read()
             #write frame to video
-            self.vid.addFrame(frame)
+            self.vid.add_frame(frame)
             # Display the resulting frame
-            if showPic:
+            if show_pic:
                 cv2.imshow('frame',frame)
             #stop when q is pressed
             
-            if timelapse != -1:
-                time.sleep(timelapse)
+            if time_lapse != -1:
+                time.sleep(time_lapse)
                 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.vid.close()
@@ -135,7 +126,7 @@ class Camera:
                 loopvar = False
             n=n+1
             #Stop after numframes
-            if n == numframes-1:
+            if n == num_frames-1:
                 loopvar = False
                 self.vid.close()
                 cv2.destroyAllWindows()
@@ -143,25 +134,25 @@ class Camera:
             
                 
 
-    def singlePicImg(self,filename,showPic=False):
+    def single_pic_img(self,filename,show_pic=False):
         '''writes single image to picture file '''
         ret,frame=self.cam.read()        
         cv2.imwrite(filename,frame)
-        if showPic:
+        if show_pic:
                 cv2.imshow('frame',frame)
     
     
-    def singlePicVid(self,showPic=False):
+    def single_pic_vid(self,show_pic=False):
         '''Stores single picture from camera to video
         Before calling you must call createWriteVid
         When you have finished collecting video call closeWriteVid '''
         ret, frame = self.cam.read()
         #write frame to video
-        self.vid.addFrame(frame) 
-        if showPic:
+        self.vid.add_frame(frame) 
+        if show_pic:
                 cv2.imshow('frame',frame)
     
-    def getCamProps(self,show=False):
+    def get_cam_props(self,show=False):
         self.width = self.cam.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.height = self.cam.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.fps = self.cam.get(cv2.CAP_PROP_FPS)
@@ -193,7 +184,7 @@ class Camera:
             print('unsupported features return 0')
             print('-----------------------------')
     
-    def setCamProps(self,property_name,value):
+    def set_cam_props(self,property_name,value):
         '''
         Legitimate properties are brightness,contrast,hue,saturation,gain
         some cameras will not support all of them.
@@ -214,41 +205,70 @@ class Camera:
                 print('Error setting property')
         else:
             print('Error property not in list')
-        self.getCamProps()
+        self.get_cam_props()
         
-    def saveCamSettings(self):
-        camSettingsFile = filedialog.asksaveasfilename(defaultextension='.camlog',filetypes = [('CAM','.camsettingslog')])
+    def save_cam_settings(self):
+        cam_settings_file = filedialog.asksaveasfilename(defaultextension='.camlog',filetypes = [('CAM','.camsettingslog')])
         
-        self.getCamProps(show=True)
+        self.get_cam_props(show=True)
         settings = [self.brightness,self.contrast,self.gain,self.saturation,self.hue,self.exposure]
-        with open(camSettingsFile,'w') as settingsFile:
+        with open(cam_settings_file,'w') as settings_file:
             for item in settings:
-                settingsFile.write("%s\n" % item)
+                settings_file.write("%s\n" % item)
         
         
-    def loadCamSettings(self):
-        camSettingsFile = filedialog.askopenfilename(defaultextension='.camlog',filetypes = [('CAM','.camsettingslog')])        
-        with open(camSettingsFile,'r') as settingsFile:
-            settingsList = settingsFile.read().splitlines() 
-        self.brightness = settingsList[0]
-        self.contrast = settingsList[1]
-        self.gain = settingsList[2]
-        self.saturation = settingsList[3]
-        self.hue = settingsList[4]
-        self.exposure = settingsList[5]
+    def load_cam_settings(self):
+        cam_settings_file = filedialog.askopenfilename(defaultextension='.camlog',filetypes = [('CAM','.camsettingslog')])        
+        with open(cam_settings_file,'r') as settings_file:
+            settings_list = settings_file.read().splitlines() 
+        self.brightness = settings_list[0]
+        self.contrast = settings_list[1]
+        self.gain = settings_list[2]
+        self.saturation = settings_list[3]
+        self.hue = settings_list[4]
+        self.exposure = settings_list[5]
                     
-        self.setCamProps('brightness',self.brightness)
-        self.setCamProps('contrast',self.contrast)
-        self.setCamProps('gain',self.gain)
-        self.setCamProps('saturation',self.saturation)
-        self.setCamProps('hue',self.hue)
-        self.setCamProps('exposure',self.exposure)
+        self.set_cam_props('brightness',self.brightness)
+        self.set_cam_props('contrast',self.contrast)
+        self.set_cam_props('gain',self.gain)
+        self.set_cam_props('saturation',self.saturation)
+        self.set_cam_props('hue',self.hue)
+        self.set_cam_props('exposure',self.exposure)
             
 
     def close(self):
         self.cam.release()
         
         print('Camera closed')
+
+'''
+-----------------------------------------------------------------------------
+Specific Camera implementations
+-----------------------------------------------------------------------------
+'''
+class CameraDetailsList:
+    '''
+    CameraDetailsList is a helper class which stores the details of all the 
+    different cameras. Mainly this is done to make the code more readable
+    and to make it easier to add additional cameras.
+    
+    To add a new camera give is a name and add a Tuple to the dictionary
+    ([List of tuples specifying frame sizes],[list of frame rates])
+    
+    The default values should be placed first in the list.
+    '''
+    
+    def __init__(self):
+        self.camera_list = {'logitechHD1080p':([(1920,1080,3),(640,480,3),(1280,720,3),(480,360,3)],[30.0]),
+                   'philips 3':([(640,480,3),(1280,1080,3)],[20.0])
+                   }
+        
+    def search(self,cam_type):
+        return self.camera_list[cam_type]
+    
+   
+        
+    
         
 if __name__ == '__main__':
     '''clean up code in case the camera closed with an error'''
@@ -268,22 +288,22 @@ if __name__ == '__main__':
     root.destroy() 
 
     '''Create a camera object'''
-    capture = Camera(framesize = (1920,1080,3))
+    capture = Camera(cam_type='logitechHD1080p',frame_size = (1920,1080,3))
     
     '''Preview it'''
-    capture.previewCam()  
+    capture.preview_cam()  
     
-    #capture.getCamProps(show=True)
-    #capture.saveCamSettings()
-    #capture.setCamProps('exposure',0.1)
-    #capture.loadCamSettings()
+    #capture.get_cam_props(show=True)
+    #capture.save_cam_settings()
+    #capture.set_cam_props('exposure',0.1)
+    #capture.load_cam_settings()
     
     '''write a single png '''
-    #capture.singlePicImg(filename2)
+    #capture.single_pic_img(filename2)
     
     '''record a video with numframes. Vid can be stopped by hitting q'''    
-    capture.createWriteVid(filename=filename3)
-    capture.startRecord(numframes = 100,showPic=True,timelapse=1)
+    capture.create_write_vid(filename=filename3)
+    capture.start_record(num_frames = 100,show_pic=True,time_lapse=1)
     
     #Clean up
     capture.close()    
