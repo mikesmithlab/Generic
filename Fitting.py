@@ -104,7 +104,7 @@ class Fit:
     add_params()  -   add fit parameters. lower and upper bounds are optional and will be set to +/- np.inf
                       if not supplied.
     _replace_none_fixed - Internal method to replace None and Fixed values in fit limits with appropriate substitutes
-    filter()  -       Takes a logical numpy array with True or False to indicate if data should be included in fit
+    add_filter()  -       Takes a logical numpy array with True or False to indicate if data should be included in fit
     fit()             Fits the data and returns (fit_params, fit_residuals, fit_y)
     plot_fit()        Plots fit to screen or file depending on settings
     stats()           provides simple statistics on the data and filtered data sets.
@@ -171,7 +171,7 @@ class Fit:
                 elif (item == 'Fixed') and (self._params[index] < 0):
                     self._upper[index] = self._params[index]*(1.0 - nudge)
     
-    def filter(self,logic):
+    def add_filter(self,logic):
         len_logic=np.shape(logic)[0]
         if len_logic != np.shape(self.x)[0]:
             print('x','logic')
