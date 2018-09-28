@@ -59,13 +59,18 @@ def sin_const_convert(params,long=True):
     c and d or C and D remain unchanged
     '''
     if long == True:
+        print('Changing: a sin(cx) + b cos(cx) + d')
+        print('to : A sin (CX + B) + D')
         a = params[0]
         b = params[1]
         
-        params[1] = np.atan2(b/a) #B
+        params[1] = np.arctan2(b,a) #B
         params[0] = (a**2 + b**2)**0.5 #A
         
     else:
+        print('Changin : A sin (CX + B) + D')
+        print('to : a sin(cx) + b cos(cx) + d')
+        
         A = params[0]
         B = params[1]
         
@@ -123,6 +128,7 @@ class Fit:
         if type(series) == type(pd.Series()):
             x = series.index.values
             y = series.values
+        
         self.add_fit_data(x,y)
     
     def add_fit_data(self,x=None,y=None,series=None,reset_filter=True):
@@ -172,6 +178,8 @@ class Fit:
                     self._upper[index] = self._params[index]*(1.0 - nudge)
     
     def add_filter(self,logic):
+        if type(logic) == type(pd.Series()):
+            logic = logic.values
         len_logic=np.shape(logic)[0]
         if len_logic != np.shape(self.x)[0]:
             print('x','logic')
@@ -180,16 +188,24 @@ class Fit:
         self.fx = self.x[logic]
         self.fy = self.y[logic]    
     
-    def fit(self):
+    def fit(self,interpolate=False,factor=0.001):
         fit_output = optimize.curve_fit(globals()[self.fit_type], self.fx,self.fy,p0=self._params,bounds=(self._lower,self._upper))
         self.fit_params = fit_output[0]
         self.fit_residuals = fit_output[1]
-        self.fit_y = globals()[self.fit_type](self.x,*self.fit_params)
+        if interpolate == True:
+            self.stats()
+            original_step = (self.xdata_max - self.xdata_min) / self.xdata_length
+            interpolation_step_size = factor * original_step
+            self.fit_x = np.arange(self.xdata_min,self.xdata_max,interpolation_step_size)
+        else:
+            self.fit_x = self.x
+        self.fit_y = globals()[self.fit_type](self.fit_x,*self.fit_params)
         print('\nFit : ',fit_dict[self.fit_type])
         print('Fit params : ')
         letters = [chr(c) for c in range(ord('a'),ord('z')+1)]
         for index,param in enumerate(self.fit_params):
             print(letters[index],': (', param, self._lower[index], self._upper[index],')')
+        
         return (self.fit_params,self.fit_residuals,self.fit_y)
     
     def plot_fit(self,filename=None,show=False,save=False):
@@ -198,7 +214,7 @@ class Fit:
         plt.figure(filename)
         plt.plot(self.x,self.y,'rx')
         plt.plot(self.fx,self.fy,'bx')
-        plt.plot(self.x,self.fit_y)
+        plt.plot(self.fit_x,self.fit_y,'g-')
         if save == True:
             plt.savefig(filename)
         if show == True:
@@ -212,6 +228,7 @@ class Fit:
         self.ydata_min = np.min(self.y)
         self.xdata_max = np.max(self.x)
         self.xdata_min = np.min(self.x)
+        self.xdata_length = np.shape(self.x)[0]
         
         self.fydata_mean = np.mean(self.fy)
         self.fydata_std = np.std(self.fy)
@@ -220,6 +237,8 @@ class Fit:
         self.fydata_min = np.min(self.fy)
         self.fxdata_max = np.max(self.fx)
         self.fxdata_min = np.min(self.fx)
+        self.fdata_length = np.shape(self.fx)[0]
+        
         if show_stats:
             print('ydata:')
             print('mean - ',self.ydata_mean)
@@ -230,6 +249,7 @@ class Fit:
             print('xdata:')
             print('min - ',self.xdata_min)
             print('max - ',self.xdata_max)
+            print('data length - ', self.xdata_length)
             print('')
             print('ydata filtered:')
             print('mean - ',self.fydata_mean)
@@ -240,7 +260,7 @@ class Fit:
             print('xdata filtered:')
             print('min - ',self.fxdata_min)
             print('max - ',self.fxdata_max)
-    
+            print('data length - ', self.fxdata_length)
             
 '''
 Exception defintions
@@ -266,7 +286,7 @@ if __name__ ==  '__main__':
     xdata = np.arange(1000)
     
     '''sin or cos'''
-    a = 14
+    a = 10
     b = 0.5
     c = 0.5
     d = 5
@@ -277,10 +297,10 @@ if __name__ ==  '__main__':
     guess = [a+0.1,b*0.9,c+0*np.pi,d]
     lower_bcs = [None,0,0,'Fixed']
     upper_bcs = [None,np.inf,np.pi,'Fixed']
-    fit_obj = Fit('sin_cos',series=pd_y_sin)#x=xdata,y=y_sin)
+    fit_obj = Fit('sin_cos',x=xdata,y=y_sin)#series=pd_y_sin)
     fit_obj.add_params(guess,lower=lower_bcs,upper=upper_bcs)
     logic = xdata < 500
-    fit_obj.filter(logic)
+    fit_obj.add_filter(logic)
     fit_obj.stats(show_stats=True)
     fit_obj.fit()
     fit_obj.plot_fit(show=True)
