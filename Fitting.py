@@ -138,7 +138,7 @@ class Fit:
         self.x = x
         self.y = y
         if reset_filter == True:
-            self.filter(np.ones(np.shape(x),dtype=bool))
+            self.add_filter(np.ones(np.shape(x),dtype=bool))
     
     def add_params(self,guess,lower=None,upper=None):
         _num_params = np.shape(guess)[0]
