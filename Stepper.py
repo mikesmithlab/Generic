@@ -7,20 +7,19 @@ Created on Tue Aug 14 10:49:19 2018
 
 
 import sys
-import glob
 import serial
 import time
-import struct
+
 
 class DualStepper:
  
-    def __init__(self,comport='COM5'):
+    def __init__(self,comport='COM4'):
         """Open the selected serial port"""
         self.port = serial.Serial()
         self.port.port = comport
         self.port.baudrate = 9600
         self.port.timeout = 0
-        if port.isOpen() == False:
+        if self.port.isOpen() == False:
             self.port.open()
             self.port_status = True
             time.sleep(2)
@@ -32,7 +31,8 @@ class DualStepper:
     def quit_serial(self):
         """Method to close the serial port when the Tk window is closed"""
         self.port.close()
-        sys.exit()
+        time.sleep(1)
+        
         
     def send_command(self,cmd,steps=0):
         '''
@@ -55,61 +55,58 @@ class DualStepper:
     
         if cmd =='RX':
             print('RX')
-            self.serialObj.write(b'RX\n')
+            self.port.write(b'RX\n')
             self.posx = 0
         if cmd =='RY':
             print('RY')
-            self.serialObj.write(b'RY\n')
+            self.port.write(b'RY\n')
             self.posy=0
         if cmd =='MX+':
             print('MX+')
             message  = b'MX+'
-            self.serialObj.write(message)
-            self.serialObj.write(bytes(str(steps),'utf8'))
-            self.serialObj.write(b'\n')
+            self.port.write(message)
+            self.port.write(bytes(str(steps),'utf8'))
+            self.port.write(b'\n')
             self.posx=self.posx + steps
         if cmd =='MX-':
             print('MX-')
             message  = b'MX-'
-            self.serialObj.write(message)
-            self.serialObj.write(bytes(str(steps),'utf8'))
-            self.serialObj.write(b'\n')
+            self.port.write(message)
+            self.port.write(bytes(str(steps),'utf8'))
+            self.port.write(b'\n')
             self.posx=self.posx - steps
         if cmd =='MY+':
             print('MY+')
             message  = b'MY+'
-            self.serialObj.write(message)
-            self.serialObj.write(bytes(str(steps),'utf8'))
-            self.serialObj.write(b'\n')
+            self.port.write(message)
+            self.port.write(bytes(str(steps),'utf8'))
+            self.port.write(b'\n')
             self.posy=self.posy + steps
         if cmd =='MY-':
             print('MY-')
             message  = b'MY-'
-            self.serialObj.write(message)
-            self.serialObj.write(bytes(str(steps),'utf8'))
-            self.serialObj.write(b'\n')
+            self.port.write(message)
+            self.port.write(bytes(str(steps),'utf8'))
+            self.port.write(b'\n')
             self.posy=self.posy - steps
     
           
         print('values written')
-        time.sleep(0.1)
-        return pos
+        time.sleep(0.5)
+        
 
  
     
 if __name__ == '__main__':
-    try:
-        s.quit_serial(s)
-    except:
-        pass
+
     s=DualStepper()
     
-    #Reset x barrier
-    s.send_command('RX')
+    #Reset y barrier
+    s.send_command('RY')
 
         
-    #Move x barrier 2000 steps towards the middle
-    s.send_command('MX+',steps=2000)
+    #Move y barrier 2000 steps towards the middle
+    s.send_command('MY+',steps=1000)
     
     s.quit_serial()
     
