@@ -66,6 +66,7 @@ class Camera:
             
         #Set resolution
         print(self.frame_size)
+        
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH,self.frame_size[0])
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT,self.frame_size[1]) 
         self.cam.set(cv2.CAP_PROP_FPS,self.fps)
@@ -98,7 +99,12 @@ class Camera:
                 cv2.destroyAllWindows()
                 loopvar = False
                 
-    def write_to_vid(self,filename,fps=30.0):
+    def write_to_vid(self,filename=None,fps=30.0):
+        if filename == None:
+            filename = filedialog.asksaveasfilename(
+                                            defaultextension=extensions[0][1],
+                                            filetypes = extensions
+                                            )
         self.vid = WriteVideo(filename=filename,frame_size=(self.frame_size[1],self.frame_size[0],self.frame_size[2]),fps=self.fps)
         
         
@@ -141,7 +147,12 @@ class Camera:
                 self.vid.close()
                 cv2.destroyAllWindows()        
 
-    def single_pic_img(self,filename,show_pic=False):
+    def single_pic_img(self,filename=None,show_pic=False):
+        if filename == None:
+            filename = filedialog.asksaveasfilename(
+                                            defaultextension=extensions[0][1],
+                                            filetypes = extensions
+                                            )
         '''writes single image to picture file '''
         ret,frame=self.cam.read()        
         cv2.imwrite(filename,frame)
