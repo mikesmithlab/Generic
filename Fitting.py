@@ -116,6 +116,8 @@ class Fit:
     '''
     
     def __init__(self,fit_type,x=None,y=None,series=None):
+        self.x=0
+        self.y=0
         self.fit_type = fit_type
         self.fit_string,self._num_fit_params = fit_dict[fit_type]
         if type(series) == type(pd.Series()):
