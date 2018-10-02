@@ -45,7 +45,8 @@ def flipped_exponential(x,a,b):
     return a*(1-np.exp(b*x))
 
 '''
-sin wave fitting is incredibly sensitive to phase c so use the following form
+sin wave fitting is incredibly sensitive to phase c so use the following form. You can use sin_const_convert
+to find parameters for asin(cx+b) + d
 '''
 def sin_cos(x,a,b,c,d):
     return a * np.sin(c * x) + b * np.cos(c * x) + d
