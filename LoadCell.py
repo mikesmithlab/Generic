@@ -40,10 +40,12 @@ class LoadCell:
 
     def wait_for_ready(self):
         """Method to ensure the arduino has initialised"""
+        serial_length = 0
+        while(serial_length<5): #always print 'Ready' when arduino has initialised
+            serial_length = self.port.inWaiting()
         print(self.port.readline().decode())
 
 if __name__=="__main__":
     lc = LoadCell()
-    #time.sleep(2)
     lc.read_force()
     lc.quit_serial()
