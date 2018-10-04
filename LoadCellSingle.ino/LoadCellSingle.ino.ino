@@ -13,10 +13,16 @@ int val1;
 int valRaw1;
 
 void loop() {
-  char inByte = ' '; 
+  char inBytes[5]; 
   if (Serial.available()){ // wait for serial input
-    char inByte = Serial.read(); // read the incoming data
-    if (inByte == 'r'){ // if input is 'r' then measure force and print to serial
+    delay(50); // make sure line has finished
+    
+    for(int i = 0; i < sizeof(inBytes); ++i){ // reset inBytes
+      inBytes[i] = char(0);
+    }
+    
+    int size_t = Serial.readBytesUntil('\n', inBytes, sizeof(inBytes));
+    if (inBytes[0] == 'r'){ // if input is 'r' then measure force and print to serial
       val1 = wsb_strain1.measureForce();
       Serial.println(val1, DEC);
     }
