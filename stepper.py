@@ -94,15 +94,26 @@ class DualStepper:
         print('values written')
         time.sleep(0.5)
 
-class Stepper(arduino.Arduino):
-
-    def __init__(self):
-        super().__init__()
+class Stepper():
+    """
+    Class to manage the movement of stepper motors
+    """
+    def __init__(self, ard):
+        """ Initialise with an instance of arduino.Arduino"""
+        self.ard = ard
 
     def move_motor(self, motor_no, steps, direction):
+        """
+        Generate the message to be sent to self.ard.send_serial_line
+
+        Inputs:
+        motor_no: 1 or 2
+        steps: int
+        direction: either '+' or '-'
+        """
         motor_assignment = {1: 'A', 2:'B', 3:'C'}
         message = 'M' + motor_assignment[1] + direction + str(steps) + '\n'
-        self.send_serial_line(message)
+        self.ard.send_serial_line(message)
         print('done')
 
 
@@ -118,6 +129,7 @@ if __name__ == '__main__':
         s.quit_serial()
 
     elif class_choice == '2':
-        s = Stepper()
+        ard = arduino.Arduino()
+        s = Stepper(ard)
         s.move_motor(1, 100, '+')
-        s.quit_serial()
+        ard.quit_serial()
