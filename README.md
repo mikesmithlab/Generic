@@ -1,11 +1,13 @@
 # Generic
-This is a repository for all the highly generic code that will be reused in project after project. It consists of the following modules
+This is a repository for all the highly generic code that will be reused in project after project. It consists of the following modules:
+
 - Camera --> Allows taking images and videos with the different cameras in the lab with generic user interface
 - Video --> Allows reading writing videos
 - stepper --> Contains class DualStepper which handles Serial communication with Arduino running newStepperBoard.ino to control up to 2 stepper motors.
               Contains class Stepper which controls a number of stepper motors with Arduino running StepperMotor.ino
-- load_cell --> Contains class LoadCell which inherits from arduino.Arduino to read the value of a load cell from an Arduino running LoadCellSingle.ino
+- load_cell --> Contains class LoadCellto read the value of a load cell from an Arduino running LoadCellSingle.ino
 - arduino --> Contains class Arduino which handles Serial communication with Arduinos
+- balancer --> Conatins class Balancer which uses the load_cell, stepper and arduino modules to balance the shaker.
 
 
 Also contains a number of arduino sketches:

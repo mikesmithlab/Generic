@@ -10,21 +10,27 @@ import serial
 import time
 import arduino
 
-class LoadCell(arduino.Arduino):
-
-    def __init__(self,comport='/dev/ttyACM0'):
-        super().__init__()
+class LoadCell():
+    """
+    This is a class to manage reading the values
+    from load cells
+    """
+    def __init__(self, ard):
+        """
+        Initialise with an instance of arduino.Arduino
+        """
+        self.ard = ard
 
     def read_force(self):
         """
-        Method to return the force from the load cell and print the results
+        Read the force from the load cell and print the results.
         """
-        self.send_serial_line('r')
-        force = self.read_serial_line()
+        self.ard.send_serial_line('r')
+        force = self.ard.read_serial_line()
         print(force)
 
 if __name__=="__main__":
-    #ard = arduino.Arduino()
-    lc = LoadCell()
+    ard = arduino.Arduino()
+    lc = LoadCell(ard)
     lc.read_force()
-    lc.quit_serial()
+    ard.quit_serial()
