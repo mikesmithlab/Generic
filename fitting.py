@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import optimize
+from math import factorial
 
 
 '''
@@ -19,7 +20,9 @@ fit_dict = {
             'cubic':('f(x) = a*x**3 + b*x**2 + c*x + d',4),
             'exponential':('f(x) = a*exp(b*x)',2),
             'flipped_exponential':('f(x) = a*(1 - exp(b*x))'),
-            'sin_cos':('f(x) = asin(bx)+bcos(cx)+d',4)
+            'sin_cos':('f(x) = asin(bx)+bcos(cx)+d',4),
+            'gaussian':('f(x) = aexp(-(x-b)**2/(2c**2))',3),
+            'poisson':('f(x)=a*(b**c)*exp(-b)/c!',3)
            }
 
 
@@ -44,9 +47,30 @@ def exponential(x,a,b):
 def flipped_exponential(x,a,b):
     return a*(1-np.exp(b*x))
 
+
 '''
-sin wave fitting is incredibly sensitive to phase c so use the following form. You can use sin_const_convert
-to find parameters for asin(cx+b) + d
+Probability distributions
+'''
+def gaussian(x,a,b,c):
+    return a*np.exp(-(x-b)**2/(2*c**2))
+
+def guess_fit_params_gaussian(x,y):
+    '''
+    Performs some simple calcs to guess initial params for gaussian fit.
+    '''
+    a = np.max(y)
+    b = np.mean(x)
+    N = np.sum(y)
+    c = 0.5*(1/N)*np.sum(y*(x-b)**2)
+    print(c)
+    return [a,b,c]
+
+def poisson(x,a,b,c):
+    return a*(b**c)*exp(-b)/factorial(c)
+
+
+'''
+sin wave fitting is incredibly sensitive to phase c so use the following form
 '''
 def sin_cos(x,a,b,c,d):
     return a * np.sin(c * x) + b * np.cos(c * x) + d
@@ -69,7 +93,7 @@ def sin_const_convert(params,long=True):
         params[0] = (a**2 + b**2)**0.5 #A
         
     else:
-        print('Changin : A sin (CX + B) + D')
+        print('Changing : A sin (CX + B) + D')
         print('to : a sin(cx) + b cos(cx) + d')
         
         A = params[0]
@@ -169,14 +193,19 @@ class Fit:
                 self._lower[index] = self._params[index]*(1.0 + nudge)
             elif (item == 'Fixed') and (self._params[index] > 0):
                 self._lower[index] = self._params[index]*(1.0 - nudge)
+            elif (item =='Fixed') and (self._params[index] == 0):
+                self._lower[index] = -nudge
     
             for index,item in enumerate(self._upper):
                 if item == None:
                     self._upper[index] = np.inf
-                elif (item == 'Fixed') and (self._params[index] >= 0):
+                elif (item == 'Fixed') and (self._params[index] > 0):
                     self._upper[index] = self._params[index]*(1.0 + nudge)
                 elif (item == 'Fixed') and (self._params[index] < 0):
                     self._upper[index] = self._params[index]*(1.0 - nudge)
+                elif (item =='Fixed') and (self._params[index] == 0):
+                    self._upper[index] = nudge
+
     
     def add_filter(self,logic):
         if type(logic) == type(pd.Series()):
@@ -189,25 +218,64 @@ class Fit:
         self.fx = self.x[logic]
         self.fy = self.y[logic]    
     
-    def fit(self,interpolate=False,factor=0.001):
-        fit_output = optimize.curve_fit(globals()[self.fit_type], self.fx,self.fy,p0=self._params,bounds=(self._lower,self._upper))
+    def fit(self,interpolate=False,factor=0.001, errors=False):
+        fit_output = optimize.curve_fit(globals()[self.fit_type],
+                                        self.fx,
+                                        self.fy,
+                                        p0=self._params,
+                                        bounds=(self._lower,self._upper))
         self.fit_params = fit_output[0]
         self.fit_residuals = fit_output[1]
+        if errors:
+            self.fit_errors()
+        else:
+            self.fit_param_errors = [np.nan]*int(fit_dict[self.fit_type][1])
+            
+        
         if interpolate == True:
             self.stats()
             original_step = (self.xdata_max - self.xdata_min) / self.xdata_length
             interpolation_step_size = factor * original_step
-            self.fit_x = np.arange(self.xdata_min,self.xdata_max,interpolation_step_size)
+            self.fit_x = np.arange(
+                                   self.xdata_min,
+                                   self.xdata_max,
+                                   interpolation_step_size
+                                  )
         else:
             self.fit_x = self.x
+        
         self.fit_y = globals()[self.fit_type](self.fit_x,*self.fit_params)
         print('\nFit : ',fit_dict[self.fit_type])
-        print('Fit params : ')
+        print('Fit params : (param, lower, upper, ci) ')
         letters = [chr(c) for c in range(ord('a'),ord('z')+1)]
         for index,param in enumerate(self.fit_params):
-            print(letters[index],': (', param, self._lower[index], self._upper[index],')')
+            print(letters[index],': (', param, self._lower[index], self._upper[index], self.fit_param_errors[index], ')')
         
-        return (self.fit_params,self.fit_residuals,self.fit_y)
+        return (self.fit_params,self.fit_y)
+        
+                
+    def fit_errors(self):
+        errfunc = lambda p, x, y: globals()[self.fit_type](x,*p) - y
+        pfit, perr = optimize.leastsq(errfunc, self.fit_params, args=(self.fx, self.fy), full_output=0)
+        residuals = errfunc(pfit, self.fx, self.fy)
+        sigma_res = np.std(residuals)
+        
+        ps = []
+        for i in range(100):
+            randomDelta = np.random.normal(0., sigma_res, len(self.fy))
+            randomdataY = self.fy + randomDelta
+
+            randomfit, randomcov = \
+                optimize.leastsq(errfunc, self.fit_params, args=(self.fx, randomdataY),\
+                             full_output=0)
+            ps.append(randomfit) 
+
+        ps = np.array(ps)
+        mean_pfit = np.mean(ps,0)
+
+        pfit_bootstrap = mean_pfit
+        self.fit_param_errors = np.std(ps,0)        
+        
     
     def plot_fit(self,filename=None,show=False,save=False):
         if filename == None:
