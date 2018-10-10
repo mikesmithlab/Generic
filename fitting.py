@@ -110,7 +110,6 @@ def sin_const_convert(params,long=True):
     
 class Fit:
     '''
-    Test
     Generic fit object. Allows simple fitting of various functional forms together with viewing data
     and selecting appropriate values. Also provides simple statistics.
     
