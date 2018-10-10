@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 from math import factorial
 
+#Testing
 
 '''
 To add a new fit function you need to provide a function that has the x and fit params listed
@@ -85,7 +86,7 @@ def sin_const_convert(params,long=True):
     '''
     if long == True:
         print('Changing: a sin(cx) + b cos(cx) + d')
-        print('to : A sin (CX + B) + D')
+        print('to : A sin ppzmis(CX + B) + D')
         a = params[0]
         b = params[1]
         
