@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import optimize
 from math import factorial
-#tesse
+#tessedddddd
 '''
 To add a new fit function you need to provide a function that has the x and fit params listed
 and returns the value f(x). The you need to add to the dictionary a string which describes the equation
