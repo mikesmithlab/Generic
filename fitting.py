@@ -178,8 +178,8 @@ class Fit:
     
     Outputs:
     fit_params        A list of the parameters used to fit the data. Definitions are provided in the dict type fit_dict['*Fit Type*']
-    fit_x             Returns the x values of the fit
-    fit_y             Returns the values of the fit at each point
+    fx             Returns the x values of the fit
+    fy             Returns the values of the fit at each point
     """
     
     def __init__(self, fit_type, x=None, y=None, series=None):
@@ -219,12 +219,14 @@ class Fit:
     def guess_params(self):
         try:
             print('here')
-            guess = globals()[self.fit_type + '_guess'](self.fit_x, self.fit_y)
+            print(self.fit_type + '_guess')
+            guess = globals()[self.fit_type + '_guess'](self.fx, self.fy)
             print(guess)
-            self._params = guess.copy()
-            print(self.params)
+            self._params = guess
+            print('no problem')
         except:
-            raise FitTypeGuessNotDefined(self.fit_type)
+            raise FitTypeGuessException(self.fit_type)
+
         return guess
     
     def _replace_none_fixed(self,nudge = 0.001):
@@ -402,7 +404,7 @@ class ParamNumberException(Exception):
         print('params guess has only ', len_guess)
 
 
-class FitTypeGuessNotDefined(Exception):
+class FitTypeGuessException(Exception):
     def __init__(self, fittype):
         print(fittype, 'has not yet been defined for this function')
         print('You must define initial parameters manually')
