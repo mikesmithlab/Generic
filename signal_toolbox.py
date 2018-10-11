@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import fftpack
 
 
 def smooth(xdata, window_len=0, window='bartlett', show=False):
@@ -34,15 +35,15 @@ def smooth(xdata, window_len=0, window='bartlett', show=False):
 
     NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
     """
-    if type(data) == type(pd.Series()):
+    if isinstance(xdata, pd.Series):
         series = True
         name_val = xdata.name
         x = xdata.values
         x_index = xdata.index
     else:
+        name_val = ' '
         series = False
         x = xdata
-
 
     if window_len > 3:
         s = np.r_[x[window_len - 1:0:-1], x, x[-2:-window_len - 1:-1]]
@@ -57,27 +58,48 @@ def smooth(xdata, window_len=0, window='bartlett', show=False):
         new_y2 = y[int(window_len / 2 - 1) + 1:-int(-1 + window_len / 2)]
         new_y = 0.5 * (new_y1 + new_y2)
 
-        # Pack back into pd.Series
-        smoothed_vals = pd.Series(new_y, name=name_val, index=x_index)
-
         if show:
             plt.figure(name_val)
-            plt.plot(x_series[x_series.index < 200].index, x_series[x_series.index < 200], 'rx')
-            plt.plot(smoothed_vals[smoothed_vals.index < 200].index, smoothed_vals[smoothed_vals.index < 200], 'b-')
+            plt.plot(xdata, 'rx')
+            plt.plot(new_y, 'b-')
+            plt.show()
+
         if series:
-            smoothed_series = pd.Series(data=smoothed_vals,index=x_index,name=name_val)
+            smoothed_series = pd.Series(data=new_y, index=x_index, name=name_val)
             return smoothed_series
         else:
-            return smoothed_vals
+            return new_y
 
     else:
         # If window_len < 3 leave unchanged
+        print('window_len < 3 leaves the data unchanged')
         return x_data
 
-def fft(tdata,ydata,show=False):
 
-    Y = np.fft.fft(ydata)
-    freq = np.fft.fftfreq(len(y), tdata[1] - tdata[0])
+def fft_power_spectrum(tdata, ydata, limits=None, show=False):
+    """
+    Calculates the power spectrum on a 1D signal. It also obtains
+    a quick estimate of the peak freq.
+
+    :param tdata: time series
+    :param ydata: signal to fft
+    :param limits: adjusts displayed freq axis. Either None - no limits
+                    or a tuple (lower limit, upper limit)
+    :param show: set to True if you want to visualise the fft
+
+    :return: 3 part tuple (freqs,powerspectrum amplitudes, peak freq)
+    """
+    y_fft = fftpack.rfft(ydata)
+    step_size = tdata[2] - tdata[1]
+    sample_freq = fftpack.fftfreq(ydata.size, d=step_size)
+
+    power_spectrum = np.abs(y_fft)
+
+    # Find the peak frequency: we can focus on only the positive frequencies
+    pos_mask = np.where(sample_freq > 0)
+    freqs = sample_freq[pos_mask]
+    powers = power_spectrum[pos_mask]
+    peak_freq = freqs[powers.argmax()]
 
     if show:
         plt.figure('fft')
@@ -88,22 +110,68 @@ def fft(tdata,ydata,show=False):
         plt.ylabel('ydata')
 
         plt.subplot(2, 1, 2)
-        plt.plot(freq, Y, 'b-')
-        plt.title('Fourier Transform')
+        plt.plot(freqs, powers, 'b-')
+
+        axis = plt.gca()
+        if limits is not None:
+            axis.set_xlim(left=limits[0], right=limits[1])
+        plt.title('FFT')
         plt.xlabel('Frequency')
         plt.ylabel('Fourier Amplitude')
 
         plt.show()
 
-    return (freq, Y)
+    return freqs, powers, peak_freq
+
+
+def fft_freq_filter(tdata, ydata, cutoff_freq, high_pass=True, show=False):
+    """
+
+    :param tdata: Time series data
+    :param ydata: Y data
+    :param cutoff_freq: cutoff frequency for filter, must be specified
+    :param high_pass: If True filters high frequency if False filters low frequency
+    :param show: Plots the before and after data
+
+    :return: time data, filtered y data.
+    """
+
+    y_fft = fftpack.fftfreq(ydata.size, d=tdata[1] - tdata[0])
+    f_signal = fftpack.rfft(ydata)
+
+    # If our original signal time was in seconds, this is now in Hz
+    cut_f_signal = f_signal.copy()
+
+    if high_pass:
+        cut_f_signal[(y_fft > cutoff_freq)] = 0
+    else:
+        cut_f_signal[(y_fft < cutoff_freq)] = 0
+
+    cut_signal = fftpack.irfft(cut_f_signal)
+
+    if show:
+        plt.figure('fft filter')
+        plt.plot(tdata, ydata, 'rx')
+        plt.plot(tdata, cut_signal, 'b-')
+        plt.title('Original data')
+        plt.xlabel('tdata')
+        plt.ylabel('ydata')
+        plt.show()
+    return tdata, cut_signal
+
 
 
 if __name__ == '__main__':
-    freq = 0.1
-    noise = 0.1
-    amplitude = 3.0
+    # Seed the random number generator
+    np.random.seed(1234)
 
-    t = np.arange(0,1000,1)
-    y = amplitude*np.sin(2*np.pi*freq*t) + noise*np.random.normal(size=1000)
+    time_step = 0.02
+    period = 5.
 
-    F,Y = fft(t,y,show=True)
+    time_vec = np.arange(0, 20, time_step)
+    signal = (np.sin(2 * np.pi / period * time_vec)
+           + 0.5 * np.random.randn(time_vec.size))
+
+    fft_power_spectrum(time_vec, signal, show=True)
+    fft_freq_filter(time_vec, signal, cutoff_freq=5.0, show=True)
+    smoothed_signal = smooth(signal, window_len=20, show=True)
