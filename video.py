@@ -32,8 +32,7 @@ class WriteVideo:
     Methods:
     add_frame() - requires an image which matches dimensions of 
                  self.frame_size
-    close() - releases video object 
-                                                                            
+    close() - releases video object
     '''
 
     def __init__(self,filename=None,frame_size=None,frame=None,
@@ -75,7 +74,7 @@ class WriteVideo:
         self.filename = filename
         print('Video open for writing')
         
-    def add_frame(self,img):   
+    def add_frame(self, img):
         if self.frame_size == np.shape(img):
             self.write_vid.write(img)
         else:
