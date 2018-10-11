@@ -209,7 +209,7 @@ class Fit:
     
     def add_params(self, guess=None, lower=None, upper=None):
         if guess is None:
-            self.guess_params()
+            guess = self.guess_params()
         _num_params = np.shape(guess)[0]
         if _num_params != self._num_fit_params:
             raise ParamNumberException(guess)
