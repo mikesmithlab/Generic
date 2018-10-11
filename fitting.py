@@ -134,7 +134,14 @@ class Fit:
                       if not supplied.
     _replace_none_fixed - Internal method to replace None and Fixed values in fit limits with appropriate substitutes
     add_filter()  -       Takes a logical numpy array with True or False to indicate if data should be included in fit
-    fit()             Fits the data and returns (fit_params, fit_residuals, fit_y)
+    fit()             Fits the data and returns (fit_params, fit_residuals, fit_y), optional parameter
+                      errors which calculates errors on fit parameters using fit_errors(). This
+                      may be slow especially for large datasets and hence is set to False by default.
+    fit_errors()      Calculates the confidence interval on the fits. It estimates the
+                      noise in the data based on the residuals. It creates some versions of the 
+                      data with gaussian noise of same size as stdev of residuals and then
+                      fits numfits times to these. The variance in these fits is then used
+                      to calculate the ci on the fit parameters.
     plot_fit()        Plots fit to screen or file depending on settings
     stats()           provides simple statistics on the data and filtered data sets.
     
@@ -253,14 +260,14 @@ class Fit:
         return (self.fit_params,self.fit_y)
         
                 
-    def fit_errors(self):
+    def fit_errors(self,numfits=100):
         errfunc = lambda p, x, y: globals()[self.fit_type](x,*p) - y
         pfit, perr = optimize.leastsq(errfunc, self.fit_params, args=(self.fx, self.fy), full_output=0)
         residuals = errfunc(pfit, self.fx, self.fy)
         sigma_res = np.std(residuals)
         
         ps = []
-        for i in range(100):
+        for i in range(int(numfits)):
             randomDelta = np.random.normal(0., sigma_res, len(self.fy))
             randomdataY = self.fy + randomDelta
 
