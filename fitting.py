@@ -218,7 +218,9 @@ class Fit:
 
     def guess_params(self):
         try:
+            print('here')
             guess = globals()[self.fit_type + '_guess'](self.fit_x, self.fit_y)
+            print(guess)
             self._params = guess.copy()
             print(self.params)
         except:
