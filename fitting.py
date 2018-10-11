@@ -79,7 +79,7 @@ def gaussian_guess(x, y):
     a = np.max(y)
     b = np.mean(x)
     N = np.sum(y)
-    c = 0.5*(1/N)*np.sum(y*(x-b)**2)
+    c = 0.5*np.sqrt((1/N)*np.sum(y*(x-b)**2))
     return [a, b, c]
 
 
