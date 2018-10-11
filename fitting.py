@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import optimize
 from math import factorial
-#tesse
+
 '''
 To add a new fit function you need to provide a function that has the x and fit params listed
 and returns the value f(x). The you need to add to the dictionary a string which describes the equation
@@ -23,6 +23,11 @@ fit_dict = {
             'gaussian':('f(x) = aexp(-(x-b)**2/(2c**2))',3),
             'poisson':('f(x)=a*(b**c)*exp(-b)/c!',3)
            }
+
+'''
+Each fitting function has a function for the type of fit called fittype and optionally a function
+which makes a guess of the initial fitting parameters called fittype_guess
+'''
 
 
 '''
@@ -53,7 +58,7 @@ Probability distributions
 def gaussian(x,a,b,c):
     return a*np.exp(-(x-b)**2/(2*c**2))
 
-def guess_fit_params_gaussian(x,y):
+def gaussian_guess(x,y):
     '''
     Performs some simple calcs to guess initial params for gaussian fit.
     '''
@@ -74,6 +79,13 @@ sin wave fitting is incredibly sensitive to phase c so use the following form
 def sin_cos(x,a,b,c,d):
     return a * np.sin(c * x) + b * np.cos(c * x) + d
 
+def sin_cos_guess(x,y):
+    A = np.std(y)/np.sqrt(2)
+    D = np.mean(y)
+    B = 0
+    C = 
+    return sin_const_convert([A,B,C,D],long=False)
+
 def sin_const_convert(params,long=True):
     '''
     There are two equivalent forms 1) Asin(CX + B) + D and 2) asin(cx) +  bcos(cx) + d. 
@@ -84,7 +96,7 @@ def sin_const_convert(params,long=True):
     '''
     if long == True:
         print('Changing: a sin(cx) + b cos(cx) + d')
-        print('to : A sin ppzmis(CX + B) + D')
+        print('to : A sin(CX + B) + D')
         a = params[0]
         b = params[1]
         
@@ -355,7 +367,12 @@ class ParamNumberException(Exception):
         print('fit_num_params is ',fit_num_params)
         print('params guess has only ', len_guess)
         
-        
+class FittypeGuessNotDefined(fittype):
+    print(fittype, 'has not yet been defined for this function')
+    print('You must define initial parameters manually')
+
+
+
 if __name__ ==  '__main__':
     '''This contains all the unit tests'''
     xdata = np.arange(1000)
