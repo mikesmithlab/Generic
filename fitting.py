@@ -207,7 +207,9 @@ class Fit:
         if reset_filter:
             self.add_filter(np.ones(np.shape(x), dtype=bool))
     
-    def add_params(self, guess, lower=None, upper=None):
+    def add_params(self, guess=None, lower=None, upper=None):
+        if guess is None:
+            self.guess_params()
         _num_params = np.shape(guess)[0]
         if _num_params != self._num_fit_params:
             raise ParamNumberException(guess)
@@ -218,12 +220,8 @@ class Fit:
 
     def guess_params(self):
         try:
-            print('here')
-            print(self.fit_type + '_guess')
             guess = globals()[self.fit_type + '_guess'](self.fx, self.fy)
-            print(guess)
             self._params = guess
-            print('no problem')
         except:
             raise FitTypeGuessException(self.fit_type)
 
