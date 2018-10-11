@@ -220,6 +220,7 @@ class Fit:
         try:
             guess = globals()[self.fit_type + '_guess'](self.fit_x, self.fit_y)
             self._params = guess.copy()
+            print(self.params)
         except:
             raise FitTypeGuessNotDefined(self.fit_type)
         return guess
