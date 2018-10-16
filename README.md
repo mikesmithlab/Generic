@@ -8,7 +8,7 @@ This is a repository for all the highly generic code that will be reused in proj
 - load_cell --> Contains class LoadCellto read the value of a load cell from an Arduino running LoadCellSingle.ino
 - arduino --> Contains class Arduino which handles Serial communication with Arduinos
 - balancer --> Conatins class Balancer which uses the load_cell, stepper and arduino modules to balance the shaker.
-
+- simple_funcs --> Contains simple functions for various uses
 
 Also contains a number of arduino sketches:
 - LoadCellSingle.ino --> Allows the reading of load cell values by the load_cell.LoadCell class
