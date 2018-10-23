@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import fftpack
+from scipy import fftpack, signal
 
 
 def smooth(xdata, window_len=0, window='bartlett', show=False):
@@ -160,6 +160,37 @@ def fft_freq_filter(tdata, ydata, cutoff_freq, high_pass=True, show=False):
     return tdata, cut_signal
 
 
+def correlation(x1=None, x2=None, time_step=1.0, show=False):
+    '''
+    Performs the correlation of a signal with either itself or another signal
+    The returned signal is normalised
+    :param x1: 1D dataset as numpy array
+    :param x2: optional second dataset. If you want to do autocorrelation leave blank
+    x1 and x2 should be the same length
+    :param time_step: convenience function which converts array index to a time.
+    :param show: plots the data and correlation
+
+    :return: returns the lags and correlation coeffs as numpy arrays
+    '''
+    len_data = np.shape(x1)[0]
+    if x2 == None:
+        x2 = x1.copy()
+    time = time_step*np.arange(len_data)
+    lags = time.copy()
+    corr = signal.correlate(x1, x2, mode='same') / len_data
+
+    if show:
+        fig, (ax_orig, ax_corr) = plt.subplots(2, 1, sharex=True)
+        ax_orig.plot(time,x1,'b-')
+        ax_orig.plot(time,x2, 'r-')
+        ax_orig.set_title('Original signal')
+        ax_corr.plot(lags,corr,'g-')
+        ax_corr.set_title('Correlation')
+        ax_orig.margins(0, 0.1)
+        fig.tight_layout()
+        fig.show()
+
+    return lags, corr
 
 if __name__ == '__main__':
     # Seed the random number generator
@@ -169,9 +200,11 @@ if __name__ == '__main__':
     period = 5.
 
     time_vec = np.arange(0, 20, time_step)
-    signal = (np.sin(2 * np.pi / period * time_vec)
-           + 0.5 * np.random.randn(time_vec.size))
+    sig = (np.sin(2 * np.pi / period * time_vec)+ np.sin(2 * np.pi / (0.1*period) * time_vec) + 0.5 * np.random.randn(time_vec.size))
 
-    fft_power_spectrum(time_vec, signal, show=True)
-    fft_freq_filter(time_vec, signal, cutoff_freq=5.0, show=True)
-    smoothed_signal = smooth(signal, window_len=20, show=True)
+    fft_power_spectrum(time_vec, sig, show=True)
+    time_vec,sig = fft_freq_filter(time_vec, sig, cutoff_freq=2 , high_pass=True, show=True)
+    fft_power_spectrum(time_vec, sig, show=True)
+    #smoothed_signal = smooth(signal, window_len=20, show=True)
+
+    lags,corr = correlation(sig,time_step=time_step,show=True)
