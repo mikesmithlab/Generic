@@ -201,6 +201,7 @@ class ReadVideo:
     def set_frame(self, frame_num):
         """Moves the video reader to the given frame"""
         self.read_vid.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
+        self.frame_num = frame_num
         
     def generate_frame_filename(self,ext='.png'):
         len_file_ext = len(self.file_extension)+1
