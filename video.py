@@ -116,6 +116,7 @@ class ReadVideo:
         
         read_next_frame() - read the next frame in video
         find_frame(frame_num) - find frame specified by framenum
+        set_frame(frame_num) - sets the frame specified by framenum
         generate_frame_filename - creates an appropriate filename for an image
                                 ie vid filename_00035.png where number digits
                                 relates to total number of frames in video
@@ -196,6 +197,10 @@ class ReadVideo:
         self.frame_num = frame_num
         img=self.read_next_frame()
         return img
+
+    def set_frame(self, frame_num):
+        """Moves the video reader to the given frame"""
+        self.read_vid.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
         
     def generate_frame_filename(self,ext='.png'):
         len_file_ext = len(self.file_extension)+1
