@@ -24,7 +24,8 @@ fit_dict = {
             'flipped_exponential': ('f(x) = a*(1 - exp(b*x))',2),
             'sin_cos': ('f(x) = asin(bx)+bcos(cx)+d', 4),
             'gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2))', 3),
-            'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3)
+            'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3),
+            'axb':('f(x)=a(x)**b',2)
            }
 
 '''
@@ -61,6 +62,7 @@ def exponential(x, a, b):
 
 def flipped_exponential(x, a, b):
     return a*(1-np.exp(b*x))
+
 
 
 '''
@@ -134,7 +136,11 @@ def sin_const_convert(params, long=True):
     
     return params
 
-    
+
+def axb(x,a,b):
+    return a*(x)**b
+
+
 class Fit:
     """
     Generic fit object. Allows simple fitting of various functional forms together with viewing data
