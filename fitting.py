@@ -138,6 +138,7 @@ def sin_const_convert(params, long=True):
 
 
 def axb(x,a,b):
+    '''Simple power law'''
     return a*(x)**b
 
 
