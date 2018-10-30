@@ -66,10 +66,12 @@ class WriteVideo:
                                       codec_code[0], codec_code[1],
                                       codec_code[2], codec_code[3]
                                       )
+
         if np.size(self.frame_size) == 2:
+
             self.write_vid = cv2.VideoWriter(
                 filename, fourcc, fps,
-                (self.frame_size[1], self.frame_size[0]),1)
+                (self.frame_size[1], self.frame_size[0]), 1)
         elif np.size(self.frame_size) == 3:
             self.write_vid = cv2.VideoWriter(
                 filename, fourcc, fps,
@@ -78,7 +80,7 @@ class WriteVideo:
         else:
             raise ImageShapeError(frame, frame_size)
 
-        if (write_frame and frame) is not None:
+        if (write_frame is not None) and (frame is not None):
             self.add_frame(frame)
         self.fps = fps
         self.filename = filename
