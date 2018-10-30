@@ -23,6 +23,8 @@ class WriteVideo:
     codec - 'XVID'
             'XVID' seems to work for colour but not grayscale with mp4 and avi
             'LAGS' seems to work for grayscale with avi but not mp4
+            LAGS requires installation:
+            sudo apt-get install ffmpeg libavcodec-extra
             and avibut others seem to fail.
     
     Variables:
@@ -37,7 +39,7 @@ class WriteVideo:
     close() - releases video object
     '''
 
-    def __init__(self,filename=None, frame_size=None, frame=None,
+    def __init__(self, filename=None, frame_size=None, frame=None,
                  write_frame=False, fps=30.0):
         
         extensions = [('MP4', '.mp4'), ('AVI', '.avi')]
@@ -63,9 +65,7 @@ class WriteVideo:
         #Set correct codec
         if np.size(self.frame_size) == 2:
             codec_code = codec_list[1]
-            extension = extensions[1][1]
         elif np.size(self.frame_size)==3:
-            extension = extensions[0][1]
             codec_code = codec_list[0]
 
         fourcc=cv2.VideoWriter_fourcc(
@@ -73,13 +73,15 @@ class WriteVideo:
                                       codec_code[2], codec_code[3]
                                       )
         if filename is None:
+            if np.size(self.frame_size) == 2:
+                extension = ".avi"
+            elif np.size(self.frame_size) == 3:
+                extension = ".mp4"
             filename = filedialog.asksaveasfilename(
-                                            defaultextension=extension,
-                                            filetypes=extensions
+                                            defaultextension=extension
                                             )
-        print(filename)
-        if np.size(self.frame_size) == 2:
 
+        if np.size(self.frame_size) == 2:
             self.write_vid = cv2.VideoWriter(
                 filename, fourcc, fps,
                 (self.frame_size[1], self.frame_size[0]), 1)
