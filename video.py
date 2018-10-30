@@ -20,7 +20,9 @@ class WriteVideo:
             as first frame of output video
     write_frame - if True frame is used as first frame of video
     fps - framerate for the video
-    codec - 'XVID','MJPG','H264' very fiddly. 'XVID' seems to work with mp4 
+    codec - 'XVID'
+            'XVID' seems to work for colour but not grayscale with mp4 and avi
+            'LAGS' seems to work for grayscale with avi but not mp4
             and avibut others seem to fail.
     
     Variables:
@@ -36,17 +38,19 @@ class WriteVideo:
     '''
 
     def __init__(self,filename=None, frame_size=None, frame=None,
-                 write_frame=False, fps=30.0, codec='XVID'):
+                 write_frame=False, fps=30.0):
         
         extensions = [('MP4', '.mp4'), ('AVI', '.avi')]
-        codec_code = list(codec)
-        
+        codec_list = ['XVID','LAGS']
+
+        #Check inputs for errors
         if (frame_size is None) and (frame is None):
             raise ArgumentsMissing(('frame_size','frame'))
         if (frame_size is not None) and (frame is not None):
             if frame_size != np.shape(frame):
                 raise ImageShapeError(frame,frame_size)
-        
+
+        #Optional arguments to get frame_size and set codec type
         if frame is None:
             self.frame_size = frame_size
         elif frame_size is None:
@@ -56,17 +60,24 @@ class WriteVideo:
             else:
                 self.frame_size = (frame_size[0], frame_size[1], frame_size[2])
         
-        if filename is None:
-            filename = filedialog.asksaveasfilename(
-                                            defaultextension=extensions[0][1],
-                                            filetypes=extensions
-                                            )
-        
+        #Set correct codec
+        if np.size(self.frame_size) == 2:
+            codec_code = codec_list[1]
+            extension = extensions[1][1]
+        elif np.size(self.frame_size)==3:
+            extension = extensions[0][1]
+            codec_code = codec_list[0]
+
         fourcc=cv2.VideoWriter_fourcc(
                                       codec_code[0], codec_code[1],
                                       codec_code[2], codec_code[3]
                                       )
-
+        if filename is None:
+            filename = filedialog.asksaveasfilename(
+                                            defaultextension=extension,
+                                            filetypes=extensions
+                                            )
+        print(filename)
         if np.size(self.frame_size) == 2:
 
             self.write_vid = cv2.VideoWriter(
