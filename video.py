@@ -36,7 +36,7 @@ class WriteVideo:
     '''
 
     def __init__(self,filename=None,frame_size=None,frame=None,
-                 write_frame=True,fps=30.0,codec='XVID'):
+                 write_frame=False,fps=30.0,codec='XVID'):
         
         extensions = [('MP4','.mp4'),('AVI','.avi')]
         codec_code = list(codec)
