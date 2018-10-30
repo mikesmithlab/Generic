@@ -35,40 +35,50 @@ class WriteVideo:
     close() - releases video object
     '''
 
-    def __init__(self,filename=None,frame_size=None,frame=None,
-                 write_frame=False,fps=30.0,codec='XVID'):
+    def __init__(self,filename=None, frame_size=None, frame=None,
+                 write_frame=False, fps=30.0, codec='XVID'):
         
-        extensions = [('MP4','.mp4'),('AVI','.avi')]
+        extensions = [('MP4', '.mp4'), ('AVI', '.avi')]
         codec_code = list(codec)
         
-        if (frame_size == None) and (frame == None):
+        if (frame_size is None) and (frame is None):
             raise ArgumentsMissing(('frame_size','frame'))
-        if (frame_size !=None) and (frame != None):
+        if (frame_size is not None) and (frame is not None):
             if frame_size != np.shape(frame):
                 raise ImageShapeError(frame,frame_size)
         
-        if frame == None:
+        if frame is None:
             self.frame_size = frame_size
-        elif frame_size == None:
+        elif frame_size is None:
             frame_size = np.shape(frame)
-            self.frame_size = (frame_size[0],frame_size[1],frame_size[2])
+            if np.size(frame_size) == 2:
+                self.frame_size = (frame_size[0], frame_size[1])
+            else:
+                self.frame_size = (frame_size[0], frame_size[1], frame_size[2])
         
-        if filename == None:
+        if filename is None:
             filename = filedialog.asksaveasfilename(
                                             defaultextension=extensions[0][1],
-                                            filetypes = extensions
+                                            filetypes=extensions
                                             )
         
         fourcc=cv2.VideoWriter_fourcc(
-                                      codec_code[0],codec_code[1],
-                                      codec_code[2],codec_code[3]
+                                      codec_code[0], codec_code[1],
+                                      codec_code[2], codec_code[3]
                                       )
-        self.write_vid = cv2.VideoWriter(
-                                        filename,fourcc,fps,
-                                        (self.frame_size[1],self.frame_size[0]),
-                                        self.frame_size[2]
-                                        )
-        if write_frame and frame != None:
+        if np.size(self.frame_size) == 2:
+            self.write_vid = cv2.VideoWriter(
+                filename, fourcc, fps,
+                (self.frame_size[1], self.frame_size[0]),1)
+        elif np.size(self.frame_size) == 3:
+            self.write_vid = cv2.VideoWriter(
+                filename, fourcc, fps,
+                (self.frame_size[1], self.frame_size[0]),
+                self.frame_size[2])
+        else:
+            raise ImageShapeError(frame, frame_size)
+
+        if (write_frame and frame) is not None:
             self.add_frame(frame)
         self.fps = fps
         self.filename = filename
@@ -78,7 +88,7 @@ class WriteVideo:
         if self.frame_size == np.shape(img):
             self.write_vid.write(img)
         else:
-            raise ImageShapeError(img,self.frame_size)
+            raise ImageShapeError(img, self.frame_size)
     
     def close(self):
         self.write_vid.release()
