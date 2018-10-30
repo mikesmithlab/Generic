@@ -218,14 +218,14 @@ class ReadVideo:
 
     def find_frame(self,frame_num):
         '''searches for specific frame and reads it'''
-        self.read_vid.set(cv2.CAP_PROP_POS_FRAMES,float(frame_num))
+        self.set_frame(frame_num)
         self.frame_num = frame_num
         img=self.read_next_frame()
         return img
 
     def set_frame(self, frame_num):
         """Moves the video reader to the given frame"""
-        self.read_vid.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
+        self.read_vid.set(cv2.CAP_PROP_POS_FRAMES, float(frame_num))
         self.frame_num = frame_num
         
     def generate_frame_filename(self,ext='.png'):
