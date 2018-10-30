@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+
 from tkinter import filedialog
 
 class WriteVideo:
@@ -20,12 +21,9 @@ class WriteVideo:
             as first frame of output video
     write_frame - if True frame is used as first frame of video
     fps - framerate for the video
-    codec - 'XVID'
-            'XVID' seems to work for colour but not grayscale with mp4 and avi
-            'LAGS' seems to work for grayscale with avi but not mp4
-            LAGS requires installation:
-            sudo apt-get install ffmpeg libavcodec-extra
-            and avibut others seem to fail.
+    codec - 'XVID'  -  'XVID' seems to work for  mp4 and avi
+            Grayscale images are converted to pseudo colour before writing.
+
     
     Variables:
         self.filename - output filename
@@ -41,9 +39,8 @@ class WriteVideo:
 
     def __init__(self, filename=None, frame_size=None, frame=None,
                  write_frame=False, fps=30.0):
-        
-        extensions = [('MP4', '.mp4'), ('AVI', '.avi')]
-        codec_list = ['XVID','LAGS']
+
+        codec_list = ['XVID']
 
         #Check inputs for errors
         if (frame_size is None) and (frame is None):
@@ -57,54 +54,42 @@ class WriteVideo:
             self.frame_size = frame_size
         elif frame_size is None:
             frame_size = np.shape(frame)
-            if np.size(frame_size) == 2:
-                self.frame_size = (frame_size[0], frame_size[1])
-            else:
-                self.frame_size = (frame_size[0], frame_size[1], frame_size[2])
-        
+            self.frame_size = frame_size
+
         #Set correct codec
-        if np.size(self.frame_size) == 2:
-            codec_code = codec_list[1]
-        elif np.size(self.frame_size)==3:
-            codec_code = codec_list[0]
+        codec_code = codec_list[0]
 
         fourcc=cv2.VideoWriter_fourcc(
                                       codec_code[0], codec_code[1],
                                       codec_code[2], codec_code[3]
                                       )
         if filename is None:
-            if np.size(self.frame_size) == 2:
-                extension = ".avi"
-            elif np.size(self.frame_size) == 3:
-                extension = ".mp4"
-            filename = filedialog.asksaveasfilename(
-                                            defaultextension=extension
-                                            )
+            filename = filedialog.asksaveasfilename('*.mp4')
 
-        if np.size(self.frame_size) == 2:
-            self.write_vid = cv2.VideoWriter(
+        self.write_vid = cv2.VideoWriter(
                 filename, fourcc, fps,
-                (self.frame_size[1], self.frame_size[0]), 1)
-        elif np.size(self.frame_size) == 3:
-            self.write_vid = cv2.VideoWriter(
-                filename, fourcc, fps,
-                (self.frame_size[1], self.frame_size[0]),
-                self.frame_size[2])
-        else:
-            raise ImageShapeError(frame, frame_size)
+                (self.frame_size[1], self.frame_size[0]))
 
         if (write_frame is not None) and (frame is not None):
             self.add_frame(frame)
         self.fps = fps
         self.filename = filename
-        print('Video open for writing')
+        if self.write_vid.isOpened():
+            print('Video open for writing')
+        else:
+            print('Issue correctly opening video')
+            print('Prob a compatability problem between codec '
+                  'and format. Grayscale images are more fussy')
         
     def add_frame(self, img):
         if self.frame_size == np.shape(img):
+            if np.size(self.frame_size) == 2:
+                img=cv2.cvtColor(np.uint8(img), cv2.COLOR_GRAY2BGR)
+
             self.write_vid.write(img)
         else:
             raise ImageShapeError(img, self.frame_size)
-    
+
     def close(self):
         self.write_vid.release()
         print('Video closed for writing')
@@ -272,6 +257,8 @@ class ArgumentsMissing(Exception):
     def __init__(self,arguments_missing):
         print('You have failed to supply all necessary arguments')
         print('In this case: ', arguments_missing)
+
+
 
 if __name__ == '__main__':
     #Create video objects
