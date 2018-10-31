@@ -90,6 +90,8 @@ class Plotter():
             filename = fd.save_filename(caption='select filename', file_filter='*.png;;*.jpg;;*.tiff')
         self.fig.savefig(filename, dpi=dpi)
 
+    def show_figure(self):
+        plt.show()
 
 
 
