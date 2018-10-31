@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+from plotting import Plotter
 from scipy import optimize
 from math import factorial
 from signal_toolbox import fft_power_spectrum
@@ -328,22 +328,23 @@ class Fit:
         if filename is None:
             filename = ' '
 
-        plt.figure(filename)
-        if residuals:
-            plt.subplot(2, 1, 1)
-        plt.plot(self.x, self.y, 'rx')
-        plt.plot(self.fx, self.fy, 'bx')
-        plt.plot(self.fit_x, self.fit_y, 'g-')
 
         if residuals:
-            plt.subplot(2, 1, 2)
-            plt.plot(self.fx, self.fit_residuals, 'rx')
-            plt.ylabel('Residuals')
+            plot_obj = Plotter(subplot=(2, 1))
+        else:
+            plot_obj = Plotter(subplot=(1, 1))
+        plot_obj.add_plot(self.x, self.y, marker='rx')
+        plot_obj.add_plot(self.fx, self.fy, marker='bx')
+        plot_obj.add_plot(self.fit_x, self.fit_y, marker='g-')
+
+        if residuals:
+            plot_obj.add_plot(self.fx, self.fit_residuals, marker='rx',subplot=1)
+            plot_obj.configure_yaxis(ylabel='Residuals')
 
         if save:
-            plt.savefig(filename)
+            plot_obj.save_figure(filename)
         if show:
-            plt.show()            
+            plot_obj.show_figure()
 
     def stats(self, show_stats=True):
         self.ydata_max = np.max(self.y)
