@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
+import Generic.filedialogs as fd
 
-from tkinter import filedialog
 
 class WriteVideo:
     '''
@@ -63,13 +63,11 @@ class WriteVideo:
         fourcc=cv2.VideoWriter_fourcc(
                                       codec_code[0], codec_code[1],
                                       codec_code[2], codec_code[3]
-                                      )
+                                        )
+
+
         if filename is None:
-            filename = filedialog.asksaveasfilename(defaultextension='.mp4',
-                                                    filetypes = [
-                                                              ('AVI','.avi'),
-                                                              ('MP4','.mp4')
-                                                              ])
+            filename = fd.save_filename(caption='select movie filename', file_filter='*.avi;;*.mp4')
 
         self.write_vid = cv2.VideoWriter(
                 filename, fourcc, fps,
@@ -153,13 +151,7 @@ class ReadVideo:
         if filename = None user must select filename with dialogue
         '''
         if filename == None:
-            filename = filedialog.askopenfilename(
-                                                  defaultextension='.mp4',
-                                                  filetypes = [
-                                                              ('AVI','.avi'),
-                                                              ('MP4','.mp4')
-                                                              ]
-                                                  )
+            filename = fd.load_filename(caption='select movie filename', file_filter='*.avi;;*.mp4;;*.*')
         self.filename = filename
         self.open_video()
         self.get_vid_props()

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from tkinter import filedialog
+import Generic.filedialogs as fd
+
 
 
 
@@ -86,7 +87,7 @@ class Plotter():
         options['title'] = 'save image'
 
         if filename == '*.png':
-            filename = filedialog.asksaveasfilename(**options)
+            filename = fd.save_filename(caption='select filename', file_filter='*.png;;*.jpg;;*.tiff')
         self.fig.savefig(filename, dpi=dpi)
 
 
