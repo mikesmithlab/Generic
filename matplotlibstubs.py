@@ -60,8 +60,8 @@ class Plotter():
         options['initialfile'] = filename
         options['title'] = 'save image'
 
-        if filename is '*.png':
-            filename = filedialog.asksaveasfilename(mode='w', **options)
+        if filename == '*.png':
+            filename = filedialog.asksaveasfilename()
         self.fig.savefig(filename, dpi=dpi)
 
     def show_figure(self):
