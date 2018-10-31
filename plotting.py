@@ -25,8 +25,8 @@ class Plotter():
     list_plots = access to dictionary indicating num_of_plot: subplot numbers, markers used for data
     configure.... = access to the various labels
     save_figure  = enables saving the figure
-
-    call plt.show() in script to display the figure
+    show_figure = show figure. This will make a call to plt.show() and will open all currently
+                  live figures regardless of origin.
 
 
 
@@ -79,13 +79,6 @@ class Plotter():
         self._subplot_handles[subplot].set_ylim(bottom=ylim[0], top=ylim[1])
 
     def save_figure(self, filename='*.png', initialdir='~ppzmis/Documents', dpi=80):
-        options = {}
-        options['defaultextension'] = '.png'
-        options['filetypes'] = [('PNG', '.png'), ('JPG', '.jpg'), ('TIFF', '.tiff')]
-        options['initialdir'] = initialdir
-        options['initialfile'] = filename
-        options['title'] = 'save image'
-
         if filename == '*.png':
             filename = fd.save_filename(caption='select filename', file_filter='*.png;;*.jpg;;*.tiff')
         self.fig.savefig(filename, dpi=dpi)
@@ -111,8 +104,8 @@ if __name__=='__main__':
     f.configure_xaxis(subplot=1,xlim=(0,1))
     f.configure_yaxis()
     f.list_plots()
+    f.show_figure()
 
-    plt.show()
 
 
 
