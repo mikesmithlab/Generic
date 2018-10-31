@@ -35,13 +35,13 @@ class Plotter():
     def __init__(self, figsize=(8,6), dpi=80, subplot=None, sharex='none', sharey='none'):
 
         if (subplot is None):
-            subplot = (1,1)
+            subplot = (1, 1)
         self._num_subplots = subplot[0]*subplot[1]
         # row and column sharing
         self.fig, self._subplot_handles = plt.subplots(subplot[0], subplot[1],
                                                       sharex=sharex, sharey=sharey,
                                                       figsize=figsize, dpi=dpi)
-        if subplot == (1,1):
+        if subplot == (1, 1):
             #This is to force _subplot_handles to be a list and prevent
             #code failing when we try to index it
             self._subplot_handles = [self._subplot_handles,'dummy_var']
@@ -52,7 +52,6 @@ class Plotter():
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
-            print(self._subplot_handles)
             plot_handle = self._subplot_handles[subplot].plot(xdata, ydata, marker)
             self._plots += 1
             self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
