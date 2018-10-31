@@ -29,6 +29,7 @@ class Plotter():
             self._subplots[str(self._plots)] = subplot
 
     def remove_plot(self, num_of_plot):
+
         print(self._subplots[str(num_of_plot)])
         #self._subplot_handles[]
         self.fig.draw()
@@ -72,6 +73,9 @@ class Plotter():
 if __name__=='__main__':
     X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
     y2, y1 = np.cos(X), np.sin(X)
+
+    #fig, subplot_handles = plt.subplots(2, 1)
+    #plt.show()
 
     f = Plotter(subplot=(2,1))
     f.add_plot(X, y1, marker='r-')

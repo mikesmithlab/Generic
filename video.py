@@ -38,9 +38,11 @@ class WriteVideo:
     '''
 
     def __init__(self, filename=None, frame_size=None, frame=None,
-                 write_frame=False, fps=30.0):
+                 write_frame=False, fps=30.0, codec='XVID'):
 
-        codec_list = ['XVID']
+        #codec_list = ['XVID','mp4v']
+        codec_code = list(codec)
+
 
         #Check inputs for errors
         if (frame_size is None) and (frame is None):
@@ -56,15 +58,18 @@ class WriteVideo:
             frame_size = np.shape(frame)
             self.frame_size = frame_size
 
-        #Set correct codec
-        codec_code = codec_list[0]
+
 
         fourcc=cv2.VideoWriter_fourcc(
                                       codec_code[0], codec_code[1],
                                       codec_code[2], codec_code[3]
                                       )
         if filename is None:
-            filename = filedialog.asksaveasfilename('*.mp4')
+            filename = filedialog.asksaveasfilename(defaultextension='.mp4',
+                                                    filetypes = [
+                                                              ('AVI','.avi'),
+                                                              ('MP4','.mp4')
+                                                              ])
 
         self.write_vid = cv2.VideoWriter(
                 filename, fourcc, fps,
