@@ -69,7 +69,7 @@ class Plotter():
     def configure_subplot_title(self, subplot=0, title='', fontsize=20):
         self._subplot_handles[subplot].set_title(title, fontsize=fontsize)
 
-    def configure_xaxis(self,subplot=0, xlabel='x', fontsize=20, xlim=(None, None)):
+    def configure_xaxis(self, subplot=0, xlabel='x', fontsize=20, xlim=(None, None)):
         self._subplot_handles[subplot].set_xlabel(xlabel, fontsize=fontsize)
         self._subplot_handles[subplot].set_xlim(left=xlim[0], right=xlim[1])
 
