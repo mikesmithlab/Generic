@@ -34,13 +34,17 @@ class Plotter():
     """
     def __init__(self, figsize=(8,6), dpi=80, subplot=None, sharex='none', sharey='none'):
 
-        if subplot is None:
+        if (subplot is None):
             subplot = (1,1)
         self._num_subplots = subplot[0]*subplot[1]
         # row and column sharing
         self.fig, self._subplot_handles = plt.subplots(subplot[0], subplot[1],
                                                       sharex=sharex, sharey=sharey,
                                                       figsize=figsize, dpi=dpi)
+        if subplot == (1,1):
+            #This is to force _subplot_handles to be a list and prevent
+            #code failing when we try to index it
+            self._subplot_handles = [self._subplot_handles,'dummy_var']
         self._plots = -1
         self._dict_plots = {}
 
@@ -48,6 +52,7 @@ class Plotter():
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
+            print(self._subplot_handles)
             plot_handle = self._subplot_handles[subplot].plot(xdata, ydata, marker)
             self._plots += 1
             self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
@@ -93,15 +98,15 @@ if __name__=='__main__':
     X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
     y2, y1 = np.cos(X), np.sin(X)
 
-    f = Plotter(subplot=(2, 1))
+    f = Plotter(subplot=(1, 1))
     f.add_plot(X, y1, marker='r-')
     f.add_plot(X, y2, marker='b-')
-    f.add_plot(X, y2, marker='g-', subplot=1)
+    f.add_plot(X, y2, marker='g-', subplot=0)
     f.save_figure()
 
     f.remove_plot(0)
     f.configure_title('test_title')
-    f.configure_xaxis(subplot=1,xlim=(0,1))
+    f.configure_xaxis(subplot=0,xlim=(0,1))
     f.configure_yaxis()
     f.list_plots()
     f.show_figure()
