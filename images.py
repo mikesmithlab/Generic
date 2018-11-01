@@ -224,9 +224,9 @@ class CropShape:
         self.refPt = []
         self.image = input_image
         self.no_of_sides = no_of_sides
-        self.scale = 1280/im.get_height(self.image)
+        self.scale = 1280/get_height(self.image)
         self.original_image = self.image.copy()
-        self.image = im.resize(self.image, self.scale*100)
+        self.image = resize(self.image, self.scale*100)
 
     def _click_and_crop(self, event, x, y, flags, param):
         """Internal method to manage the user cropping"""
@@ -246,20 +246,20 @@ class CropShape:
                       self.refPt[0][1])
                 rad = int((self.refPt[1][0] - self.refPt[0][0]) / 2)
                 cv2.circle(self.image, (int(cx), int(cy)), rad, (0, 255, 0), 2)
-                cv2.imshow(str(self.no_of_sides), self.image)
+                cv2.imshow('crop: '+str(self.no_of_sides), self.image)
 
     def begin_crop(self):
         """Method to create the mask image and the crop region"""
 
         clone = self.image.copy()
         points = np.zeros((self.no_of_sides, 2))
-        cv2.namedWindow(str(self.no_of_sides))
-        cv2.setMouseCallback(str(self.no_of_sides), self._click_and_crop)
+        cv2.namedWindow('crop: '+str(self.no_of_sides))
+        cv2.setMouseCallback('crop: '+str(self.no_of_sides), self._click_and_crop)
         count = 0
 
         # keep looping until 'q' is pressed
         while True:
-            cv2.imshow(str(self.no_of_sides), self.image)
+            cv2.imshow('crop: '+str(self.no_of_sides), self.image)
             key = cv2.waitKey(1) & 0xFF
 
             if self.cropping and self.no_of_sides > 1:
@@ -310,6 +310,13 @@ if __name__ == "__main__":
     display(img)
 
     width, height = get_width_and_height(img)
+
+    crop_inst = CropShape(img, 1)
+    mask, crop, boundary = crop_inst.begin_crop()
+
+    masked_im = mask_img(img, mask)
+    masked_and_cropped = crop_img(masked_im, crop)
+    display(masked_and_cropped, 'masked and cropped')
 
     img = resize(img, 50)
     display(img, 'resize')
