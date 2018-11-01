@@ -4,9 +4,17 @@ import Generic.filedialogs as fd
 
 
 def get_width_and_height(img):
-    width = np.shape(img)[0]
-    height = np.shape(img)[1]
+    width = get_width(img)
+    height = get_height(img)
     return width, height
+
+
+def get_width(img):
+    return np.shape(img)[0]
+
+
+def get_height(img):
+    return np.shape(img)[1]
 
 
 def resize(img, percent=25):
