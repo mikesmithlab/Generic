@@ -200,6 +200,109 @@ def crop_img(img, crop):
         out = img[crop[0][0]:crop[0][1], crop[1][0]:crop[1][1]]
     return out
 
+
+class CropShape:
+    """ Take an interactive crop of a circle"""
+
+    def __init__(self, input_image, no_of_sides=1):
+        """
+        Initialise with input image and the number of sides:
+
+        Parameters
+        ----------
+        input_image: 2D numpy array
+            contains an image
+        no_of_sides: int
+            The number of sides that the desired shape contains.
+                1: Uses a circle
+                >2: Uses a polygon
+
+        """
+
+        super().__init__()
+        self.cropping = False
+        self.refPt = []
+        self.image = input_image
+        self.no_of_sides = no_of_sides
+        self.scale = 1280/im.get_height(self.image)
+        self.original_image = self.image.copy()
+        self.image = im.resize(self.image, self.scale*100)
+
+    def _click_and_crop(self, event, x, y, flags, param):
+        """Internal method to manage the user cropping"""
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            # x is across, y is down
+            self.refPt = [(x, y)]
+            self.cropping = True
+
+        elif event == cv2.EVENT_LBUTTONUP:
+            self.cropping = False
+            if self.no_of_sides == 1:
+                self.refPt.append((x, y))
+                cx = ((self.refPt[1][0] - self.refPt[0][0]) / 2 +
+                      self.refPt[0][0])
+                cy = ((self.refPt[1][1] - self.refPt[0][1]) / 2 +
+                      self.refPt[0][1])
+                rad = int((self.refPt[1][0] - self.refPt[0][0]) / 2)
+                cv2.circle(self.image, (int(cx), int(cy)), rad, (0, 255, 0), 2)
+                cv2.imshow(str(self.no_of_sides), self.image)
+
+    def begin_crop(self):
+        """Method to create the mask image and the crop region"""
+
+        clone = self.image.copy()
+        points = np.zeros((self.no_of_sides, 2))
+        cv2.namedWindow(str(self.no_of_sides))
+        cv2.setMouseCallback(str(self.no_of_sides), self._click_and_crop)
+        count = 0
+
+        # keep looping until 'q' is pressed
+        while True:
+            cv2.imshow(str(self.no_of_sides), self.image)
+            key = cv2.waitKey(1) & 0xFF
+
+            if self.cropping and self.no_of_sides > 1:
+                points[count, 0] = self.refPt[0][0]
+                points[count, 1] = self.refPt[0][1]
+                self.cropping = False
+                count += 1
+
+            if key == ord("r"):
+                self.image = clone.copy()
+                count = 0
+                points = np.zeros((self.no_of_sides, 2))
+
+            elif key == ord("c"):
+                break
+
+        cv2.destroyAllWindows()
+
+        if self.no_of_sides == 1:
+            cx = (self.refPt[1][0] - self.refPt[0][0]) / 2 + self.refPt[0][0]
+            cy = (self.refPt[1][1] - self.refPt[0][1]) / 2 + self.refPt[0][1]
+            rad = int((self.refPt[1][0] - self.refPt[0][0]) / 2)
+            cx = int(cx/self.scale)
+            cy = int(cy/self.scale)
+            rad = int(rad/self.scale)
+            mask_img = np.zeros((np.shape(self.original_image))).astype(np.uint8)
+            cv2.circle(mask_img, (cx, cy), rad, [1, 1, 1], thickness=-1)
+            crop = ([int(cy - rad), int(cy + rad)],
+                    [int(self.refPt[0][0]/self.scale), int(self.refPt[1][0]/self.scale)])
+            boundary = np.array((cx, cy, rad), dtype=np.int32)
+            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), boundary
+
+        else:
+            points = points/self.scale
+            mask_img = np.zeros(np.shape(self.original_image)).astype('uint8')
+            cv2.fillPoly(mask_img, pts=np.array([points], dtype=np.int32),
+                         color=(250, 250, 250))
+            crop = ([min(points[:, 1]), max(points[:, 1])],
+                    [min(points[:, 0]), max(points[:, 0])])
+            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points
+
+
+
 if __name__ == "__main__":
     filename = fd.load_filename()
 
