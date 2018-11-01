@@ -302,6 +302,14 @@ class CropShape:
             return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points
 
 
+def draw_circles(img, circles, color_tuple=(0, 255, 255), thickness=2):
+    img = img.copy()
+    if circles is not None:
+        for x, y, size in circles:
+            cv2.circle(img, (int(x), int(y)), int(size), color_tuple, thickness)
+    return img
+
+
 
 if __name__ == "__main__":
     filename = fd.load_filename()
