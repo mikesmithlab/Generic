@@ -76,11 +76,13 @@ class Plotter():
 
     def configure_xaxis(self, subplot=0, xlabel='x', fontsize=20, xlim=(None, None)):
         self._subplot_handles[subplot].set_xlabel(xlabel, fontsize=fontsize)
-        self._subplot_handles[subplot].set_xlim(left=xlim[0], right=xlim[1])
+        if (xlim[0] is not None) and (xlim[1] is not None):
+            self._subplot_handles[subplot].set_xlim(left=xlim[0], right=xlim[1])
 
     def configure_yaxis(self, subplot=0, ylabel='y', fontsize=20, ylim=(None, None)):
         self._subplot_handles[subplot].set_ylabel(ylabel, fontsize=fontsize)
-        self._subplot_handles[subplot].set_ylim(bottom=ylim[0], top=ylim[1])
+        if (ylim[0] is not None) and (ylim[1] is not None):
+            self._subplot_handles[subplot].set_ylim(bottom=ylim[0], top=ylim[1])
 
     def save_figure(self, filename='*.png', initialdir='~ppzmis/Documents', dpi=80):
         if filename == '*.png':
@@ -97,15 +99,17 @@ if __name__=='__main__':
     X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
     y2, y1 = np.cos(X), np.sin(X)
 
-    f = Plotter(subplot=(1, 1))
+    f = Plotter(subplot=(2, 1),sharey = True)
     f.add_plot(X, y1, marker='r-')
     f.add_plot(X, y2, marker='b-')
     f.add_plot(X, y2, marker='g-', subplot=0)
     f.save_figure()
 
     f.remove_plot(0)
+    f.add_plot(X, y2, marker='b-',subplot=1)
+    print(f._subplot_handles)
     f.configure_title('test_title')
-    f.configure_xaxis(subplot=0,xlim=(0,1))
+    f.configure_xaxis(subplot=1,xlim=(0,1))
     f.configure_yaxis()
     f.list_plots()
     f.show_figure()
