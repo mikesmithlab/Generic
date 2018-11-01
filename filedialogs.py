@@ -3,9 +3,25 @@ import sys
 import os
 import glob
 
+
+def save_filename(caption='Save File',
+              directory='/home/ppxjd3/Code/Generic/',
+              file_filter='*.mp4;;*.avi'):
+    app = QApplication(sys.argv)
+    output = QFileDialog.getSaveFileName(parent=None,
+                                           caption=caption,
+                                           directory=directory,
+                                           filter=file_filter)
+    file, extension = os.path.splitext(output[0])
+    if extension != "":
+        filename = output[0]
+    else:
+        filename = file + output[1][1:]
+    return filename
+
 def load_filename(caption='Find a filename',
                  directory='/home/ppxjd3/Code/Generic/',
-                 file_filter='*.png;;*.jpg;;*.*'):
+                 file_filter='*.*;;*.png;;*.jpg'):
     app = QApplication(sys.argv)
     filename = QFileDialog.getOpenFileName(parent=None,
                                            caption=caption,
@@ -13,10 +29,6 @@ def load_filename(caption='Find a filename',
                                            filter=file_filter)[0]
     app.exit()
     return filename
-
-
-
-
 
 def get_files_directory(path, full_filenames=True):
     '''
@@ -40,26 +52,54 @@ def get_files_directory(path, full_filenames=True):
         f = [os.path.split(f)[1] for f in filename_list]
         return f
 
-def save_filename(caption='Save File',
-              directory='/home/ppxjd3/Code/Generic/',
-              file_filter='*.mp4;;*.avi'):
-    app = QApplication(sys.argv)
-    output = QFileDialog.getSaveFileName(parent=None,
-                                           caption=caption,
-                                           directory=directory,
-                                           filter=file_filter)
-    file, extension = os.path.splitext(output[0])
-    if extension != "":
-        filename = output[0]
-    else:
-        filename = file + output[1][1:]
-    return filename
+class BatchProcess():
+    """Generator for batch processing of files in scripts
+       The BatchProcess() object if called without a path filter
+       such as ~/ppzmis/*ab*.csv will open a dialogue. If you click on a
+       file in a folder it will create a list of all the filenames with
+       the same type of extension.
+
+       The object can then be iterated over yielding a new filename until
+       there are no more left. Easiest way to set up is:
+
+       for filename in BatchProcess():
+           load file for processing
+           function_of_script(filename)
+
+    """
+    def __init__(self,pathfilter=None):
+        if pathfilter is None:
+            filename = load_filename(caption='Select file in directory')
+            path = os.path.split(filename)[0]
+            file, extension = os.path.splitext(filename)
+            extension='*' + extension
+            pathfilter = os.path.join(path, extension)
+
+        self.filenames = get_files_directory(pathfilter)
+        self.num_files = len(self.filenames)
+        self.current = 0
+
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            filename = self.filenames[self.current]
+            self.current += 1
+        except IndexError:
+            raise StopIteration
+        return filename
+
 
 
 if __name__ == "__main__":
-    file = load_filename()
-    print('file = ', file)
+    #file = load_filename()
+    #print('file = ', file)
 
-    new_file = save_filename()
-    print('save_file = ', new_file)
+    #new_file = save_filename()
+    #print('save_file = ', new_file)
 
+
+    for filename in BatchProcess():
+        print(filename)
