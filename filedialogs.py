@@ -7,6 +7,25 @@ import glob
 def save_filename(caption='Save File',
               directory='/home/ppxjd3/Code/Generic/',
               file_filter='*.mp4;;*.avi'):
+    """
+    Choose a save filename using a dialog.
+
+    Parameters
+    ----------
+    caption: str
+        Title for the window
+
+    directory: str
+        Path to open the file dialog at
+
+    file_filter:str
+        String containing extension wildcards separated by ;;
+
+    Returns
+    -------
+    filename: str
+        The save filename including path and extension
+    """
     app = QApplication(sys.argv)
     output = QFileDialog.getSaveFileName(parent=None,
                                            caption=caption,
@@ -22,6 +41,25 @@ def save_filename(caption='Save File',
 def load_filename(caption='Find a filename',
                  directory='/home/ppxjd3/Code/Generic/',
                  file_filter='*.*;;*.png;;*.jpg'):
+    """
+    Choose a load filename using a dialog.
+
+    Parameters
+    ----------
+    caption: str
+        Title for the window
+
+    directory: str
+        Path to open the file dialog at
+
+    file_filter:str
+        String containing extension wildcards separated by ;;
+
+    Returns
+    -------
+    filename: str
+        The load filename including path and extension
+    """
     app = QApplication(sys.argv)
     filename = QFileDialog.getOpenFileName(parent=None,
                                            caption=caption,
@@ -32,18 +70,26 @@ def load_filename(caption='Find a filename',
 
 def get_files_directory(path, full_filenames=True):
     '''
-    Inputs:
-    Given a path it will return a list of all files as a list
-    path can include wild cards see example
-    full_filenames =True joins filenames to path
+    Gets list of files from a directory
 
-    Returns:
+    Given a path it will return a list of all files as a list
+
+    Parameters
+    ----------
+    path: str
+        filepath to load files from, including wildcards will only load
+        files which fit the wildcard
+
+    full_filenames: Bool
+        If True joins filenames to path
+
+    Returns
+    -------
     List of filenames with or without paths
 
-    Example:
+    Example
+    -------
     file_list = get_files_directory('~/*.png')
-
-
     '''
     filename_list = glob.glob(path)
     if full_filenames == True:
@@ -53,19 +99,20 @@ def get_files_directory(path, full_filenames=True):
         return f
 
 class BatchProcess():
-    """Generator for batch processing of files in scripts
-       The BatchProcess() object if called without a path filter
-       such as ~/ppzmis/*ab*.csv will open a dialogue. If you click on a
-       file in a folder it will create a list of all the filenames with
-       the same type of extension.
+    """
+    Generator for batch processing of files in scripts
 
-       The object can then be iterated over yielding a new filename until
-       there are no more left. Easiest way to set up is:
+   The BatchProcess() object if called without a path filter
+   such as ~/ppzmis/*ab*.csv will open a dialogue. If you click on a
+   file in a folder it will create a list of all the filenames with
+   the same type of extension.
 
-       for filename in BatchProcess():
-           load file for processing
-           function_of_script(filename)
+   The object can then be iterated over yielding a new filename until
+   there are no more left. Easiest way to set up is:
 
+   for filename in BatchProcess():
+       load file for processing
+       function_of_script(filename)
     """
     def __init__(self,pathfilter=None):
         if pathfilter is None:
