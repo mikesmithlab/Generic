@@ -94,12 +94,20 @@ class BatchProcess():
 
 
 if __name__ == "__main__":
-    #file = load_filename()
-    #print('file = ', file)
+    file = load_filename()
+    print('load file = ', file)
 
-    #new_file = save_filename()
-    #print('save_file = ', new_file)
+    new_file = save_filename()
+    print('save_file = ', new_file)
 
-
+    #2 possibilities for using BatchProcess()
     for filename in BatchProcess():
-        print(filename)
+       print(filename)
+       #call your script with filename, load file whatever
+
+    #use it like a normal generator expression.
+    batch = BatchProcess()
+    filename = next(batch)
+    print(filename)
+    filename = next(batch)
+    print(filename)
