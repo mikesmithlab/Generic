@@ -344,7 +344,7 @@ def draw_polygons(img, polygons, color=RED):
     return out
 
 
-def add_delaunay_tess(frame, points):
+def draw_delaunay_tess(frame, points):
     tess = spatial.Delaunay(points)
     frame = draw_polygons(frame,
                           points[tess.simplices],
