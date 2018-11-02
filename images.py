@@ -264,7 +264,7 @@ class CropShape:
                 cy = ((self.refPt[1][1] - self.refPt[0][1]) / 2 +
                       self.refPt[0][1])
                 rad = int((self.refPt[1][0] - self.refPt[0][0]) / 2)
-                cv2.circle(self.image, (int(cx), int(cy)), rad, (0, 255, 0), 2)
+                cv2.circle(self.image, (int(cx), int(cy)), rad, LIME, 2)
                 cv2.imshow('crop: '+str(self.no_of_sides), self.image)
 
     def begin_crop(self):
@@ -321,7 +321,7 @@ class CropShape:
             return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points
 
 
-def draw_circles(img, circles, color_tuple=(0, 255, 255), thickness=2):
+def draw_circles(img, circles, color_tuple=YELLOW, thickness=2):
     img = img.copy()
     if circles is not None:
         for x, y, size in circles:
@@ -329,14 +329,14 @@ def draw_circles(img, circles, color_tuple=(0, 255, 255), thickness=2):
     return img
 
 
-def draw_triangle(img, vertices, color=(0, 255, 255)):
+def draw_triangle(img, vertices, color=RED):
     vertices = vertices.astype(np.int32)
     out = cv2.polylines(img, [vertices], True, color)
     return out
 
 
 
-def draw_triangles(img, triangles, color=(0, 255, 255)):
+def draw_triangles(img, triangles, color=RED):
     out = img.copy()
     for vertices in triangles:
         out = draw_triangle(out, vertices, color)
