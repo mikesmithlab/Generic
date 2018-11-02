@@ -310,6 +310,19 @@ def draw_circles(img, circles, color_tuple=(0, 255, 255), thickness=2):
     return img
 
 
+def draw_triangle(img, vertices):
+    vertices = vertices.astype(np.int32)
+    out = cv2.polylines(img, [vertices], True, (0, 255, 255))
+    return out
+
+
+
+def draw_triangles(img, triangles):
+    out = img.copy()
+    for vertices in triangles:
+        out = draw_triangle(out, vertices)
+    return out
+
 
 if __name__ == "__main__":
     filename = fd.load_filename()
