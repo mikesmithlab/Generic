@@ -80,7 +80,7 @@ def get_height(img):
     return int(np.shape(img)[1])
 
 
-def resize(img, percent=25):
+def resize(img, percent=25.0):
     """
     Resizes an image to a given percentage
 
@@ -344,25 +344,25 @@ def rotate(img, angle):
     # grab the dimensions of the image and then determine the
     # center
     (h, w) = img.shape[:2]
-    (cX, cY) = (w // 2, h // 2)
+    (c_x, c_y) = (w // 2, h // 2)
 
     # grab the rotation matrix (applying the negative of the
     # angle to rotate clockwise), then grab the sine and cosine
     # (i.e., the rotation components of the matrix)
-    M = cv2.getRotationMatrix2D((cX, cY), -angle, 1.0)
-    cos = np.abs(M[0, 0])
-    sin = np.abs(M[0, 1])
+    rot_matrix = cv2.getRotationMatrix2D((c_x, c_y), -angle, 1.0)
+    cos = np.abs(rot_matrix[0, 0])
+    sin = np.abs(rot_matrix[0, 1])
 
     # compute the new bounding dimensions of the image
-    nW = int((h * sin) + (w * cos))
-    nH = int((h * cos) + (w * sin))
+    n_w = int((h * sin) + (w * cos))
+    n_h = int((h * cos) + (w * sin))
 
     # adjust the rotation matrix to take into account translation
-    M[0, 2] += (nW / 2) - cX
-    M[1, 2] += (nH / 2) - cY
+    rot_matrix[0, 2] += (n_w / 2) - c_x
+    rot_matrix[1, 2] += (n_h / 2) - c_y
 
     # perform the actual rotation and return the image
-    out = cv2.warpAffine(img, M, (nW, nH))
+    out = cv2.warpAffine(img, rot_matrix, (n_w, n_h))
     return out
 
 
@@ -388,7 +388,7 @@ def imfill(img):
     h, w = img.shape[:2]
     mask = np.zeros((h + 2, w + 2), np.uint8)
     # Floodfill from point (0, 0)
-    cv2.floodFill(im_floodfill, mask, (0, 0), 255);
+    cv2.floodFill(im_floodfill, mask, (0, 0), 255)
 
     # Invert floodfilled image
     im_floodfill_inv = cv2.bitwise_not(im_floodfill)
@@ -604,7 +604,8 @@ class CropShape:
         clone = self.image.copy()
         points = np.zeros((self.no_of_sides, 2))
         cv2.namedWindow('crop: '+str(self.no_of_sides))
-        cv2.setMouseCallback('crop: '+str(self.no_of_sides), self._click_and_crop)
+        cv2.setMouseCallback('crop: '+str(self.no_of_sides),
+                             self._click_and_crop)
         count = 0
 
         # keep looping until 'q' is pressed
@@ -635,10 +636,12 @@ class CropShape:
             cx = int(cx/self.scale)
             cy = int(cy/self.scale)
             rad = int(rad/self.scale)
-            mask_img = np.zeros((np.shape(self.original_image))).astype(np.uint8)
+            mask_img = np.zeros((np.shape(self.original_image)))\
+                .astype(np.uint8)
             cv2.circle(mask_img, (cx, cy), rad, [1, 1, 1], thickness=-1)
             crop = ([int(cy - rad), int(cy + rad)],
-                    [int(self.refPt[0][0]/self.scale), int(self.refPt[1][0]/self.scale)])
+                    [int(self.refPt[0][0]/self.scale),
+                     int(self.refPt[1][0]/self.scale)])
             boundary = np.array((cx, cy, rad), dtype=np.int32)
             return mask_img[:, :, 0], np.array(crop, dtype=np.int32), boundary
 
