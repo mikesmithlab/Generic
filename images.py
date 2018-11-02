@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import Generic.filedialogs as fd
+from scipy import spatial
 
 # Color list BGR tuples
 BLUE = (255, 0, 0)
@@ -341,6 +342,27 @@ def draw_polygons(img, polygons, color=RED):
     for vertices in polygons:
         out = draw_polygon(out, vertices, color)
     return out
+
+
+def add_delaunay_tess(frame, points):
+    tess = spatial.Delaunay(points)
+    frame = draw_polygons(frame,
+                          points[tess.simplices],
+                          color=LIME)
+    return frame
+
+
+def add_voronoi_cells(frame, points):
+    voro = spatial.Voronoi(points)
+    ridge_vertices = voro.ridge_vertices
+    new_ridge_vertices = []
+    for ridge in ridge_vertices:
+        if -1 not in ridge:
+            new_ridge_vertices.append(ridge)
+    frame = draw_polygons(frame,
+                          voro.vertices[new_ridge_vertices],
+                          color=PINK)
+    return frame
 
 
 if __name__ == "__main__":
