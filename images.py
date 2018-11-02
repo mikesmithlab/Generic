@@ -352,7 +352,7 @@ def draw_delaunay_tess(frame, points):
     return frame
 
 
-def add_voronoi_cells(frame, points):
+def draw_voronoi_cells(frame, points):
     voro = spatial.Voronoi(points)
     ridge_vertices = voro.ridge_vertices
     new_ridge_vertices = []
