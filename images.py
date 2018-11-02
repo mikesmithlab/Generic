@@ -21,23 +21,82 @@ GREEN = (0, 128, 0)
 MAROON = (0, 0, 128)
 
 
-
-
 def get_width_and_height(img):
+    """
+    Returns width, height for an image
+
+    Parameters
+    ----------
+    img: Array containing an image
+
+    Returns
+    -------
+    width: int
+        Width of the image
+    height: int
+        Height of the image
+
+    Notes
+    -----
+    Width of an image is the first dimension for numpy arrays.
+    Height of an image is the first dimension for openCV
+    """
     width = get_width(img)
     height = get_height(img)
     return width, height
 
 
 def get_width(img):
-    return np.shape(img)[0]
+    """
+    Returns width for img
+
+    Parameters
+    ----------
+    img: Array containing an image
+
+    Returns
+    -------
+    width: int
+        Width of the image
+
+    """
+    return int(np.shape(img)[0])
 
 
 def get_height(img):
-    return np.shape(img)[1]
+    """
+    Returns the height of an image
+
+    Parameters
+    ----------
+    img: Array containing an image
+
+    Returns
+    -------
+    height: int
+        height of the image
+
+    """
+    return int(np.shape(img)[1])
 
 
 def resize(img, percent=25):
+    """
+    Resizes an image to a given percentage
+
+    Parameters
+    ----------
+    img: numpy array containing an image
+
+    percent:
+        the new size of the image as a percentage
+
+    Returns
+    -------
+    resized_image:
+        The image after it's been resized
+
+    """
     width, height = get_width_and_height(img)
     dim = (int(height * percent / 100), int(width * percent / 100))
     return cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
@@ -51,10 +110,16 @@ def display(image, title=''):
 
 
 def bgr_2_grayscale(img):
+    """Converts a BGR image to grayscale"""
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
 def threshold(img, thresh=100):
+    """
+    Thresholds an image
+
+    Pixels below thresh set to black, pixels above set to white
+    """
     ret, out = cv2.threshold(
             img,
             thresh,
@@ -64,6 +129,25 @@ def threshold(img, thresh=100):
 
 
 def adaptive_threshold(img, block_size=5, constant=0):
+    """
+    Performs an adaptive threshold on an image
+
+    Uses cv2.ADAPTIVE_THRESH_GAUSSIAN_C:
+        threshold value is the weighted sum of neighbourhood values where
+        weights are a gaussian window.
+
+    Uses cv2.THRESH_BINARY:
+        Pixels below the threshold set to black
+        Pixels above the threshold set to white
+
+    Parameters
+    ----------
+    img: numpy array containing an image
+
+    block_size: the size of the neighbourhood area
+
+    constant: subtracted from the weighted sum
+    """
     out = cv2.adaptiveThreshold(
             img,
             255,
@@ -75,37 +159,188 @@ def adaptive_threshold(img, block_size=5, constant=0):
     return out
 
 
-def gaussian_blur(img, kernel=(3,3)):
+def gaussian_blur(img, kernel=(3, 3)):
+    """
+    Blurs an image using a gaussian filter
+
+    The function convolves the source image with the specified Gaussian kernel.
+
+    Parameters
+    ----------
+    img: input image
+        Can have any number of channels which are processed separately
+
+    kernel: tuple giving (width, height) for kernel
+        Width and height should be positive and odd
+
+    Returns
+    -------
+    out: output image
+        Same size and type as img
+    """
     out = cv2.GaussianBlur(img, kernel, 0)
     return out
 
 
-def dilate(img, kernel=(3,3)):
+def dilate(img, kernel=(3, 3)):
+    """
+    Dilates an image by using a specific structuring element.
+
+    The function dilates the source image using the specified structuring
+    element that determines the shape of a pixel neighborhood over which
+    the maximum is taken
+
+    Parameters
+    ----------
+    img: binary input image
+        Can have any number of channels which are processed separately
+
+    kernel: tuple giving (width, height) for kernel
+        Width and height should be positive and odd
+
+    Returns
+    -------
+    out: output image
+        Same size and type as img
+
+    Notes
+    -----
+    It dilates the boundaries of the foreground object (Always try to keep
+    foreground in white).
+
+    A pixel in the original image (either 1 or 0) will be considered 1 if
+    any of the pixels under the kernel is 1.
+
+    """
     out = cv2.dilate(img, kernel)
     return out
 
 
-def erode(img, kernel=(3,3)):
+def erode(img, kernel=(3, 3)):
+    """
+    Erodes an image by using a specific structuring element.
+
+    The function erodes the source image using the specified structuring
+    element that determines the shape of a pixel neighborhood over which
+    the minimum is taken.
+
+    Parameters
+    ----------
+    img: binary input image
+        Number of channels can be arbitrary
+
+    kernel: tuple giving (width, height) for kernel
+        Width and height should be positive and odd
+
+    Returns
+    -------
+    out: output image
+        Same size and type as img
+
+    Notes
+    -----
+    It erodes away the boundaries of foreground object
+    (Always try to keep foreground in white).
+
+    A pixel in the original image (either 1 or 0) will be considered 1
+    only if all the pixels under the kernel is 1, otherwise it is eroded
+    (made to zero).
+
+
+    """
     out = cv2.erode(img, kernel)
     return out
 
 
-def closing(img, kernel=(3,3)):
+def closing(img, kernel=(3, 3)):
+    """
+    Performs a dilation followed by an erosion
+
+    Parameters
+    ----------
+    img: binary input image
+        Number of channels can be arbitrary
+
+    kernel: tuple giving (width, height) for kernel
+        Width and height should be positive and odd
+
+    Returns
+    -------
+    out: output image
+        Same size and type as img
+
+    """
     out = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
     return out
 
 
-def opening(img, kernel=(3,3)):
+def opening(img, kernel=(3, 3)):
+    """
+    Performs an erosion followed by a dilation
+
+    Parameters
+    ----------
+    img: binary input image
+        Number of channels can be arbitrary
+
+    kernel: tuple giving (width, height) for kernel
+        Width and height should be positive and odd
+
+    Returns
+    -------
+    out: output image
+        Same size and type as img
+
+    """
     out = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
     return out
 
 
 def distance_transform(img):
+    """
+    Calculates the distance to the closest zero pixel for each pixel.
+
+    Calculates the approximate or precise distance from every binary image
+    pixel to the nearest zero pixel. For zero image pixels, the distance will
+    obviously be zero.
+
+    Parameters
+    ----------
+    img: 8-bit, single-channel (binary) source image.
+
+    Returns
+    -------
+    out: Output image with calculated distances.
+        It is a 8-bit or 32-bit floating-point, single-channel image of the
+        same size as img.
+
+    References
+    ----------
+    Pedro Felzenszwalb and Daniel Huttenlocher. Distance transforms of sampled
+    functions. Technical report, Cornell University, 2004.
+    """
     out = cv2.distanceTransform(img, cv2.DIST_L2, 3)
     return out
 
 
 def rotate(img, angle):
+    """
+    Rotates an image without cropping it
+
+    Parameters
+    ----------
+    img: input image
+        Can have any number of channels
+
+    angle: angle to rotate by in degrees
+        Positive values mean clockwise rotation
+
+    Returns
+    -------
+    out: output image
+        May have different dimensions than the original image
+
+    """
     # grab the dimensions of the image and then determine the
     # center
     (h, w) = img.shape[:2]
@@ -127,15 +362,29 @@ def rotate(img, angle):
     M[1, 2] += (nH / 2) - cY
 
     # perform the actual rotation and return the image
-    return cv2.warpAffine(img, M, (nW, nH))
+    out = cv2.warpAffine(img, M, (nW, nH))
+    return out
 
 
 def imfill(img):
-    # img should be a thresholded image
-    # Copy the thresholded image.
+    """
+    Fills holes in the input binary image.
+
+    A hole is a set of background pixels that cannot be reached by filling in
+    the background from the edge of the image.
+
+    Parameters
+    ----------
+    img: binary input image
+
+    Returns
+    -------
+    out: binary output image
+        same size and type as img
+    """
     im_floodfill = img.copy()
     # Mask used to flood filling.
-    # Notice the size needs to be 2 pixels than the image.
+    # Notice the size needs to be 2 pixels larger than the image.
     h, w = img.shape[:2]
     mask = np.zeros((h + 2, w + 2), np.uint8)
     # Floodfill from point (0, 0)
@@ -184,12 +433,57 @@ def mask_top(img, row=0):
     return img
 
 
-def load_img(filename):
-    img = cv2.imread(filename)
+def load_img(filepath, flag=1):
+    """
+    Reads an image from a filepath.
+
+    The image should be in the working directory or a full path of image
+    should be given.
+
+    Parameters
+    ----------
+    filepath: filepath of the image
+
+    flag: Specifies how the image is read
+        1: Loads a color image. Any transparency will be neglected.
+        0: Loads image in grayscale mode.
+        -1: Loads image including alpha channel
+
+    Returns
+    -------
+    img: output image
+        Number of channels will be determined by the chosen flag.
+        Equal to None if filepath does not exist
+        Color images will have channels stored in BGR order
+
+    """
+    img = cv2.imread(filepath, flag)
     return img
 
 
 def write_img(img, filename):
+    """
+    Saves an image to a specified file.
+
+    The image format is chosen based on the filename extension
+
+    Parameters
+    ----------
+    img: Image to be saved
+
+    filename: Name of the file
+
+    Notes
+    -----
+    Only 8-bit single channel or 3-channel (BGR order) can be saved. If
+    the format, depth or channel order is different convert it first.
+
+    It is possible to store PNG images with an alpha channel using this
+    function. To do this, create 8-bit 4-channel image BGRA, where the alpha
+    channel goes last. Fully transparent pixels should have alpha set to 0,
+    fully opaque pixels should have alpha set to 255
+
+    """
     cv2.imwrite(filename, img)
 
 
@@ -210,10 +504,46 @@ def extract_biggest_object(img):
 
 
 def mask_img(img, mask):
-    return cv2.bitwise_and(img, img, mask=mask)
+    """
+    Masks pixels in an image.
+
+    Pixels in the image that are 1 in the mask are kept.
+    Pixels in the image that are 0 in the mask are set to 0.
+
+    Parameters
+    ----------
+    img: The input image
+        Any number of channels
+
+    mask: Mask image
+        Same height and width as img containing 0 or 1 in each pixel
+
+    Returns
+    -------
+    out: The masked image
+        Same dimensions and type as img
+    """
+    out = cv2.bitwise_and(img, img, mask=mask)
+    return out
 
 
 def crop_img(img, crop):
+    """
+    Crops an image.
+
+    Parameters
+    ----------
+    img: input image
+        Any number of channels
+
+    crop: list containing crop values
+        crop = [[xmin, xmax], [ymin, ymax]] where x goes from left to right
+        and y goes from top to bottom in the image
+
+    Returns
+    -------
+    out: cropped image
+    """
     if len(np.shape(img)) == 3:
         out = img[crop[0][0]:crop[0][1], crop[1][0]:crop[1][1], :]
     else:
@@ -222,7 +552,7 @@ def crop_img(img, crop):
 
 
 class CropShape:
-    """ Take an interactive crop of a circle"""
+    """ Take an interactive crop of a shape"""
 
     def __init__(self, input_image, no_of_sides=1):
         """
@@ -322,47 +652,149 @@ class CropShape:
             return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points
 
 
-def draw_circles(img, circles, color_tuple=YELLOW, thickness=2):
-    img = img.copy()
+def draw_circles(img, circles, color=YELLOW, thickness=2):
+    """
+    Draws circles on an image.
+
+    Parameters
+    ----------
+    img: Input image
+        Any number of channels
+
+    circles: array of shape (N, 3) containing x, y, and radius of N circles
+        circles[:,0] contains the x-coordinates of the centers
+        circles[:,1] contains the y-coordinates of the centers
+        circles[:,2] contains the radii of the circles
+
+    color: BGR tuple
+        If input image is grayscale circles will be black
+
+    thickness: pixel thickness
+        If -1, the circle is filled in
+
+    Returns
+    -------
+    img: image with annotated circles
+        Same height, width and channels as input image
+    """
     if circles is not None:
-        for x, y, size in circles:
-            cv2.circle(img, (int(x), int(y)), int(size), color_tuple, thickness)
+        for x, y, rad in circles:
+            cv2.circle(img, (int(x), int(y)), int(rad), color, thickness)
     return img
 
 
-def draw_polygon(img, vertices, color=RED):
-    vertices = vertices.astype(np.int32)
-    out = cv2.polylines(img, [vertices], True, color)
-    return out
+def draw_polygon(img, vertices, color=RED, thickness=1):
+    """
+    Draws a polygon on an image from a list of vertices
 
+    Parameters
+    ----------
+    img: input image
+        Any number of channels
+
+    vertices: array of N vertices
+        Shape (N, 2) where
+            vertices[:, 0] contains x coordinates
+            vertices[:, 1] contains y coordinates
+
+    color: BGR tuple
+        if input image is grayscale then circles will be black
+
+    thickness: int
+        Thickness of the lines
+
+    Returns
+    -------
+    out: output image
+        Same shape and type as input image
+    """
+    vertices = vertices.astype(np.int32)
+    out = cv2.polylines(img, [vertices], True, color, thickness=thickness)
+    return out
 
 
 def draw_polygons(img, polygons, color=RED):
-    out = img.copy()
+    """
+    Draws multiple polygons on an image from a list of polygons
+
+    Parameters
+    ----------
+    img: input image
+        Any number of channels
+
+    polygons: array containing coordinates of polygons
+        shape is (P, N, 2) where P is the number of polygons, N is the number
+        of vertices in each polygon. [:, :, 0] contains x coordinates,
+        [:, :, 1] contains y coordinates.
+
+    color: BGR tuple
+
+    Returns
+    -------
+    img: annotated image
+        Same shape and type as input image
+    """
+    print(polygons)
     for vertices in polygons:
-        out = draw_polygon(out, vertices, color)
-    return out
+        img = draw_polygon(img, vertices, color)
+    return img
 
 
-def draw_delaunay_tess(frame, points):
+def draw_delaunay_tess(img, points):
+    """
+    Draws the delaunay tesselation for a set of points on an image
+
+    Parameters
+    ----------
+    img: input image
+        Any number of channels
+
+    points: array of N points
+        Shape (N, 2).
+        points[:, 0] contains x coordinates
+        points[:, 1] contains y coordinates
+
+    Returns
+    -------
+    ing: annotated image
+        Same shape and type as input image
+    """
     tess = spatial.Delaunay(points)
-    frame = draw_polygons(frame,
-                          points[tess.simplices],
-                          color=LIME)
-    return frame
+    img = draw_polygons(img,
+                        points[tess.simplices],
+                        color=LIME)
+    return img
 
 
-def draw_voronoi_cells(frame, points):
+def draw_voronoi_cells(img, points):
+    """
+    Draws the voronoi cells for a set of points on an image
+
+    Parameters
+    ----------
+    img: input image
+        Any number of channels
+
+    points: array of N points
+        Shape (N, 2).
+        points[:, 0] contains x coordinates
+        points[:, 1] contains y coordinates
+
+    Returns
+    -------
+    ing: annotated image
+        Same shape and type as input image
+    """
     voro = spatial.Voronoi(points)
     ridge_vertices = voro.ridge_vertices
     new_ridge_vertices = []
     for ridge in ridge_vertices:
         if -1 not in ridge:
             new_ridge_vertices.append(ridge)
-    frame = draw_polygons(frame,
-                          voro.vertices[new_ridge_vertices],
-                          color=PINK)
-    return frame
+    img = draw_polygons(img,
+                        voro.vertices[new_ridge_vertices],
+                        color=PINK)
+    return img
 
 
 if __name__ == "__main__":
