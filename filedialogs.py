@@ -104,6 +104,7 @@ if __name__ == "__main__":
     for filename in BatchProcess():
        print(filename)
        #call your script with filename, load file whatever
+       #Script can take a filefilter e.g '~/ppzmis/*ball*.txt' to filter files in generator
 
     #use it like a normal generator expression.
     batch = BatchProcess()
