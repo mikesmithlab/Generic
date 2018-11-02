@@ -2,6 +2,25 @@ import cv2
 import numpy as np
 import Generic.filedialogs as fd
 
+# Color list BGR tuples
+BLUE = (255, 0, 0)
+LIME = (0, 255, 0)
+RED = (0, 0, 255)
+YELLOW = (0, 255, 255)
+ORANGE = (0, 128, 255)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+MAGENTA = (255, 0, 255)
+PINK = MAGENTA
+CYAN = (255, 255, 0)
+NAVY = (128, 0, 0)
+TEAL = (128, 128, 0)
+PURPLE = (128, 0, 128)
+GREEN = (0, 128, 0)
+MAROON = (0, 0, 128)
+
+
+
 
 def get_width_and_height(img):
     width = get_width(img)
@@ -245,7 +264,7 @@ class CropShape:
                 cy = ((self.refPt[1][1] - self.refPt[0][1]) / 2 +
                       self.refPt[0][1])
                 rad = int((self.refPt[1][0] - self.refPt[0][0]) / 2)
-                cv2.circle(self.image, (int(cx), int(cy)), rad, (0, 255, 0), 2)
+                cv2.circle(self.image, (int(cx), int(cy)), rad, LIME, 2)
                 cv2.imshow('crop: '+str(self.no_of_sides), self.image)
 
     def begin_crop(self):
@@ -302,7 +321,7 @@ class CropShape:
             return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points
 
 
-def draw_circles(img, circles, color_tuple=(0, 255, 255), thickness=2):
+def draw_circles(img, circles, color_tuple=YELLOW, thickness=2):
     img = img.copy()
     if circles is not None:
         for x, y, size in circles:
@@ -310,17 +329,17 @@ def draw_circles(img, circles, color_tuple=(0, 255, 255), thickness=2):
     return img
 
 
-def draw_triangle(img, vertices):
+def draw_polygon(img, vertices, color=RED):
     vertices = vertices.astype(np.int32)
-    out = cv2.polylines(img, [vertices], True, (0, 255, 255))
+    out = cv2.polylines(img, [vertices], True, color)
     return out
 
 
 
-def draw_triangles(img, triangles):
+def draw_polygons(img, polygons, color=RED):
     out = img.copy()
-    for vertices in triangles:
-        out = draw_triangle(out, vertices)
+    for vertices in polygons:
+        out = draw_polygon(out, vertices, color)
     return out
 
 
