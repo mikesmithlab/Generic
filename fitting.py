@@ -22,6 +22,7 @@ fit_dict = {
             'cubic': ('f(x) = a*x**3 + b*x**2 + c*x + d', 4),
             'exponential': ('f(x) = a*exp(b*x)', 2),
             'flipped_exponential': ('f(x) = a*(1 - exp(b*x))',2),
+            'double_flipped_exponential':('a*(1-c*np.exp(b*x)-e*np.exp(d*x))',5)
             'sin_cos': ('f(x) = asin(bx)+bcos(cx)+d', 4),
             'gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2))', 3),
             'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3),
@@ -62,6 +63,9 @@ def exponential(x, a, b):
 
 def flipped_exponential(x, a, b):
     return a*(1-np.exp(b*x))
+
+def double_flipped_exponential(x, a, b, c, d, e):
+    return a*(1-c*np.exp(b*x)-e*np.exp(d*x))
 
 
 
