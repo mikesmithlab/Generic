@@ -329,17 +329,17 @@ def draw_circles(img, circles, color_tuple=YELLOW, thickness=2):
     return img
 
 
-def draw_triangle(img, vertices, color=RED):
+def draw_polygon(img, vertices, color=RED):
     vertices = vertices.astype(np.int32)
     out = cv2.polylines(img, [vertices], True, color)
     return out
 
 
 
-def draw_triangles(img, triangles, color=RED):
+def draw_polygons(img, polygons, color=RED):
     out = img.copy()
-    for vertices in triangles:
-        out = draw_triangle(out, vertices, color)
+    for vertices in polygons:
+        out = draw_polygon(out, vertices, color)
     return out
 
 
