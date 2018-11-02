@@ -22,7 +22,7 @@ fit_dict = {
             'cubic': ('f(x) = a*x**3 + b*x**2 + c*x + d', 4),
             'exponential': ('f(x) = a*exp(b*x)', 2),
             'flipped_exponential': ('f(x) = a*(1 - exp(b*x))',2),
-            'double_flipped_exponential':('a*(1-c*np.exp(b*x)-e*np.exp(d*x))',5)
+            'double_flipped_exponential':('a*(1-c*np.exp(b*x)-e*np.exp(d*x))',5),
             'sin_cos': ('f(x) = asin(bx)+bcos(cx)+d', 4),
             'gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2))', 3),
             'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3),
@@ -51,6 +51,9 @@ def quadratic(x, a, b, c):
 def cubic(x, a, b, c, d):
     return a*x**3 + b*x**2 + c*x + d
 
+def axb(x,a,b):
+    '''Simple power law'''
+    return a*(x)**b
 
 '''
 Exponential functions
@@ -62,10 +65,10 @@ def exponential(x, a, b):
 
 
 def flipped_exponential(x, a, b):
-    return a*(1-np.exp(b*x))
+    return a*(1-np.exp(-b*x))
 
 def double_flipped_exponential(x, a, b, c, d, e):
-    return a*(1-c*np.exp(b*x)-e*np.exp(d*x))
+    return a*(1-c*np.exp(-b*x)-e*np.exp(-d*x))
 
 
 
@@ -141,9 +144,6 @@ def sin_const_convert(params, long=True):
     return params
 
 
-def axb(x,a,b):
-    '''Simple power law'''
-    return a*(x)**b
 
 
 class Fit:
@@ -327,8 +327,28 @@ class Fit:
 
         pfit_bootstrap = mean_pfit
         self.fit_param_errors = np.std(ps, 0)
-        
-    def plot_fit(self, filename=None, residuals=False, show=False, save=False):
+
+    def plot_data(self):
+        plot_obj = Plotter()
+        plot_obj.add_plot(self.x, self.y, marker='bx')
+        plot_obj.show_figure()
+
+    def _plot_limits(self, data_array, lower=True):
+        '''internal method to control axes limits correctly'''
+        if lower == True:
+            lim = np.min(data_array)
+            upordown = -1
+        else:
+            lim = np.max(data_array)
+            upordown = 1
+        if lim < 0:
+            lim=lim *(1 - upordown*0.1)
+        else:
+            lim = lim * (1 + upordown * 0.1)
+        return lim
+
+
+    def plot_fit(self, filename=None, residuals=False, show=True, save=False):
         if filename is None:
             filename = ' '
 
@@ -340,6 +360,8 @@ class Fit:
         plot_obj.add_plot(self.x, self.y, marker='rx')
         plot_obj.add_plot(self.fx, self.fy, marker='bx')
         plot_obj.add_plot(self.fit_x, self.fit_y, marker='g-')
+
+        plot_obj.configure_yaxis(ylim=(self._plot_limits(self.y,lower=True),self._plot_limits(self.y,lower=False)))
 
         if residuals:
             plot_obj.add_plot(self.fx, self.fit_residuals, marker='rx',subplot=1)
