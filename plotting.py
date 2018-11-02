@@ -76,12 +76,12 @@ class Plotter():
 
     def configure_xaxis(self, subplot=0, xlabel='x', fontsize=20, xlim=(None, None)):
         self._subplot_handles[subplot].set_xlabel(xlabel, fontsize=fontsize)
-        if (xlim[0] is not None) and (xlim[1] is not None):
+        if (xlim[0] is not None) or (xlim[1] is not None):
             self._subplot_handles[subplot].set_xlim(left=xlim[0], right=xlim[1])
 
     def configure_yaxis(self, subplot=0, ylabel='y', fontsize=20, ylim=(None, None)):
         self._subplot_handles[subplot].set_ylabel(ylabel, fontsize=fontsize)
-        if (ylim[0] is not None) and (ylim[1] is not None):
+        if (ylim[0] is not None) or (ylim[1] is not None):
             self._subplot_handles[subplot].set_ylim(bottom=ylim[0], top=ylim[1])
 
     def save_figure(self, filename='*.png', initialdir='~ppzmis/Documents', dpi=80):
