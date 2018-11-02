@@ -310,17 +310,17 @@ def draw_circles(img, circles, color_tuple=(0, 255, 255), thickness=2):
     return img
 
 
-def draw_triangle(img, vertices):
+def draw_triangle(img, vertices, color=(0, 255, 255)):
     vertices = vertices.astype(np.int32)
-    out = cv2.polylines(img, [vertices], True, (0, 255, 255))
+    out = cv2.polylines(img, [vertices], True, color)
     return out
 
 
 
-def draw_triangles(img, triangles):
+def draw_triangles(img, triangles, color=(0, 255, 255)):
     out = img.copy()
     for vertices in triangles:
-        out = draw_triangle(out, vertices)
+        out = draw_triangle(out, vertices, color)
     return out
 
 
