@@ -65,10 +65,10 @@ def exponential(x, a, b):
 
 
 def flipped_exponential(x, a, b):
-    return a*(1-np.exp(b*x))
+    return a*(1-np.exp(-b*x))
 
 def double_flipped_exponential(x, a, b, c, d, e):
-    return a*(1-c*np.exp(b*x)-e*np.exp(d*x))
+    return a*(1-c*np.exp(-b*x)-e*np.exp(-d*x))
 
 
 
