@@ -7,7 +7,8 @@ class WriteVideo:
     '''
     Class is designed to make writing to video files easy.
     
-    Keyword Arguments:
+    Keyword Arguments
+    -----------------
     filename - Specifies output filename. 
                     If filename == None then a dialog will ask for 
                     output file to be supplied
@@ -25,13 +26,15 @@ class WriteVideo:
             Grayscale images are converted to pseudo colour before writing.
 
     
-    Variables:
+    Variables
+    ---------
         self.filename - output filename
         self.frame_size - frame dimensions as tuple (w,h,colour depth)
         self.fps - framerate of output video
         self.write_vid - instance of cv2 Video Object
     
-    Methods:
+    Methods
+    -------
     add_frame() - requires an image which matches dimensions of 
                  self.frame_size
     close() - releases video object
@@ -100,15 +103,17 @@ class WriteVideo:
         
 class ReadVideo:
     '''
-    Class is designed to handle the reading of video. Videos can be read from
-    .mp4 and .avi formats.
+    Class is designed to handle the reading of video.
+    Videos can be read from .mp4 and .avi formats.
         
-    Keyword Arguments:
-    filename - Specifies output file. 
+    Keyword Arguments
+    -----------------
+    filename: Specifies output file.
                     If filename == None then a dialog will ask for 
                     output filename to be supplied
         
-    Variables:
+    Variables
+    ---------
         self.filename - filename
         self.framenum - current frame
         self.read_vid - Instance of cv2 Video Object
@@ -121,7 +126,8 @@ class ReadVideo:
         self.format - format of video (Not always supported)
         self.codec - codec of video
     
-    Methods:
+    Methods
+    -------
         __init__(filename=None) - Create Video Object
         open_video() - opens Video for reading
         get_vid_props(show=True) - get video properties and print 
@@ -135,7 +141,8 @@ class ReadVideo:
                                 relates to total number of frames in video
         close() - closes Video for reading
     
-    Example Usage:
+    Example Usage
+    -------------
         vid = ReadVideo()
         #Print out video properties to the terminal
         vid.get_vid_props(show=True)
