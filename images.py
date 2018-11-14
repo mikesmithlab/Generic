@@ -503,7 +503,7 @@ def extract_biggest_object(img):
     return out
 
 
-def mask_img(img, mask):
+def mask_img(img, mask, colour='black'):
     """
     Masks pixels in an image.
 
@@ -523,7 +523,12 @@ def mask_img(img, mask):
     out: The masked image
         Same dimensions and type as img
     """
-    out = cv2.bitwise_and(img, img, mask=mask)
+    if colour == 'black':
+        out = cv2.bitwise_and(img, img, mask=mask)
+    else:
+        out = cv2.bitwise_and(img, img, mask=mask)
+        add = cv2.cvtColor(~mask, cv2.COLOR_GRAY2BGR)
+        out = cv2.add(out, add)
     return out
 
 
@@ -550,6 +555,10 @@ def crop_img(img, crop):
         out = img[crop[0][0]:crop[0][1], crop[1][0]:crop[1][1]]
     return out
 
+def crop_and_mask_image(img, crop, mask, mask_color='black'):
+    img = mask_img(img, mask, mask_color)
+    img = crop_img(img, crop)
+    return img
 
 class CropShape:
     """ Take an interactive crop of a shape"""
@@ -638,7 +647,7 @@ class CropShape:
             rad = int(rad/self.scale)
             mask_img = np.zeros((np.shape(self.original_image)))\
                 .astype(np.uint8)
-            cv2.circle(mask_img, (cx, cy), rad, [1, 1, 1], thickness=-1)
+            cv2.circle(mask_img, (cx, cy), rad, [255, 255, 255], thickness=-1)
             crop = ([int(cy - rad), int(cy + rad)],
                     [int(self.refPt[0][0]/self.scale),
                      int(self.refPt[1][0]/self.scale)])
@@ -683,6 +692,10 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
     if circles is not None:
         for x, y, rad in circles:
             cv2.circle(img, (int(x), int(y)), int(rad), color, thickness)
+    return img
+
+def draw_circle(img, cx, cy, rad, color=YELLOW, thickness=2):
+    cv2.circle(img, (int(cx), int(cy)), int(rad), color, thickness)
     return img
 
 

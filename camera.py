@@ -2,8 +2,8 @@ import cv2
 import tkinter
 from tkinter import filedialog
 import time
-from Video import WriteVideo
-from camconfig import*
+from Generic.video import WriteVideo
+import os
 
 '''
 If you are going to add a camera to this list please test and fill in all
@@ -45,7 +45,7 @@ class Camera:
         self.frame_sizes = camera_settings[cam_type]['res']
         self.frame_rates = camera_settings[cam_type]['fps']
 
-        self.default_frame_size = self.frame_sizes[0]
+        self.default_frame_size = self.frame_sizes[1]
         self.default_fps = self.frame_rates[0]
        
         #Set framerate
@@ -81,7 +81,7 @@ class Camera:
     def preview(self):
         '''This produces a live preview window to enable you to optimise camera settings
         If you have more than one camera you need to change the number of the camera which is 
-        linked to the usb port being used
+        linked to the usb port being us ed
         press q to quit the preview'''
     
         time.sleep(2)
@@ -158,6 +158,11 @@ class Camera:
         cv2.imwrite(filename,frame)
         if show_pic:
                 cv2.imshow('frame',frame)
+
+    def single_pic_array(self):
+        """Return single image as array"""
+        ret, frame = self.cam.read()
+        return frame
     
     
     def single_pic_vid(self,show_pic=False):
@@ -264,7 +269,15 @@ class Camera:
             return self.camera_list[cam_type]
         except:
             print('Camera Details List Error')
-    
+
+def find_camera_number():
+    items = os.listdir('/dev/')
+    newlist = []
+    for names in items:
+        if names.startswith("video"):
+            newlist.append(names)
+    return int(newlist[0][5:])
+
 class CamPropsError(Exception):
     def __init__(self,property_name,property_exists):
         if property_exists == True:
