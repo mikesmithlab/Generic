@@ -45,7 +45,7 @@ class Camera:
         self.frame_sizes = camera_settings[cam_type]['res']
         self.frame_rates = camera_settings[cam_type]['fps']
 
-        self.default_frame_size = self.frame_sizes[1]
+        self.default_frame_size = self.frame_sizes[0]
         self.default_fps = self.frame_rates[0]
        
         #Set framerate
@@ -187,6 +187,7 @@ class Camera:
         self.contrast = self.cam.get(cv2.CAP_PROP_CONTRAST)
         self.brightness = self.cam.get(cv2.CAP_PROP_BRIGHTNESS)
         self.exposure = self.cam.get(cv2.CAP_PROP_EXPOSURE)
+        self.auto_exposure = self.cam.get(cv2.CAP_PROP_AUTO_EXPOSURE)
         
         if show:
             print('----------------------------')
@@ -203,11 +204,12 @@ class Camera:
             print('saturation : ',self.saturation)
             print('gain : ',self.gain)
             print('exposure :',self.exposure)
+            print('auto_exposure:', self.auto_exposure)
             print('')
             print('unsupported features return 0')
             print('-----------------------------')
     
-    def set_cam_props(self,property_name,value):
+    def set_cam_props(self, property_name, value):
         '''
         Legitimate properties are brightness,contrast,hue,saturation,gain
         some cameras will not support all of them.
@@ -216,18 +218,26 @@ class Camera:
         
         Frame size require you to initialise a new camera object.
         First call object.close() then reinitialise obj = Camera(framesize = -1)
+
+        Set auto exposure to 0.25 for manual control
         '''
-        property_names = ('brightness','contrast','gain','saturation','hue','exposure')
-        cv_property_codes = (cv2.CAP_PROP_BRIGHTNESS,cv2.CAP_PROP_CONTRAST,cv2.CAP_PROP_GAIN,
-                            cv2.CAP_PROP_SATURATION,cv2.CAP_PROP_HUE,cv2.CAP_PROP_EXPOSURE)
+        property_names = (
+                'brightness', 'contrast', 'gain',
+                'saturation', 'hue', 'exposure',
+                'auto exposure')
+        cv_property_codes = (
+                cv2.CAP_PROP_BRIGHTNESS, cv2.CAP_PROP_CONTRAST,
+                cv2.CAP_PROP_GAIN, cv2.CAP_PROP_SATURATION,
+                cv2.CAP_PROP_HUE, cv2.CAP_PROP_EXPOSURE,
+                cv2.CAP_PROP_AUTO_EXPOSURE)
         if property_name in property_names:
             property_code = cv_property_codes[property_names.index(property_name)]
             try:
-                self.cam.set(property_code,value)
+                self.cam.set(property_code, value)
             except:
-                raise CamPropsError(property_name,True)
+                raise CamPropsError(property_name, True)
         else:
-            raise CamPropsError(property_name,False)
+            raise CamPropsError(property_name, False)
         self.get_cam_props()
         
     def save_cam_settings(self,filename=None):
