@@ -114,7 +114,7 @@ def bgr_2_grayscale(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
-def threshold(img, thresh=100):
+def threshold(img, thresh=100, type=cv2.THRESH_BINARY):
     """
     Thresholds an image
 
@@ -124,7 +124,7 @@ def threshold(img, thresh=100):
             img,
             thresh,
             255,
-            cv2.THRESH_BINARY)
+            type)
     return out
 
 
