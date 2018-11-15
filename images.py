@@ -679,6 +679,7 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
         circles[:,0] contains the x-coordinates of the centers
         circles[:,1] contains the y-coordinates of the centers
         circles[:,2] contains the radii of the circles
+            Can not have radii dimension
 
     color: BGR tuple
         If input image is grayscale circles will be black
@@ -692,8 +693,12 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
         Same height, width and channels as input image
     """
     if circles is not None:
-        for x, y, rad in circles:
-            cv2.circle(img, (int(x), int(y)), int(rad), color, thickness)
+        if np.shape(circles)[1] == 3:
+            for x, y, rad in circles:
+                cv2.circle(img, (int(x), int(y)), int(rad), color, thickness)
+        elif np.shape(circles)[1] == 2:
+            for x, y in circles:
+                cv2.circle(img, (int(x), int(y)), int(5), color, thickness)
     return img
 
 def draw_circle(img, cx, cy, rad, color=YELLOW, thickness=2):
