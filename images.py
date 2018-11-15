@@ -60,7 +60,7 @@ def get_width(img):
         Width of the image
 
     """
-    return int(np.shape(img)[0])
+    return int(np.shape(img)[1])
 
 
 def get_height(img):
@@ -77,7 +77,7 @@ def get_height(img):
         height of the image
 
     """
-    return int(np.shape(img)[1])
+    return int(np.shape(img)[0])
 
 
 def resize(img, percent=25.0):
@@ -104,6 +104,8 @@ def resize(img, percent=25.0):
 
 def display(image, title=''):
     """Uses cv2 to display an image then wait for a button press"""
+    cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
+    cv2.resizeWindow(title, (960, 540))
     cv2.imshow(title, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
@@ -550,9 +552,11 @@ def crop_img(img, crop):
     out: cropped image
     """
     if len(np.shape(img)) == 3:
-        out = img[crop[0][0]:crop[0][1], crop[1][0]:crop[1][1], :]
+        # out = img[ymin:ymax, xmin:xmax
+        # crop = ([xmin, ymin], [xmax, ymax])
+        out = img[crop[0][1]:crop[1][1], crop[0][0]:crop[1][0], :]
     else:
-        out = img[crop[0][0]:crop[0][1], crop[1][0]:crop[1][1]]
+        out = img[crop[0][1]:crop[1][1], crop[0][0]:crop[1][0]]
     return out
 
 def crop_and_mask_image(img, crop, mask, mask_color='black'):
@@ -583,9 +587,7 @@ class CropShape:
         self.refPt = []
         self.image = input_image
         self.no_of_sides = no_of_sides
-        self.scale = 1280/get_height(self.image)
         self.original_image = self.image.copy()
-        self.image = resize(self.image, self.scale*100)
 
     def _click_and_crop(self, event, x, y, flags, param):
         """Internal method to manage the user cropping"""
@@ -612,7 +614,8 @@ class CropShape:
 
         clone = self.image.copy()
         points = np.zeros((self.no_of_sides, 2))
-        cv2.namedWindow('crop: '+str(self.no_of_sides))
+        cv2.namedWindow('crop: '+str(self.no_of_sides), cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('crop: '+str(self.no_of_sides), 960, 540)
         cv2.setMouseCallback('crop: '+str(self.no_of_sides),
                              self._click_and_crop)
         count = 0
@@ -623,6 +626,7 @@ class CropShape:
             key = cv2.waitKey(1) & 0xFF
 
             if self.cropping and self.no_of_sides > 1:
+                # self.refPt = [(x, y)]
                 points[count, 0] = self.refPt[0][0]
                 points[count, 1] = self.refPt[0][1]
                 self.cropping = False
@@ -639,28 +643,26 @@ class CropShape:
         cv2.destroyAllWindows()
 
         if self.no_of_sides == 1:
+            # self.refPt = [(xmin, ymin), (xmax, ymax)]
             cx = (self.refPt[1][0] - self.refPt[0][0]) / 2 + self.refPt[0][0]
             cy = (self.refPt[1][1] - self.refPt[0][1]) / 2 + self.refPt[0][1]
             rad = int((self.refPt[1][0] - self.refPt[0][0]) / 2)
-            cx = int(cx/self.scale)
-            cy = int(cy/self.scale)
-            rad = int(rad/self.scale)
             mask_img = np.zeros((np.shape(self.original_image)))\
                 .astype(np.uint8)
-            cv2.circle(mask_img, (cx, cy), rad, [255, 255, 255], thickness=-1)
-            crop = ([int(cy - rad), int(cy + rad)],
-                    [int(self.refPt[0][0]/self.scale),
-                     int(self.refPt[1][0]/self.scale)])
+            cv2.circle(mask_img, (int(cx), int(cy)), int(rad), [255, 255, 255], thickness=-1)
+            crop = ([int(self.refPt[0][0]), int(cy-rad)],
+                    [int(self.refPt[1][0]), int(cy+rad)])
+            # crop = ([xmin, ymin], [xmax, ymax])
             boundary = np.array((cx, cy, rad), dtype=np.int32)
             return mask_img[:, :, 0], np.array(crop, dtype=np.int32), boundary
 
         else:
-            points = points/self.scale
             mask_img = np.zeros(np.shape(self.original_image)).astype('uint8')
             cv2.fillPoly(mask_img, pts=np.array([points], dtype=np.int32),
                          color=(250, 250, 250))
-            crop = ([min(points[:, 1]), max(points[:, 1])],
-                    [min(points[:, 0]), max(points[:, 0])])
+            crop = ([min(points[:, 0]), min(points[:, 1])],
+                    [max(points[:, 0]), max(points[:, 1])])
+            # crop = ([xmin, ymin], [xmax, ymax])
             return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points
 
 
@@ -819,56 +821,56 @@ if __name__ == "__main__":
     img = load_img(filename)
     display(img)
 
-    width, height = get_width_and_height(img)
+    #width, height = get_width_and_height(img)
 
-    crop_inst = CropShape(img, 1)
+    crop_inst = CropShape(img, 6)
     mask, crop, boundary = crop_inst.begin_crop()
 
     masked_im = mask_img(img, mask)
     masked_and_cropped = crop_img(masked_im, crop)
     display(masked_and_cropped, 'masked and cropped')
-
-    img = resize(img, 50)
-    display(img, 'resize')
-
-    img = bgr_2_grayscale(img)
-    display(img, 'grayscale')
-
-    img = rotate(img, 45)
-    display(img, 'rotate')
-
-    thresh = threshold(img, 100)
-    display(thresh, 'simple threshold')
-
-    adap = adaptive_threshold(img)
-    display(adap, 'adaptive threshold')
-
-    blur = gaussian_blur(img)
-    display(blur, 'blur')
-
-    dil = dilate(thresh)
-    display(dil, 'dilation')
-
-    ero = erode(thresh)
-    display(ero, 'erosion')
-
-    clo = closing(thresh)
-    display(clo, 'closing')
-
-    ope = opening(thresh)
-    display(ope, 'opening')
-
-    dist = distance_transform(thresh)
-    display(dist, 'distance_transform')
-
-    white, mask = set_edge_white(img)
-    display(white, 'set edge white')
-
-    right = mask_right(img, int(width/2))
-    display(right, 'mask right')
-
-    top = mask_top(img, int(height/2))
-    display(top, 'mask top')
-
-    big = extract_biggest_object(img)
-    display(big)
+    #
+    # img = resize(img, 50)
+    # display(img, 'resize')
+    #
+    # img = bgr_2_grayscale(img)
+    # display(img, 'grayscale')
+    #
+    # img = rotate(img, 45)
+    # display(img, 'rotate')
+    #
+    # thresh = threshold(img, 100)
+    # display(thresh, 'simple threshold')
+    #
+    # adap = adaptive_threshold(img)
+    # display(adap, 'adaptive threshold')
+    #
+    # blur = gaussian_blur(img)
+    # display(blur, 'blur')
+    #
+    # dil = dilate(thresh)
+    # display(dil, 'dilation')
+    #
+    # ero = erode(thresh)
+    # display(ero, 'erosion')
+    #
+    # clo = closing(thresh)
+    # display(clo, 'closing')
+    #
+    # ope = opening(thresh)
+    # display(ope, 'opening')
+    #
+    # dist = distance_transform(thresh)
+    # display(dist, 'distance_transform')
+    #
+    # white, mask = set_edge_white(img)
+    # display(white, 'set edge white')
+    #
+    # right = mask_right(img, int(width/2))
+    # display(right, 'mask right')
+    #
+    # top = mask_top(img, int(height/2))
+    # display(top, 'mask top')
+    #
+    # big = extract_biggest_object(img)
+    # display(big)
