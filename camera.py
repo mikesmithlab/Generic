@@ -1,8 +1,7 @@
 import cv2
-import tkinter
-from tkinter import filedialog
+import tkinter as tk
 import time
-from Generic.video import WriteVideo
+import Generic.video as video
 import os
 import sys
 
@@ -111,11 +110,11 @@ class Camera:
 
     def write_to_vid(self, filename=None, fps=30.0):
         if filename is None:
-            filename = filedialog.asksaveasfilename(
+            filename = tk.filedialog.asksaveasfilename(
                 defaultextension=extensions[0][1],
                 filetypes=extensions
             )
-        self.vid = WriteVideo(
+        self.vid = video.WriteVideo(
                 filename=filename,
                 frame_size=(self.frame_size[1],
                             self.frame_size[0],
@@ -167,7 +166,7 @@ class Camera:
 
     def single_pic_img(self, filename=None, show_pic=False):
         if filename == None:
-            filename = filedialog.asksaveasfilename(
+            filename = tk.filedialog.asksaveasfilename(
                 defaultextension=extensions[0][1],
                 filetypes=extensions
             )
@@ -262,7 +261,7 @@ class Camera:
 
     def save_cam_settings(self, filename=None):
         if filename is None:
-            filename = filedialog.asksaveasfilename(
+            filename = tk.filedialog.asksaveasfilename(
                     defaultextension='.camlog',
                     filetypes=[('CAM', '.camsettingslog')])
 
@@ -276,7 +275,7 @@ class Camera:
 
     def load_cam_settings(self, filename=None):
         if filename is None:
-            filename = filedialog.askopenfilename(
+            filename = tk.filedialog.askopenfilename(
                     defaultextension='.camlog',
                     filetypes=[('CAM', '.camsettingslog')])
 

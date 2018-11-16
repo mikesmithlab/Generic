@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import Generic.filedialogs as fd
-from scipy import spatial
+import scipy.spatial as sp
 
 # Color list BGR tuples
 BLUE = (255, 0, 0)
@@ -782,7 +782,7 @@ def draw_delaunay_tess(img, points):
     ing: annotated image
         Same shape and type as input image
     """
-    tess = spatial.Delaunay(points)
+    tess = sp.Delaunay(points)
     img = draw_polygons(img,
                         points[tess.simplices],
                         color=LIME)
@@ -808,7 +808,7 @@ def draw_voronoi_cells(img, points):
     ing: annotated image
         Same shape and type as input image
     """
-    voro = spatial.Voronoi(points)
+    voro = sp.Voronoi(points)
     ridge_vertices = voro.ridge_vertices
     new_ridge_vertices = []
     for ridge in ridge_vertices:
