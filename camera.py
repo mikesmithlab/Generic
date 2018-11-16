@@ -4,11 +4,16 @@ from tkinter import filedialog
 import time
 from Generic.video import WriteVideo
 import os
+import sys
 
 '''
 If you are going to add a camera to this list please test and fill in all
 available settings.
 '''
+
+LOGITECH = 'logitechHD1080p'
+PHILIPS =  'philips 3'
+
 camera_settings = {
     'logitechHD1080p': {
         'res': ((1920, 1080, 3), (640, 480, 3), (1280, 720, 3), (480, 360, 3)),
@@ -301,12 +306,19 @@ class Camera:
 
 
 def find_camera_number():
-    items = os.listdir('/dev/')
-    newlist = []
-    for names in items:
-        if names.startswith("video"):
-            newlist.append(names)
-    return int(newlist[0][5:])
+    try:
+        assert ('linux' in sys.platform), "Finding camera number only works in linux"
+        items = os.listdir('/dev/')
+        newlist = []
+        for names in items:
+            if names.startswith("video"):
+                newlist.append(names)
+        cam_num = int(newlist[0][5:])
+    except AssertionError as error:
+        print(error)
+        print("Camera number is set to 0")
+        cam_num = 0
+    return cam_num
 
 
 class CamPropsError(Exception):
@@ -326,7 +338,8 @@ class FrameReadingError(Exception):
 
 
 if __name__ == '__main__':
-    web_cam = Camera(cam_type='philips 3')
+    cam_num = find_camera_number()
+    web_cam = Camera(cam_type=LOGITECH, cam_num=cam_num)
     web_cam.preview()
     web_cam.write_to_vid('test.mp4')
     web_cam.start_record(num_frames=15, show_pic=True, time_lapse=1)
