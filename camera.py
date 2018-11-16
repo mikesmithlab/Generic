@@ -295,7 +295,8 @@ class Camera:
     def search(self, cam_type):
         try:
             return self.camera_list[cam_type]
-        except:
+        except KeyError as error:
+            print(error)
             print('Camera Details List Error')
 
 
