@@ -96,7 +96,8 @@ class Camera:
         while loopvar:
             # Capture frame-by-frame
             ret, frame = self.cam.read()
-
+            cv2.namedWindow('frame', cv2.WINDOW_KEEPRATIO)
+            cv2.resizeWindow('frame', 1280, 720)
             if not ret:
                 print(
                     'No frame returned from camera.'
@@ -138,6 +139,8 @@ class Camera:
         """
         n = 0
         loopvar = True
+        cv2.namedWindow('frame', cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow('frame', 1280, 720)
         while loopvar:
             # Capture frame from camera
             ret, frame = self.cam.read()
