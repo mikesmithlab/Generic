@@ -98,7 +98,7 @@ class WriteVideo:
 
     def close(self):
         self.write_vid.release()
-        print('Video closed for writing')
+        #print('Video closed for writing')
 
         
 class ReadVideo:
@@ -229,7 +229,7 @@ class ReadVideo:
         
     def close(self):
         self.read_vid.release()
-        print('Video closed for reading')
+        #print('Video closed for reading')
         
 '''
 Custom Exception definitions
