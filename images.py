@@ -692,13 +692,15 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
     img: image with annotated circles
         Same height, width and channels as input image
     """
-    if circles is not None:
+    try:
         if np.shape(circles)[1] == 3:
             for x, y, rad in circles:
                 cv2.circle(img, (int(x), int(y)), int(rad), color, thickness)
         elif np.shape(circles)[1] == 2:
             for x, y in circles:
                 cv2.circle(img, (int(x), int(y)), int(5), color, thickness)
+    except IndexError as error:
+        print('no circles', error)
     return img
 
 def draw_circle(img, cx, cy, rad, color=YELLOW, thickness=2):
