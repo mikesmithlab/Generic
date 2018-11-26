@@ -116,13 +116,21 @@ def bgr_2_grayscale(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
-def threshold(img, thresh=100, type=cv2.THRESH_BINARY):
+def threshold(img, thresh=None, type=cv2.THRESH_BINARY):
     """
     Thresholds an image
 
     Pixels below thresh set to black, pixels above set to white
     """
-    ret, out = cv2.threshold(
+    if thresh == None:
+        type = type + cv2.THRESH_OTSU
+        ret, out = cv2.threshold(
+                img,
+                0,
+                255,
+                type)
+    else:
+        ret, out = cv2.threshold(
             img,
             thresh,
             255,
@@ -276,7 +284,7 @@ def closing(img, kernel=(3, 3)):
     return out
 
 
-def opening(img, kernel=(3, 3)):
+def opening(img, kernel=(3, 3), kernel_type=None):
     """
     Performs an erosion followed by a dilation
 
@@ -294,6 +302,8 @@ def opening(img, kernel=(3, 3)):
         Same size and type as img
 
     """
+    if kernel_type is not None:
+        kernel = cv2.getStructuringElement(kernel_type, kernel)
     out = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
     return out
 
