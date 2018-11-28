@@ -769,7 +769,6 @@ def draw_polygons(img, polygons, color=RED):
     img: annotated image
         Same shape and type as input image
     """
-    print(polygons)
     for vertices in polygons:
         img = draw_polygon(img, vertices, color)
     return img
