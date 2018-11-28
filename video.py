@@ -1,7 +1,78 @@
 import numpy as np
 import cv2
 import Generic.filedialogs as fd
+import subprocess
+import os
+import ffmpeg
 
+
+def crop_video(filename, xmin, xmax, ymin, ymax, outname=None):
+    if outname == None:
+        outname = os.path.splitext(filename)[0] + '_crop' + \
+                   os.path.splitext(filename)[1]
+    width = xmax - xmin
+    height = ymax - ymin
+    stream = ffmpeg.input(filename)
+    stream = ffmpeg.crop(stream, xmin, ymin, width, height)
+    stream = ffmpeg.output(stream, outname)
+    stream = ffmpeg.overwrite_output(stream)
+    ffmpeg.run(stream, quiet=True)
+
+class ReadVideoFFMPEG:
+
+    def __init__(self, filename):
+        self.filename = filename
+        self._get_info()
+        self._setup_process()
+
+    def read_frame(self):
+        frame_bytes = self.process.stdout.read(self.width * self.height * 3)
+        frame = (
+            np.frombuffer(frame_bytes, np.uint8)
+            .reshape([self.height, self.width, 3]))
+        return frame
+
+    def _setup_process(self):
+        self.process = (
+            ffmpeg
+            .input(self.filename)
+            .output('pipe:', format='rawvideo', pix_fmt='rgb24')
+            .run_async(pipe_stdout=True, quiet=True)
+            )
+
+    def _get_info(self):
+        probe = ffmpeg.probe(self.filename)
+        video_info = next(
+            s for s in probe['streams'] if s['codec_type'] == 'video')
+        self.width = int(video_info['width'])
+        self.height = int(video_info['height'])
+        self.num_frames = int(video_info['nb_frames'])
+
+class WriteVideoFFMPEG:
+
+    def __init__(self, filename):
+        self.filename = filename
+        self.frame_no = 0
+
+    def add_frame(self, frame):
+        if self.frame_no == 0:
+            width = np.shape(frame)[1]
+            height = np.shape(frame)[0]
+            self._setup_process(width, height)
+        self.process.stdin.write(frame.astype(np.uint8).tobytes())
+        self.frame_no += 1
+
+    def _setup_process(self, width, height):
+        self.process = (
+            ffmpeg
+            .input('pipe:', format='rawvideo', pix_fmt='rgb24', s='{}x{}'.format(width, height))
+            .output(self.filename, pix_fmt='yuv420p', vcodec='h264', preset='superfast')
+            .overwrite_output()
+            .run_async(pipe_stdin=True, quiet=True)
+        )
+    def close(self):
+        self.process.stdin.close()
+        self.process.wait()
 
 class WriteVideo:
     '''
@@ -231,9 +302,7 @@ class ReadVideo:
         self.read_vid.release()
         #print('Video closed for reading')
         
-'''
-Custom Exception definitions
-'''
+
 class ImageShapeError(Exception):
     '''
     Tries to helpfully work out what is wrong with supplied image
@@ -263,25 +332,88 @@ class ArgumentsMissing(Exception):
         print('In this case: ', arguments_missing)
 
 
+def get_video_dimensions(filename):
+    command_w = ['ffprobe',
+                '-v', 'error',
+                '-show_entries',
+                'stream=width',
+                '-of',
+                'csv=p=0:s=x',
+                filename]
+    command_h = ['ffprobe',
+                 '-v', 'error',
+                 '-show_entries',
+                 'stream=height',
+                 '-of',
+                 'csv=p=0:s=x',
+                 filename]
+    width_out = subprocess.check_output(command_w)
+    width = int(width_out.decode("utf-8"))
+    height_out = subprocess.check_output(command_h)
+    height = int(height_out.decode("utf-8"))
+    return width, height
+
+def resize_video(filename, scale=0.5):
+    width, height = get_video_dimensions(filename)
+    new_width = round(width * scale / 2) * 2
+    new_height = round(height * scale / 2) * 2
+
+    command = ['ffmpeg',
+               '-i',
+               filename,
+               '-vf',
+               'scale={}:{}'.format(new_width, new_height),
+               'out.mp4']
+    subprocess.call(command)
+
+# def crop_video(filename, x_min, x_max, y_min, y_max):
+#     command = ['ffmpeg -i {} -filter:v "crop={}:{}:{}:{}" out.mp4'.format(
+#         filename, x_max-x_min, y_max-y_min, x_min, y_min)]
+#     subprocess.call(command)
 
 if __name__ == '__main__':
-    #Create video objects
-    read_vid = ReadVideo()
-    img = read_vid.read_next_frame()
-    write_vid = WriteVideo(frame=img)
-    
-    #Start at frame 100
-    img=read_vid.find_frame(100)
-    write_vid.add_frame(img)
-    
-    #Then add every subsequent frame
-    for frame_num in range(100,read_vid.num_frames-1):
-        img = read_vid.read_next_frame()
-        write_vid.add_frame(img)
-        
-    #release resources
-    read_vid.close()
-    write_vid.close()
+    # #Create video objects
+    # read_vid = ReadVideo()
+    # img = read_vid.read_next_frame()
+    # write_vid = WriteVideo(frame=img)
+    #
+    # #Start at frame 100
+    # img=read_vid.find_frame(100)
+    # write_vid.add_frame(img)
+    #
+    # #Then add every subsequent frame
+    # for frame_num in range(100,read_vid.num_frames-1):
+    #     img = read_vid.read_next_frame()
+    #     write_vid.add_frame(img)
+    #
+    # #release resources
+    # read_vid.close()
+    # write_vid.close()
+    in_file = "/home/ppxjd3/Videos/short.mp4"
+    out_file = "/home/ppxjd3/Videos/short_ffmpeg.mp4"
+    import time
+    s = time.time()
+    input = ReadVideoFFMPEG(in_file)
+    output = WriteVideoFFMPEG(out_file)
+    for f in range(input.num_frames):
+        frame = input.read_frame()
+        frame = ~frame
+        output.add_frame(frame)
+    output.close()
+    print(time.time() - s)
+    # out_file = "/home/ppxjd3/Videos/short_opencv.mp4"
+    # s2 = time.time()
+    # input = ReadVideo(in_file)
+    # for f in range(input.num_frames):
+    #     frame = input.read_next_frame()
+    #     frame = ~frame
+    #     if f == 0:
+    #         output = WriteVideo(out_file, frame=frame)
+    #     else:
+    #         output.add_frame(frame)
+    # input.close()
+    # output.close()
+    # print(time.time() - s2)
     
         
         
