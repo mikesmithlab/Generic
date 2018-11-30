@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
-from plotting import Plotter
+from Generic.plotting import Plotter
 from scipy import optimize
 from math import factorial
-from signal_toolbox import fft_power_spectrum
+from Generic.signal_toolbox import fft_power_spectrum
 
 '''
 To add a new fit function you need to provide a function that has the x and fit params listed
@@ -43,6 +43,10 @@ Polynomial functions
 def linear(x, a, b):
     return a*x + b
 
+def linear_guess(x, y):
+    b = 0
+    a = (y.max()-y.min())/(x.max()-x.min())
+    return [a, b]
 
 def quadratic(x, a, b, c):
     return a*x**2 + b*x + c
