@@ -618,6 +618,7 @@ class CropShape:
                 rad = int((self.refPt[1][0] - self.refPt[0][0]) / 2)
                 cv2.circle(self.image, (int(cx), int(cy)), rad, LIME, 2)
                 cv2.imshow('crop: '+str(self.no_of_sides), self.image)
+            print(self.refPt)
 
     def begin_crop(self):
         """Method to create the mask image and the crop region"""
@@ -651,20 +652,25 @@ class CropShape:
                 break
 
         cv2.destroyAllWindows()
+        if self.no_of_sides == 1:
+            points = self.refPt
+        return self.find_crop_and_mask(points)
+
+    def find_crop_and_mask(self, points):
 
         if self.no_of_sides == 1:
             # self.refPt = [(xmin, ymin), (xmax, ymax)]
-            cx = (self.refPt[1][0] - self.refPt[0][0]) / 2 + self.refPt[0][0]
-            cy = (self.refPt[1][1] - self.refPt[0][1]) / 2 + self.refPt[0][1]
-            rad = int((self.refPt[1][0] - self.refPt[0][0]) / 2)
+            cx = (points[1][0] - points[0][0]) / 2 + points[0][0]
+            cy = (points[1][1] - points[0][1]) / 2 + points[0][1]
+            rad = int((points[1][0] - points[0][0]) / 2)
             mask_img = np.zeros((np.shape(self.original_image)))\
                 .astype(np.uint8)
             cv2.circle(mask_img, (int(cx), int(cy)), int(rad), [255, 255, 255], thickness=-1)
-            crop = ([int(self.refPt[0][0]), int(cy-rad)],
-                    [int(self.refPt[1][0]), int(cy+rad)])
+            crop = ([int(points[0][0]), int(cy-rad)],
+                    [int(points[1][0]), int(cy+rad)])
             # crop = ([xmin, ymin], [xmax, ymax])
             boundary = np.array((cx, cy, rad), dtype=np.int32)
-            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), boundary
+            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), boundary, points
 
         else:
             mask_img = np.zeros(np.shape(self.original_image)).astype('uint8')
@@ -673,7 +679,7 @@ class CropShape:
             crop = ([min(points[:, 0]), min(points[:, 1])],
                     [max(points[:, 0]), max(points[:, 1])])
             # crop = ([xmin, ymin], [xmax, ymax])
-            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points
+            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points, points
 
 
 def draw_circles(img, circles, color=YELLOW, thickness=2):
@@ -839,8 +845,17 @@ if __name__ == "__main__":
 
     #width, height = get_width_and_height(img)
 
-    crop_inst = CropShape(img, 6)
-    mask, crop, boundary = crop_inst.begin_crop()
+    crop_inst = CropShape(img, 1)
+    mask, crop, boundary, crop_points = crop_inst.begin_crop()
+
+    masked_im = mask_img(img, mask)
+    masked_and_cropped = crop_img(masked_im, crop)
+    display(masked_and_cropped, 'masked and cropped')
+
+    img = ~img
+
+    crop_inst = CropShape(img, 1)
+    mask, crop, boundary, crop_points = crop_inst.find_crop_and_mask(crop_points)
 
     masked_im = mask_img(img, mask)
     masked_and_cropped = crop_img(masked_im, crop)
