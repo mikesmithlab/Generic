@@ -413,17 +413,17 @@ def get_video_dimensions(filename):
     return width, height
 
 
-def resize_video(filename, scale=0.5):
-    width, height = get_video_dimensions(filename)
+def resize_video(input_filename, output_filename, scale=0.5):
+    width, height = get_video_dimensions(input_filename)
     new_width = round(width * scale / 2) * 2
     new_height = round(height * scale / 2) * 2
 
     command = ['ffmpeg',
                '-i',
-               filename,
+               input_filename,
                '-vf',
                'scale={}:{}'.format(new_width, new_height),
-               'out.mp4']
+               output_filename]
     subprocess.call(command)
 
 
