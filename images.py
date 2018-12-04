@@ -724,6 +724,18 @@ def draw_circle(img, cx, cy, rad, color=YELLOW, thickness=2):
     return img
 
 
+def find_circles(img, min_dist, p1, p2, min_rad, max_rad):
+    circles = cv2.HoughCircles(
+        img,
+        cv2.HOUGH_GRADIENT, 1,
+        min_dist,
+        param1=p1,
+        param2=p2,
+        minRadius=min_rad,
+        maxRadius=max_rad)
+    return np.squeeze(circles)
+
+
 def draw_polygon(img, vertices, color=RED, thickness=1):
     """
     Draws a polygon on an image from a list of vertices
