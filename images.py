@@ -105,7 +105,7 @@ def resize(img, percent=25.0):
 def display(image, title=''):
     """Uses cv2 to display an image then wait for a button press"""
     cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
-    cv2.resizeWindow(title, (960, 540))
+    cv2.resizeWindow(title, 960, 540)
     cv2.imshow(title, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
@@ -116,25 +116,25 @@ def bgr_2_grayscale(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
-def threshold(img, thresh=None, type=cv2.THRESH_BINARY):
+def threshold(img, thresh=None, mode=cv2.THRESH_BINARY):
     """
     Thresholds an image
 
     Pixels below thresh set to black, pixels above set to white
     """
-    if thresh == None:
-        type = type + cv2.THRESH_OTSU
+    if thresh is None:
+        mode = mode + cv2.THRESH_OTSU
         ret, out = cv2.threshold(
                 img,
                 0,
                 255,
-                type)
+                mode)
     else:
         ret, out = cv2.threshold(
             img,
             thresh,
             255,
-            type)
+            mode)
     return out
 
 
@@ -295,6 +295,8 @@ def opening(img, kernel=(3, 3), kernel_type=None):
 
     kernel: tuple giving (width, height) for kernel
         Width and height should be positive and odd
+
+    kernel_type: Either None or cv2.MORPH_?????
 
     Returns
     -------
@@ -515,7 +517,7 @@ def extract_biggest_object(img):
     return out
 
 
-def mask_img(img, mask, colour='black'):
+def mask_img(img, mask, color='black'):
     """
     Masks pixels in an image.
 
@@ -530,12 +532,14 @@ def mask_img(img, mask, colour='black'):
     mask: Mask image
         Same height and width as img containing 0 or 1 in each pixel
 
+    color: Color of the mask
+
     Returns
     -------
     out: The masked image
         Same dimensions and type as img
     """
-    if colour == 'black':
+    if color == 'black':
         out = cv2.bitwise_and(img, img, mask=mask)
     else:
         out = cv2.bitwise_and(img, img, mask=mask)
@@ -569,10 +573,12 @@ def crop_img(img, crop):
         out = img[crop[0][1]:crop[1][1], crop[0][0]:crop[1][0]]
     return out
 
+
 def crop_and_mask_image(img, crop, mask, mask_color='black'):
     img = mask_img(img, mask, mask_color)
     img = crop_img(img, crop)
     return img
+
 
 class CropShape:
     """ Take an interactive crop of a shape"""
@@ -665,12 +671,14 @@ class CropShape:
             rad = int((points[1][0] - points[0][0]) / 2)
             mask_img = np.zeros((np.shape(self.original_image)))\
                 .astype(np.uint8)
-            cv2.circle(mask_img, (int(cx), int(cy)), int(rad), [255, 255, 255], thickness=-1)
+            cv2.circle(mask_img, (int(cx), int(cy)), int(rad), [255, 255, 255],
+                       thickness=-1)
             crop = ([int(points[0][0]), int(cy-rad)],
                     [int(points[1][0]), int(cy+rad)])
             # crop = ([xmin, ymin], [xmax, ymax])
             boundary = np.array((cx, cy, rad), dtype=np.int32)
-            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), boundary, points
+            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), \
+                boundary, points
 
         else:
             mask_img = np.zeros(np.shape(self.original_image)).astype('uint8')
@@ -679,7 +687,8 @@ class CropShape:
             crop = ([min(points[:, 0]), min(points[:, 1])],
                     [max(points[:, 0]), max(points[:, 1])])
             # crop = ([xmin, ymin], [xmax, ymax])
-            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points, points
+            return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points, \
+                points
 
 
 def draw_circles(img, circles, color=YELLOW, thickness=2):
