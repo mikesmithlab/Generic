@@ -17,8 +17,10 @@ def crop_video(
         bit_rate='20000k'):
 
     if out_name is None:
-        out_name = os.path.splitext(filename)[0] + '_crop' + \
-                   os.path.splitext(filename)[1]
+        core, ext = os.path.splitext(filename)
+        if ext == '.MP4':
+            ext = '.mp4'
+        out_name = core + '_crop' + ext
     width = xmax - xmin
     height = ymax - ymin
     stream = ffmpeg.input(filename)
