@@ -53,10 +53,9 @@ class ReadVideoFFMPEG:
             .reshape([self.height, self.width, 3]))
         return frame
 
-    def read_frame_PIL(self):
+    def read_frame_bytes(self):
         frame_bytes = self.process.stdout.read(self.width * self.height * 3)
-        frame = Image.frombuffer('RGB', (self.width, self.height), frame_bytes, 'raw', 'RGB', 0, 1)
-        return frame
+        return frame_bytes
 
     def _setup_process(self):
         self.process = (
@@ -97,13 +96,11 @@ class WriteVideoFFMPEG:
         self.process.stdin.write(frame.astype(np.uint8).tobytes())
         self.frame_no += 1
 
-    def add_frame_PIL(self, frame):
+    def add_frame_bytes(self, frame, width, height):
         if self.frame_no == 0:
-            width = frame.width
-            height = frame.height
             self._setup_process(width, height)
-            self.frame_no += 1
-        self.process.stdin.write(frame.tobytes())
+        self.process.stdin.write(frame)
+        self.frame_no += 1
 
     def _setup_process(self, width, height):
         self.process = (
