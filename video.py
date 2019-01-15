@@ -4,7 +4,6 @@ import Generic.filedialogs as fd
 import subprocess
 import os
 import ffmpeg
-from PIL import Image
 
 def crop_video(
         filename,
