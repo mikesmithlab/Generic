@@ -40,7 +40,8 @@ def save_filename(caption='Save File',
 
 def load_filename(caption='Find a filename',
                  directory='/home/ppxjd3/Code/Generic/',
-                 file_filter='*.*;;*.png;;*.jpg'):
+                 file_filter='*.*;;*.png;;*.jpg',
+                 remove_ext=False):
     """
     Choose a load filename using a dialog.
 
@@ -66,6 +67,8 @@ def load_filename(caption='Find a filename',
                                            directory=directory,
                                            filter=file_filter)[0]
     app.exit()
+    if remove_ext:
+        filename = os.path.splitext(filename)[0]
     return filename
 
 def get_files_directory(path, full_filenames=True):
