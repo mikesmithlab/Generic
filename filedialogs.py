@@ -38,6 +38,7 @@ def save_filename(caption='Save File',
         filename = file + output[1][1:]
     return filename
 
+
 def load_filename(caption='Find a filename',
                  directory='/home/ppxjd3/Code/Generic/',
                  file_filter='*.*;;*.png;;*.jpg',
@@ -100,6 +101,7 @@ def get_files_directory(path, full_filenames=True):
     else:
         f = [os.path.split(f)[1] for f in filename_list]
         return f
+
 
 class BatchProcess():
     """
