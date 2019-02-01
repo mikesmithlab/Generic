@@ -10,12 +10,12 @@ class Plotter():
     Generic plotting object which allows multipanel graphs in x,y format
 
     Inputs:
-    subplot = tuple(rows,columns) of graphs
+    subplot in __init__ = tuple(rows,columns) of graphs
+    subplot everywhere else = a single number indicating which subplot to put data on. Numbers go
+                              top to bottom and then left to right.
     sharex and sharey specifies shared axes
     xdata and ydata = data to be plotted
     marker = a string to indicate how the data should be represented
-    subplot = a single number indicating which subplot to put data on. Numbers go
-              top to bottom and then left to right.
     num_of_plot = unique identifier for a set of plotted data
 
 
@@ -57,6 +57,23 @@ class Plotter():
             self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
 
     def remove_plot(self, num_of_plot):
+        self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[0].remove()
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
+        del self._dict_plots[num_of_plot]
+
+    def add_img(self, matrix, subplot=0,normalise=True):
+        if subplot > self._num_subplots:
+            print('subplot does not exist')
+        else:
+            if normalise:
+                matrix = 255*matrix / np.max(np.max(matrix))
+            marker='img'
+            plot_handle = self._subplot_handles[subplot].imshow(matrix.astype(np.uint8))
+            self._plots += 1
+            self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
+
+    def remove_img(self):
         self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[0].remove()
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()

@@ -21,8 +21,8 @@ fit_dict = {
             'quadratic': ('f(x) = a*x**2 + b*x + c', 3),
             'cubic': ('f(x) = a*x**3 + b*x**2 + c*x + d', 4),
             'exponential': ('f(x) = a*exp(b*x)', 2),
-            'flipped_exponential': ('f(x) = a*(1 - exp(b*x))',2),
-            'double_flipped_exponential':('a*(1-c*np.exp(b*x)-e*np.exp(d*x))',5),
+            'flipped_exponential': ('f(x) = a*(1 - exp(b*(x-c))+d)', 4),
+            'double_flipped_exponential':('a*(1-c*np.exp(b*(x-f))-e*np.exp(d*(x-f)))+g', 7),
             'sin_cos': ('f(x) = asin(bx)+bcos(cx)+d', 4),
             'gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2))', 3),
             'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3),
@@ -68,11 +68,11 @@ def exponential(x, a, b):
     return a*np.exp(b*x)
 
 
-def flipped_exponential(x, a, b):
-    return a*(1-np.exp(-b*x))
+def flipped_exponential(x, a, b, c, d):
+    return a*(1-np.exp(-b*(x-c))+d)
 
-def double_flipped_exponential(x, a, b, c, d, e):
-    return a*(1-c*np.exp(-b*x)-e*np.exp(-d*x))
+def double_flipped_exponential(x, a, b, c, d, e, f, g):
+    return a*(1-c*np.exp(-b*(x-f))-e*np.exp(-d*(x-f))+g)
 
 
 
@@ -197,9 +197,11 @@ class Fit:
     fy             Returns the values of the fit at each point
     """
     
-    def __init__(self, fit_type, x=None, y=None, series=None):
+    def __init__(self, fit_type, x=None, y=None,xlabel='x',ylabel='y',series=None):
         self.x = 0
         self.y = 0
+        self.xlabel=xlabel
+        self.ylabel=ylabel
         self.fit_type = fit_type
         self.fit_string, self._num_fit_params = fit_dict[fit_type]
         if series is not None:
@@ -207,10 +209,14 @@ class Fit:
             y = series.values
         self.add_fit_data(x,y)
     
-    def add_fit_data(self, x=None, y=None, series=None, reset_filter=True):
+    def add_fit_data(self, x=None, y=None, series=None,xlabel='x',ylabel='y',reset_filter=True):
         if series is not None:
             x = series.index
             y = series.values
+        if xlabel is not 'x':
+            self.xlabel=xlabel
+        if ylabel is not 'y':
+            self.ylabel=ylabel
         if np.shape(x)[0] != np.shape(y)[0]:
             print('x', 'y')
             raise DataLengthException(x, y)
@@ -335,6 +341,8 @@ class Fit:
     def plot_data(self):
         plot_obj = Plotter()
         plot_obj.add_plot(self.x, self.y, marker='bx')
+        plot_obj.configure_xaxis(xlabel=self.xlabel)
+        plot_obj.configure_yaxis(ylabel=self.ylabel)
         plot_obj.show_figure()
 
     def _plot_limits(self, data_array, lower=True):
@@ -364,8 +372,8 @@ class Fit:
         plot_obj.add_plot(self.x, self.y, marker='rx')
         plot_obj.add_plot(self.fx, self.fy, marker='bx')
         plot_obj.add_plot(self.fit_x, self.fit_y, marker='g-')
-
-        plot_obj.configure_yaxis(ylim=(self._plot_limits(self.y,lower=True),self._plot_limits(self.y,lower=False)))
+        plot_obj.configure_xaxis(xlabel=self.xlabel)
+        plot_obj.configure_yaxis(ylim=(self._plot_limits(self.y,lower=True),self._plot_limits(self.y,lower=False)),ylabel=self.ylabel)
 
         if residuals:
             plot_obj.add_plot(self.fx, self.fit_residuals, marker='rx',subplot=1)

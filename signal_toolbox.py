@@ -76,7 +76,7 @@ def smooth(xdata, window_len=0, window='bartlett', show=False):
         return x_data
 
 
-def fft_power_spectrum(tdata, ydata, limits=None, show=False):
+def fft_power_spectrum(tdata, ydata, limits=None, show=True):
     """
     Calculates the power spectrum on a 1D signal. It also obtains
     a quick estimate of the peak freq.
@@ -90,7 +90,7 @@ def fft_power_spectrum(tdata, ydata, limits=None, show=False):
     :return: 3 part tuple (freqs,powerspectrum amplitudes, peak freq)
     """
     y_fft = fftpack.rfft(ydata)
-    step_size = tdata[2] - tdata[1]
+    step_size = tdata[11] - tdata[1]
     sample_freq = fftpack.fftfreq(ydata.size, d=step_size)
 
     power_spectrum = np.abs(y_fft)
