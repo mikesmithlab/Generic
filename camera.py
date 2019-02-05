@@ -11,7 +11,7 @@ available settings.
 '''
 
 LOGITECH = 'logitechHD1080p'
-PHILIPS =  'philips 3'
+PHILIPS = 'philips 3'
 
 camera_settings = {
     'logitechHD1080p': {
