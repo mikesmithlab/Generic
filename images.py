@@ -277,7 +277,7 @@ def dilate(img, kernel=(3, 3)):
     return out
 
 
-def erode(img, kernel=(3, 3)):
+def erode(img, kernel=(3, 3), iterations=1):
     """
     Erodes an image by using a specific structuring element.
 
@@ -309,7 +309,7 @@ def erode(img, kernel=(3, 3)):
 
 
     """
-    out = cv2.erode(img, kernel)
+    out = cv2.erode(img, kernel, iterations)
     return out
 
 
