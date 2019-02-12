@@ -189,7 +189,7 @@ def threshold(img, thresh=None, mode=cv2.THRESH_BINARY):
     return out
 
 
-def adaptive_threshold(img, block_size=5, constant=0):
+def adaptive_threshold(img, block_size=5, constant=0, type=cv2.THRESH_BINARY):
     """
     Performs an adaptive threshold on an image
 
@@ -213,7 +213,7 @@ def adaptive_threshold(img, block_size=5, constant=0):
             img,
             255,
             cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv2.THRESH_BINARY,
+            type,
             block_size,
             constant
             )
@@ -243,7 +243,7 @@ def gaussian_blur(img, kernel=(3, 3)):
     return out
 
 
-def dilate(img, kernel=(3, 3)):
+def dilate(img, kernel=(3, 3), iterations=1):
     """
     Dilates an image by using a specific structuring element.
 
@@ -273,7 +273,7 @@ def dilate(img, kernel=(3, 3)):
     any of the pixels under the kernel is 1.
 
     """
-    out = cv2.dilate(img, kernel)
+    out = cv2.dilate(img, kernel, iterations=iterations)
     return out
 
 
@@ -335,7 +335,7 @@ def closing(img, kernel=(3, 3)):
     return out
 
 
-def opening(img, kernel=(3, 3), kernel_type=None):
+def opening(img, kernel=(3, 3), kernel_type=None, iterations=1):
     """
     Performs an erosion followed by a dilation
 
@@ -357,7 +357,7 @@ def opening(img, kernel=(3, 3), kernel_type=None):
     """
     if kernel_type is not None:
         kernel = cv2.getStructuringElement(kernel_type, kernel)
-    out = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+    out = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=iterations)
     return out
 
 
