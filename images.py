@@ -97,6 +97,21 @@ def find_plate_regions(image, bottom, top):
 
     return hex_corners, slot_corners, image
 
+
+def draw_contours(img, contours, col=GREEN, thickness=2):
+    img = cv2.drawContours(img, contours, -1, col, thickness)
+    return img
+
+
+def find_contours(img, hierarchy=False):
+    contours, hier = cv2.findContours(
+        img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    if hierarchy:
+        return contours, hier
+    else:
+        return contours
+
+
 def get_width(img):
     """
     Returns width for img
