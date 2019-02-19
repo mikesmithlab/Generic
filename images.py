@@ -99,6 +99,8 @@ def find_plate_regions(image, bottom, top):
 
 
 def draw_contours(img, contours, col=GREEN, thickness=2):
+    if len(np.shape(img)) == 2:
+        img = np.dstack((img, img, img))
     img = cv2.drawContours(img, contours, -1, col, thickness)
     return img
 
@@ -258,7 +260,7 @@ def gaussian_blur(img, kernel=(3, 3)):
     return out
 
 
-def dilate(img, kernel=(3, 3), iterations=1):
+def dilate(img, kernel=(3, 3), kernel_type=None, iterations=1):
     """
     Dilates an image by using a specific structuring element.
 
@@ -288,11 +290,13 @@ def dilate(img, kernel=(3, 3), iterations=1):
     any of the pixels under the kernel is 1.
 
     """
+    if kernel_type is not None:
+        kernel = cv2.getStructuringElement(kernel_type, kernel)
     out = cv2.dilate(img, kernel, iterations=iterations)
     return out
 
 
-def erode(img, kernel=(3, 3), iterations=1):
+def erode(img, kernel=(3, 3), kernel_type=None, iterations=1):
     """
     Erodes an image by using a specific structuring element.
 
@@ -324,6 +328,8 @@ def erode(img, kernel=(3, 3), iterations=1):
 
 
     """
+    if kernel_type is not None:
+        kernel = cv2.getStructuringElement(kernel_type, kernel)
     out = cv2.erode(img, kernel, iterations)
     return out
 
@@ -565,6 +571,9 @@ def write_img(img, filename):
 
     """
     cv2.imwrite(filename, img)
+
+def save(img, filename):
+    write_img(img, filename)
 
 
 def extract_biggest_object(img):
