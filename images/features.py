@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
-from .basics import *
+from . import *
 
-__all__ = ['extract_biggest_object', 'find_circles']
+__all__ = ['extract_biggest_object', 'find_circles', 'find_colour',
+           'find_color']
+
 
 def extract_biggest_object(img):
     output = cv2.connectedComponentsWithStats(img, 4, cv2.CV_32S)
@@ -30,3 +32,20 @@ def find_circles(img, min_dist, p1, p2, min_rad, max_rad):
         minRadius=min_rad,
         maxRadius=max_rad)
     return np.squeeze(circles)
+
+
+def find_colour(image, col):
+    """
+    LAB colorspace allows finding colours somewhat independent of
+    lighting conditions.
+
+    https://www.learnopencv.com/color-spaces-in-opencv-cpp-python/
+    """
+    # Swap to LAB colorspace
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    if col == 'Blue':
+        b = lab[:, :, 2]
+        blue = threshold(b, mode=cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        return ~blue
+
+find_color = find_colour
