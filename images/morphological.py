@@ -1,6 +1,9 @@
 import cv2
 
 
+__all__ = ['dilate', 'erode', 'closing', 'opening']
+
+
 def dilate(img, kernel=(3, 3), kernel_type=None, iterations=1):
     """
     Dilates an image by using a specific structuring element.

@@ -1,6 +1,9 @@
 import cv2
 
 
+__all__ = ['threshold', 'adaptive_threshold', 'distance_transform']
+
+
 def threshold(img, thresh=None, mode=cv2.THRESH_BINARY):
     """
     Thresholds an image

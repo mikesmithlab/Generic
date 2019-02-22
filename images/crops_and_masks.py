@@ -3,6 +3,9 @@ import numpy as np
 from .colors import (BLUE, LIME, RED, YELLOW, ORANGE, BLACK, WHITE, MAGENTA, PINK,
                CYAN, NAVY, TEAL, PURPLE, GREEN, MAROON)
 
+__all__ = ['crop_img', 'crop_and_mask_image', 'mask_img', 'set_edge_white',
+           'mask_right', 'mask_top', 'InteractiveCrop', 'imfill', 'CropShape']
+
 
 def crop_img(img, crop):
     """
@@ -210,6 +213,8 @@ class InteractiveCrop:
             # crop = ([xmin, ymin], [xmax, ymax])
             return mask_img[:, :, 0], np.array(crop, dtype=np.int32), points, \
                 points
+
+CropShape = InteractiveCrop
 
 
 def imfill(img):

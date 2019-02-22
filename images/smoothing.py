@@ -1,6 +1,9 @@
 import cv2
 
 
+__all__ = ['gaussian_blur']
+
+
 def gaussian_blur(img, kernel=(3, 3)):
     """
     Blurs an image using a gaussian filter

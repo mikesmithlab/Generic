@@ -4,6 +4,7 @@ from .basics import get_width_and_height
 from .colors import (BLUE, LIME, RED, YELLOW, ORANGE, BLACK, WHITE, MAGENTA, PINK,
                CYAN, NAVY, TEAL, PURPLE, GREEN, MAROON)
 
+__all__ = ['resize', 'rotate']
 
 def resize(img, percent=25.0):
     """

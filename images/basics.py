@@ -1,6 +1,11 @@
 import cv2
 import numpy as np
 
+__all__ = ['display', 'read_img', 'load', 'read', 'write_img', 'save', 'write',
+           'get_width_and_height', 'dimensions', 'get_height', 'height',
+           'get_width', 'width', 'bgr_2_grayscale']
+
+
 def display(image, title=''):
     """Uses cv2 to display an image then wait for a button press"""
     cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
@@ -8,6 +13,7 @@ def display(image, title=''):
     cv2.imshow(title, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
 
 def read_img(filepath, flag=1):
     """
@@ -37,6 +43,10 @@ def read_img(filepath, flag=1):
     return img
 
 
+load = read_img
+read = read_img
+
+
 def write_img(img, filename):
     """
     Saves an image to a specified file.
@@ -61,6 +71,11 @@ def write_img(img, filename):
 
     """
     cv2.imwrite(filename, img)
+
+
+save = write_img
+write = write_img
+
 
 def get_width_and_height(img):
     """
@@ -87,6 +102,9 @@ def get_width_and_height(img):
     return width, height
 
 
+dimensions = get_width_and_height
+
+
 def get_width(img):
     """
     Returns width for img
@@ -104,6 +122,9 @@ def get_width(img):
     return int(np.shape(img)[1])
 
 
+width = get_width
+
+
 def get_height(img):
     """
     Returns the height of an image
@@ -119,6 +140,9 @@ def get_height(img):
 
     """
     return int(np.shape(img)[0])
+
+
+height = get_height
 
 
 def bgr_2_grayscale(img):

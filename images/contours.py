@@ -1,5 +1,6 @@
 import cv2
 
+__all__ = ['find_contours']
 
 def find_contours(img, hierarchy=False):
     contours, hier = cv2.findContours(

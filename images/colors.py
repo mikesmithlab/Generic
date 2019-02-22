@@ -1,3 +1,7 @@
+__all__ = ['BLUE', 'LIME', 'RED', 'YELLOW', 'ORANGE', 'BLACK', 'WHITE',
+           'MAGENTA', 'PINK', 'CYAN', 'NAVY', 'TEAL', 'PURPLE', 'GREEN',
+           'MAROON']
+
 BLUE = (255, 0, 0)
 LIME = (0, 255, 0)
 RED = (0, 0, 255)

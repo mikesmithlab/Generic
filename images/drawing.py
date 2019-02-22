@@ -2,6 +2,12 @@ import cv2
 import numpy as np
 from .colors import (BLUE, LIME, RED, YELLOW, ORANGE, BLACK, WHITE, MAGENTA, PINK,
                CYAN, NAVY, TEAL, PURPLE, GREEN, MAROON)
+import scipy.spatial as sp
+
+
+__all__ = ['draw_voronoi_cells', 'draw_polygons', 'draw_polygon',
+           'draw_delaunay_tess', 'draw_circle', 'draw_circles',
+           'draw_contours']
 
 
 def draw_voronoi_cells(img, points):

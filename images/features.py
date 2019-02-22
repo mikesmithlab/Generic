@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from .basics import display
 
+__all__ = ['extract_biggest_object', 'find_circles']
 
 def extract_biggest_object(img):
     output = cv2.connectedComponentsWithStats(img, 4, cv2.CV_32S)
