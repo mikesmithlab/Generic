@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
-from .colors import (BLUE, LIME, RED, YELLOW, ORANGE, BLACK, WHITE, MAGENTA, PINK,
-               CYAN, NAVY, TEAL, PURPLE, GREEN, MAROON)
+from .colors import *
 
 __all__ = ['crop_img', 'crop_and_mask_image', 'mask_img', 'set_edge_white',
            'mask_right', 'mask_top', 'InteractiveCrop', 'imfill', 'CropShape']

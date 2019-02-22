@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-from .colors import (BLUE, LIME, RED, YELLOW, ORANGE, BLACK, WHITE, MAGENTA, PINK,
-               CYAN, NAVY, TEAL, PURPLE, GREEN, MAROON)
+from .colors import *
+
 import scipy.spatial as sp
 
 

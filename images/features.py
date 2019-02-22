@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from .basics import display
+from .basics import *
 
 __all__ = ['extract_biggest_object', 'find_circles']
 

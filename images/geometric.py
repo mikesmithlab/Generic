@@ -1,8 +1,7 @@
 import numpy as np
 import cv2
-from .basics import get_width_and_height
-from .colors import (BLUE, LIME, RED, YELLOW, ORANGE, BLACK, WHITE, MAGENTA, PINK,
-               CYAN, NAVY, TEAL, PURPLE, GREEN, MAROON)
+from .basics import *
+from .colors import *
 
 __all__ = ['resize', 'rotate']
 
