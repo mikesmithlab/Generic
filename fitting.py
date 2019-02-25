@@ -281,9 +281,11 @@ class Fit:
             raise DataLengthException(self.x, logic)
         self.logic = logic
         self.fx = self.x[logic]
-        self.fy = self.y[logic]    
+        self.fy = self.y[logic]
+
 
     def fit(self, interpolation_factor=1.0, errors=False):
+
         fit_output = optimize.curve_fit(globals()[self.fit_type],
                                         self.fx,
                                         self.fy,
@@ -307,7 +309,7 @@ class Fit:
                                   )
         else:
             self.fit_x = self.fx
-        
+
         self.fit_y = globals()[self.fit_type](self.fit_x, *self.fit_params)
         print('\nFit : ', fit_dict[self.fit_type])
         print('Fit params : (param, lower, upper, ci) ')

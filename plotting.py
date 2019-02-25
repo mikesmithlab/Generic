@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import Generic.filedialogs as fd
+from itertools import cycle
 
 
 
@@ -73,7 +74,7 @@ class Plotter():
             self._plots += 1
             self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
 
-    def remove_img(self):
+    def remove_img(self, num_of_plot):
         self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[0].remove()
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
@@ -109,7 +110,17 @@ class Plotter():
     def show_figure(self):
         plt.show()
 
+def next_colour(colour):
+    colour_vals = ['r','b','g','y','k','m','c']
+    if colour >= len(colour_vals):
+        colour = colour % len(colour_vals)
+    return colour_vals[colour]
 
+def next_type(index):
+    type_vals = ['x', 'o', '+', '.']
+    if index >= len(type_vals):
+       index = index % len(type_vals)
+    return type_vals[index]
 
 
 if __name__=='__main__':
