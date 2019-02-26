@@ -4,14 +4,6 @@ import Generic.filedialogs as fd
 
 
 
-def histogram(data, numbins=10, marker='rx', show=True):
-    binedges, freq = np.histogram(data,bins=numbins)
-    bins = 0.5*(binedges[:-1]+binedges[1:])
-    fig, ax = plt.subplots()
-    ax.plot(bins, freq, marker)
-    if show:
-        plt.show()
-    return fig, ax, bins, freq
 
 
 
@@ -119,6 +111,16 @@ class Plotter():
 
     def show_figure(self):
         plt.show()
+
+
+def histogram(data, numbins=10, marker='rx', show=True):
+    binedges, freq = np.histogram(data,bins=numbins)
+    bins = 0.5*(binedges[:-1]+binedges[1:])
+    fig, ax = plt.subplots()
+    ax.plot(bins, freq, marker)
+    if show:
+        plt.show()
+    return fig, ax, bins, freq
 
 def next_colour(colour):
     colour_vals = ['r','b','g','y','k','m','c']
