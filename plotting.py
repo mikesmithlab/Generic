@@ -1,7 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import Generic.filedialogs as fd
-from itertools import cycle
+
+
+
+def histogram(data, numbins=10, marker='rx', show=True):
+    binedges, freq = np.histogram(data,bins=numbins)
+    bins = 0.5*(binedges[:-1]+binedges[1:])
+    fig, ax = plt.subplots()
+    ax.plot(bins, freq, marker)
+    if show:
+        plt.show()
+    return fig, ax, bins, freq
 
 
 
@@ -127,7 +137,7 @@ if __name__=='__main__':
     X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
     y2, y1 = np.cos(X), np.sin(X)
 
-    f = Plotter(subplot=(2, 1),sharey = True)
+    f = Plotter(subplot=(2, 1), sharey = True)
     f.add_plot(X, y1, marker='r-')
     f.add_plot(X, y2, marker='b-')
     f.add_plot(X, y2, marker='g-', subplot=0)
