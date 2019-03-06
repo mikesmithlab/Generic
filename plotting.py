@@ -5,6 +5,9 @@ import Generic.filedialogs as fd
 
 
 
+
+
+
 class Plotter():
     """
     Generic plotting object which allows multipanel graphs in x,y format
@@ -73,7 +76,7 @@ class Plotter():
             self._plots += 1
             self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
 
-    def remove_img(self):
+    def remove_img(self, num_of_plot):
         self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[0].remove()
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
@@ -110,13 +113,33 @@ class Plotter():
         plt.show()
 
 
+def histogram(data, numbins=10, marker='rx', show=True):
+    binedges, freq = np.histogram(data,bins=numbins)
+    bins = 0.5*(binedges[:-1]+binedges[1:])
+    fig, ax = plt.subplots()
+    ax.plot(bins, freq, marker)
+    if show:
+        plt.show()
+    return fig, ax, bins, freq
+
+def next_colour(colour):
+    colour_vals = ['r','b','g','y','k','m','c']
+    if colour >= len(colour_vals):
+        colour = colour % len(colour_vals)
+    return colour_vals[colour]
+
+def next_type(index):
+    type_vals = ['x', 'o', '+', '.']
+    if index >= len(type_vals):
+       index = index % len(type_vals)
+    return type_vals[index]
 
 
 if __name__=='__main__':
     X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
     y2, y1 = np.cos(X), np.sin(X)
 
-    f = Plotter(subplot=(2, 1),sharey = True)
+    f = Plotter(subplot=(2, 1), sharey = True)
     f.add_plot(X, y1, marker='r-')
     f.add_plot(X, y2, marker='b-')
     f.add_plot(X, y2, marker='g-', subplot=0)

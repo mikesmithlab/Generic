@@ -169,7 +169,7 @@ class Fit:
     logic = a numpy array of length = x and y with True or False depending on whether data is to be included
     
     methods:
-    __init__()  -     initialises with fit_type and optionally with data
+    __init__()  -     initialises with fit_type
     add_fit_data()  - can be used to add data or update data. reset_filter will
                       remove any logical filters that have been added. If the data is different
                       length this will autoreset regardless printing a message.
@@ -197,34 +197,32 @@ class Fit:
     fy             Returns the values of the fit at each point
     """
     
-    def __init__(self, fit_type, x=None, y=None,xlabel='x',ylabel='y',series=None):
-        self.x = 0
-        self.y = 0
-        self.xlabel=xlabel
-        self.ylabel=ylabel
+    def __init__(self, fit_type,x=None,y=None, xlabel='x',ylabel='y'):
         self.fit_type = fit_type
         self.fit_string, self._num_fit_params = fit_dict[fit_type]
-        if series is not None:
-            x = series.index.values
-            y = series.values
-        self.add_fit_data(x,y)
+        if x is not None:
+            self.add_fit_data(x=x,y=y,xlabel=xlabel,ylabel=ylabel)
+
     
-    def add_fit_data(self, x=None, y=None, series=None,xlabel='x',ylabel='y',reset_filter=True):
+    def add_fit_data(self, x=None, y=None, series=None,xlabel=None,ylabel=None,title=None,reset_filter=True):
         if series is not None:
             x = series.index
             y = series.values
-        if xlabel is not 'x':
-            self.xlabel=xlabel
-        if ylabel is not 'y':
-            self.ylabel=ylabel
+        self.x = x
+        self.y = y
+        if xlabel is None:
+            self.xlabel = ''
+        if ylabel is None:
+            self.ylabel = ''
+        if title is None:
+            self.title = ''
         if np.shape(x)[0] != np.shape(y)[0]:
             print('x', 'y')
             raise DataLengthException(x, y)
         if np.shape(x) != np.shape(self.x):
             reset_filter = True
             print('Data different length to current data, resetting logical filter')
-        self.x = x
-        self.y = y
+
         if reset_filter:
             self.add_filter(np.ones(np.shape(x), dtype=bool))
     
@@ -280,12 +278,14 @@ class Fit:
         len_logic = np.shape(logic)[0]
         if len_logic != np.shape(self.x)[0]:
             print('x', 'logic')
-            raise DataLengthException(x, logic)
+            raise DataLengthException(self.x, logic)
         self.logic = logic
         self.fx = self.x[logic]
-        self.fy = self.y[logic]    
+        self.fy = self.y[logic]
+
 
     def fit(self, interpolation_factor=1.0, errors=False):
+
         fit_output = optimize.curve_fit(globals()[self.fit_type],
                                         self.fx,
                                         self.fy,
@@ -308,8 +308,8 @@ class Fit:
                                    interpolation_step_size
                                   )
         else:
-            self.fit_x = self.x
-        
+            self.fit_x = self.fx
+
         self.fit_y = globals()[self.fit_type](self.fit_x, *self.fit_params)
         print('\nFit : ', fit_dict[self.fit_type])
         print('Fit params : (param, lower, upper, ci) ')
@@ -343,6 +343,7 @@ class Fit:
         plot_obj.add_plot(self.x, self.y, marker='bx')
         plot_obj.configure_xaxis(xlabel=self.xlabel)
         plot_obj.configure_yaxis(ylabel=self.ylabel)
+        plot_obj.configure_title(title=self.title)
         plot_obj.show_figure()
 
     def _plot_limits(self, data_array, lower=True):
@@ -360,10 +361,15 @@ class Fit:
         return lim
 
 
-    def plot_fit(self, filename=None, residuals=False, show=True, save=False):
+    def plot_fit(self, filename=None, residuals=False, title=None, xlabel=None, ylabel=None, show=True, save=False):
         if filename is None:
             filename = ' '
-
+        if xlabel is None:
+            self.xlabel=''
+        if ylabel is None:
+            self.ylabel=''
+        if title is None:
+            self.title=''
 
         if residuals:
             plot_obj = Plotter(subplot=(2, 1))
@@ -374,6 +380,7 @@ class Fit:
         plot_obj.add_plot(self.fit_x, self.fit_y, marker='g-')
         plot_obj.configure_xaxis(xlabel=self.xlabel)
         plot_obj.configure_yaxis(ylim=(self._plot_limits(self.y,lower=True),self._plot_limits(self.y,lower=False)),ylabel=self.ylabel)
+        plot_obj.configure_title(title=self.title)
 
         if residuals:
             plot_obj.add_plot(self.fx, self.fit_residuals, marker='rx',subplot=1)
@@ -383,6 +390,8 @@ class Fit:
             plot_obj.save_figure(filename)
         if show:
             plot_obj.show_figure()
+        return
+
 
     def stats(self, show_stats=True):
         self.ydata_max = np.max(self.y)
@@ -488,7 +497,7 @@ if __name__ == '__main__':
     y_linear = linear(xdata, a, b)
     y_quadratic = quadratic(xdata, a, b, c)
     y_cubic = cubic(xdata, a, -b, -c, d)
-    
+    '''
     linear_fit = Fit('linear', x=xdata, y=y_linear)
     linear_fit.add_params([4, 0])
     linear_fit.fit()
@@ -501,9 +510,14 @@ if __name__ == '__main__':
     cubic_fit.add_params([2, 3, 2, 6])
     cubic_fit.fit()
     cubic_fit.plot_fit(show=True)
-                
-                
-    
+    '''
+
+    linear_fit = Fit('linear', x=xdata, y=y_quadratic)
+    linear_fit.add_params([4, 0])
+    logic = xdata < 200
+    linear_fit.add_filter(logic)
+    linear_fit.fit()
+    linear_fit.plot_fit(show=True)
                          
     
     

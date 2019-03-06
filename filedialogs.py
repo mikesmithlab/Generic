@@ -103,7 +103,7 @@ def get_files_directory(path, full_filenames=True):
         return f
 
 
-class BatchProcess():
+class BatchProcess:
     """
     Generator for batch processing of files in scripts
 
