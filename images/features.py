@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 from . import *
 
 __all__ = ['extract_biggest_object', 'find_circles', 'find_colour',
-           'find_color']
+           'find_color', 'histogram_peak']
 
 
 def extract_biggest_object(img):
@@ -34,6 +35,17 @@ def find_circles(img, min_dist, p1, p2, min_rad, max_rad):
     return np.squeeze(circles)
 
 
+def histogram_peak(im, disp=False):
+    if len(np.shape(im)) == 2:
+        data, bins = np.histogram(im, bins=np.arange(0, 255, 1))
+        peak = bins[np.argmax(data)]
+    if disp:
+        plt.figure()
+        plt.plot(bins[:-1], data)
+        plt.show()
+    return peak
+
+
 def find_colour(image, col):
     """
     LAB colorspace allows finding colours somewhat independent of
@@ -43,9 +55,10 @@ def find_colour(image, col):
     """
     # Swap to LAB colorspace
     lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    b = lab[:, :, 2]
     if col == 'Blue':
-        b = lab[:, :, 2]
-        blue = threshold(b, mode=cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        peak = histogram_peak(b, disp=False)
+        blue = threshold(b, thresh=peak-8, mode=cv2.THRESH_BINARY)
         return ~blue
 
 find_color = find_colour
