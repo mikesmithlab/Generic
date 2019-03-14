@@ -1,7 +1,8 @@
 import cv2
 
 
-__all__ = ['threshold', 'adaptive_threshold', 'distance_transform']
+__all__ = ['threshold', 'adaptive_threshold', 'distance_transform',
+           'threshold_slider', 'adaptive_threshold_slider']
 
 
 def threshold(img, thresh=None, mode=cv2.THRESH_BINARY):
@@ -82,3 +83,58 @@ def distance_transform(img):
     """
     out = cv2.distanceTransform(img, cv2.DIST_L2, 3)
     return out
+
+
+class threshold_slider:
+
+    def __init__(self, img):
+        self.im = img
+        self.im0 = img.copy()
+        self.g = 0
+        cv2.namedWindow('image', cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow('image', 960, 540)
+        cv2.createTrackbar('thresh', 'image', 0, 255, self.change)
+        while(1):
+            cv2.imshow('image', self.im)
+            k = cv2.waitKey(1) & 0xFF
+            if k == 32:
+                break
+        cv2.destroyAllWindows()
+
+    def change(self, g):
+        # g = cv2.getTrackbarPos('thresh')
+        if g != self.g:
+            self.im = threshold(self.im0, g)
+            self.g = g
+
+
+class adaptive_threshold_slider:
+
+    def __init__(self, img):
+        self.im = img
+        self.im0 = img.copy()
+        self.w = 3
+        self.c = 0
+        cv2.namedWindow('image', cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow('image', 960, 540)
+        cv2.createTrackbar('(w - 3)/2', 'image', 1, 101, self.change_w)
+        cv2.createTrackbar('constant + 30', 'image', 0, 60, self.change_c)
+        while(1):
+            cv2.imshow('image', self.im)
+            k = cv2.waitKey(1) & 0xFF
+            if k == 32:
+                break
+        cv2.destroyAllWindows()
+
+    def change_w(self, w):
+        w = 2*w + 3
+        self.w = w
+        self.update()
+
+    def change_c(self, c):
+        c -= 30
+        self.c = c
+        self.update()
+
+    def update(self):
+        self.im = adaptive_threshold(self.im0, self.w, self.c)

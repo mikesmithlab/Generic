@@ -3,7 +3,7 @@ import cv2
 from .basics import *
 from .colors import *
 
-__all__ = ['resize', 'rotate']
+__all__ = ['resize', 'rotate', 'horizontal_stack']
 
 def resize(img, percent=25.0):
     """
@@ -69,4 +69,8 @@ def rotate(img, angle):
     out = cv2.warpAffine(img, rot_matrix, (n_w, n_h))
     return out
 
+
+def horizontal_stack(*args):
+    new_image = np.hstack(args)
+    return new_image
 
