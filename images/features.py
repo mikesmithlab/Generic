@@ -37,13 +37,15 @@ def find_circles(img, min_dist, p1, p2, min_rad, max_rad):
 
 def histogram_peak(im, disp=False):
     if len(np.shape(im)) == 2:
-        data, bins = np.histogram(im, bins=np.arange(0, 255, 1))
+        data, bins = np.histogram(np.ndarray.flatten(im), bins=np.arange(20, 255, 1))
         peak = bins[np.argmax(data)]
     if disp:
         plt.figure()
         plt.plot(bins[:-1], data)
         plt.show()
     return peak
+
+
 
 
 def find_colour(image, col):
