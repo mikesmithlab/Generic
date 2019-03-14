@@ -25,6 +25,7 @@ fit_dict = {
             'double_flipped_exponential':('a*(1-c*np.exp(b*(x-f))-e*np.exp(d*(x-f)))+g', 7),
             'sin_cos': ('f(x) = asin(bx)+bcos(cx)+d', 4),
             'gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2))', 3),
+            'dblgaussian':('f(x) = aexp(-(x-b)**2/(2c**2)) + dexp(-(x-e)**2/(2f**2))', 6),
             'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3),
             'axb':('f(x)=a(x)**b',2)
            }
@@ -95,6 +96,8 @@ def gaussian_guess(x, y):
     c = 0.5*np.sqrt((1/N)*np.sum(y*(x-b)**2))
     return [a, b, c]
 
+def dbl_gaussian(x,a,b,c,d,e,f):
+    return a*np.exp(-(x-b)**2/(2*c**2)) + d*np.exp(-(x-e)**2/(2*f**2))
 
 def poisson(x, a, b, c):
     return a*(b**c)*np.exp(-b)/factorial(c)
@@ -228,7 +231,7 @@ class Fit:
     
     def add_params(self, guess=None, lower=None, upper=None):
         if guess is None:
-            guess = self.guess_params()
+            guess = self._guess_params()
         _num_params = np.shape(guess)[0]
         if _num_params != self._num_fit_params:
             raise ParamNumberException(guess)
@@ -237,7 +240,7 @@ class Fit:
         self._upper=upper
         self._replace_none_fixed()
 
-    def guess_params(self):
+    def _guess_params(self):
         try:
             guess = globals()[self.fit_type + '_guess'](self.fx, self.fy)
             self._params = guess
