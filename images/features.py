@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from . import *
 
 __all__ = ['extract_biggest_object', 'find_circles', 'find_colour',
-           'find_color', 'histogram_peak']
+           'find_color', 'histogram_peak', 'Circle_GUI']
 
 
 def extract_biggest_object(img):
@@ -62,5 +62,66 @@ def find_colour(image, col):
         peak = histogram_peak(b, disp=False)
         blue = threshold(b, thresh=peak-8, mode=cv2.THRESH_BINARY)
         return ~blue
+
+
+class Circle_GUI:
+
+    def __init__(self, img):
+        self.im = img
+        self.im0 = img.copy()
+        self.distance = 5
+        self.thresh1 = 200
+        self.thresh2 = 5
+        self.min_rad = 3
+        self.max_rad = 7
+        cv2.namedWindow('image', cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow('image', 960, 540)
+        cv2.createTrackbar('Min Distance', 'image', 5, 51, self.change_d)
+        cv2.createTrackbar('Thresh 1', 'image', 200, 255, self.change_t1)
+        cv2.createTrackbar('Thresh 2', 'image', 5, 10, self.change_t2)
+        cv2.createTrackbar('Min Radius', 'image', 3, 51, self.change_min_r)
+        cv2.createTrackbar('Max Radius', 'image', 3, 51, self.change_max_r)
+        while(1):
+            cv2.imshow('image', self.im)
+            k = cv2.waitKey(1) & 0xFF
+            if k == 32:
+                break
+        cv2.destroyAllWindows()
+
+    def change_d(self, d):
+        if d == 0:
+            d = 1
+        self.distance = d
+        self.update()
+
+    def change_t1(self, d):
+        self.thresh1 = d
+        self.update()
+
+    def change_t2(self, d):
+        self.thresh2 = d
+        self.update()
+
+    def change_min_r(self, d):
+        if d > self.max_rad:
+            d = self.max_rad - 2
+        self.min_rad = d
+        self.update()
+
+    def change_max_r(self, d):
+        if d < self.min_rad:
+            d = self.min_rad + 2
+        self.max_rad = d
+        self.update()
+
+    def update(self):
+        circles = find_circles(self.im0, self.distance,
+                               self.thresh1, self.thresh2,
+                               self.min_rad, self.max_rad)
+        self.im = self.im0.copy()
+        self.im = draw_circles(np.dstack((self.im, self.im, self.im)), circles)
+
+
+
 
 find_color = find_colour
