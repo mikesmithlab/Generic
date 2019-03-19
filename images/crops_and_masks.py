@@ -60,6 +60,8 @@ def mask_img(img, mask, color='black'):
     out: The masked image
         Same dimensions and type as img
     """
+    if len(np.shape(mask)) == 3:
+        mask = mask[:, :, 0]
     if color == 'black':
         out = cv2.bitwise_and(img, img, mask=mask)
     else:
