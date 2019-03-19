@@ -25,6 +25,7 @@ fit_dict = {
             'double_flipped_exponential':('a*(1-c*np.exp(b*(x-f))-e*np.exp(d*(x-f)))+g', 7),
             'sin_cos': ('f(x) = asin(bx)+bcos(cx)+d', 4),
             'gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2))', 3),
+            'dbl_gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2)) + dexp(-(x-e)**2/(2f**2))', 6),
             'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3),
             'axb':('f(x)=a(x)**b',2)
            }
@@ -71,6 +72,7 @@ def exponential(x, a, b):
 def flipped_exponential(x, a, b, c, d):
     return a*(1-np.exp(-b*(x-c))+d)
 
+
 def double_flipped_exponential(x, a, b, c, d, e, f, g):
     return a*(1-c*np.exp(-b*(x-f))-e*np.exp(-d*(x-f))+g)
 
@@ -94,6 +96,20 @@ def gaussian_guess(x, y):
     N = np.sum(y)
     c = 0.5*np.sqrt((1/N)*np.sum(y*(x-b)**2))
     return [a, b, c]
+
+
+def dbl_gaussian(x,a,b,c,d,e,f):
+    return a*np.exp(-(x-b)**2/(2*c**2)) + d*np.exp(-(x-e)**2/(2*f**2))
+
+
+def dbl_gaussian_guess(x, y):
+    a = np.max(y)/2
+    d = np.max(y)/2
+    b = np.mean(x)+1/np.max(x)
+    e = np.mean(x)-1/np.max(x)
+    c = np.std(x)/2
+    f = np.std(x)
+    return [a, b, c, d, e, f]
 
 
 def poisson(x, a, b, c):
@@ -159,8 +175,9 @@ class Fit:
     fit_type = function name that specifies the type of fit of interest. These are specified in the
                 fit_dict and have a matching named function. The corresponding function with the same name 
                 returns the value of the function for a specific set of parameter values.
-                x,y = 1d numpy array data to be fitted of the form y = f(x)
-                series = pandas series can be supplied in place of x,y data. It will plot data against index values
+
+    x,y = 1d numpy array data to be fitted of the form y = f(x)
+    series = pandas series can be supplied in place of x,y data. It will plot data against index values
     
     guess = starting values for the fit -tuple with length = number of parameters
     lower = lower bounds on fit (optional)
@@ -203,7 +220,6 @@ class Fit:
         if x is not None:
             self.add_fit_data(x=x,y=y,xlabel=xlabel,ylabel=ylabel)
 
-    
     def add_fit_data(self, x=None, y=None, series=None,xlabel=None,ylabel=None,title=None,reset_filter=True):
         if series is not None:
             x = series.index
@@ -228,7 +244,7 @@ class Fit:
     
     def add_params(self, guess=None, lower=None, upper=None):
         if guess is None:
-            guess = self.guess_params()
+            guess = self._guess_params()
         _num_params = np.shape(guess)[0]
         if _num_params != self._num_fit_params:
             raise ParamNumberException(guess)
@@ -237,7 +253,7 @@ class Fit:
         self._upper=upper
         self._replace_none_fixed()
 
-    def guess_params(self):
+    def _guess_params(self):
         try:
             guess = globals()[self.fit_type + '_guess'](self.fx, self.fy)
             self._params = guess
@@ -282,7 +298,6 @@ class Fit:
         self.logic = logic
         self.fx = self.x[logic]
         self.fy = self.y[logic]
-
 
     def fit(self, interpolation_factor=1.0, errors=False):
 
@@ -339,12 +354,12 @@ class Fit:
         self.fit_param_errors = np.std(ps, 0)
 
     def plot_data(self):
-        plot_obj = Plotter()
-        plot_obj.add_plot(self.x, self.y, marker='bx')
-        plot_obj.configure_xaxis(xlabel=self.xlabel)
-        plot_obj.configure_yaxis(ylabel=self.ylabel)
-        plot_obj.configure_title(title=self.title)
-        plot_obj.show_figure()
+        self.plot_obj = Plotter()
+        self.plot_obj.add_plot(self.x, self.y, marker='bx')
+        self.plot_obj.configure_xaxis(xlabel=self.xlabel)
+        self.plot_obj.configure_yaxis(ylabel=self.ylabel)
+        self.plot_obj.configure_title(title=self.title)
+        self.plot_obj.show_figure()
 
     def _plot_limits(self, data_array, lower=True):
         '''internal method to control axes limits correctly'''
@@ -360,7 +375,6 @@ class Fit:
             lim = lim * (1 + upordown * 0.1)
         return lim
 
-
     def plot_fit(self, filename=None, residuals=False, title=None, xlabel=None, ylabel=None, show=True, save=False):
         if filename is None:
             filename = ' '
@@ -372,26 +386,25 @@ class Fit:
             self.title=''
 
         if residuals:
-            plot_obj = Plotter(subplot=(2, 1))
+            self.plot_obj = Plotter(subplot=(2, 1))
         else:
-            plot_obj = Plotter(subplot=(1, 1))
-        plot_obj.add_plot(self.x, self.y, marker='rx')
-        plot_obj.add_plot(self.fx, self.fy, marker='bx')
-        plot_obj.add_plot(self.fit_x, self.fit_y, marker='g-')
-        plot_obj.configure_xaxis(xlabel=self.xlabel)
-        plot_obj.configure_yaxis(ylim=(self._plot_limits(self.y,lower=True),self._plot_limits(self.y,lower=False)),ylabel=self.ylabel)
-        plot_obj.configure_title(title=self.title)
+            self.plot_obj = Plotter(subplot=(1, 1))
+        self.plot_obj.add_plot(self.x, self.y, marker='rx')
+        self.plot_obj.add_plot(self.fx, self.fy, marker='bx')
+        self.plot_obj.add_plot(self.fit_x, self.fit_y, marker='g-')
+        self.plot_obj.configure_xaxis(xlabel=self.xlabel)
+        self.plot_obj.configure_yaxis(ylim=(self._plot_limits(self.y,lower=True),self._plot_limits(self.y,lower=False)),ylabel=self.ylabel)
+        self.plot_obj.configure_title(title=self.title)
 
         if residuals:
-            plot_obj.add_plot(self.fx, self.fit_residuals, marker='rx',subplot=1)
-            plot_obj.configure_yaxis(ylabel='Residuals')
+            self.plot_obj.add_plot(self.fx, self.fit_residuals, marker='rx',subplot=1)
+            self.plot_obj.configure_yaxis(ylabel='Residuals')
 
         if save:
-            plot_obj.save_figure(filename)
+            self.plot_obj.save_figure(filename)
         if show:
-            plot_obj.show_figure()
+            self.plot_obj.show_figure()
         return
-
 
     def stats(self, show_stats=True):
         self.ydata_max = np.max(self.y)

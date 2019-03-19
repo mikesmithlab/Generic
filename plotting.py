@@ -113,14 +113,23 @@ class Plotter():
         plt.show()
 
 
-def histogram(data, numbins=10, marker='rx', show=True):
-    binedges, freq = np.histogram(data,bins=numbins)
+def histogram(data, bins=10, marker='rx', normalise=False, ax=None, show=False):
+    '''
+    If you feed a sequence to bins it will use these as the binedges
+    '''
+    if ax is None:
+        fig, ax = plt.subplots()
+    freq, binedges = np.histogram(data,bins=bins,density=normalise)
+    if normalise:
+        freq=freq/np.sum(freq)
+
+    print(np.sum(freq))
+
     bins = 0.5*(binedges[:-1]+binedges[1:])
-    fig, ax = plt.subplots()
     ax.plot(bins, freq, marker)
     if show:
         plt.show()
-    return fig, ax, bins, freq
+    return ax, bins, freq
 
 def next_colour(colour):
     colour_vals = ['r','b','g','y','k','m','c']
