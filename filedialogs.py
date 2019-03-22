@@ -4,6 +4,27 @@ import os
 import glob
 
 
+def create_directory(caption='Create Directory',
+                     directory='/home/ppxjd3/Videos/'):
+    app = QApplication(sys.argv)
+    output = QFileDialog.getSaveFileName(parent=None,
+                                         caption=caption,
+                                         directory=directory)
+    file, extension = os.path.splitext(output[0])
+    os.mkdir(file)
+    return file
+
+
+def open_directory(caption='Select Directory',
+                   directory='/home/ppxjd3/Videos'):
+    app = QApplication(sys.argv)
+    output = QFileDialog.getExistingDirectory(parent=None,
+                                              caption=caption,
+                                              directory=directory)
+    return output
+
+
+
 def save_filename(caption='Save File',
               directory='/home/ppxjd3/Code/Generic/',
               file_filter='*.mp4;;*.avi'):
