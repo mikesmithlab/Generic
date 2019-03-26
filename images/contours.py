@@ -3,8 +3,10 @@ import numpy as np
 from math import pi, cos, sin
 import matplotlib.pyplot as plt
 import scipy.spatial as sp
+import scipy.optimize as op
+from shapely.geometry import Polygon, Point
 
-__all__ = ['find_contours', 'sort_contours', 'find_contour_corners']
+__all__ = ['find_contours', 'sort_contours', 'find_contour_corners', 'fit_hex']
 
 
 def find_contours(img, hierarchy=False):
@@ -72,6 +74,35 @@ def find_contour_corners(cnt, n, aligned=True):
         max_r = np.argmax(r[in_region])
         corners.append(in_region[0][max_r])
     return corners, (xc, yc)
+
+
+def fit_hex(contour):
+    """
+    Fits a regular hexagon to a list of points.
+
+    Uses scipy.optimize.minimize to minimise the distance between the points
+    and the hexagon.
+    """
+    (xc, yc), radius = cv2.minEnclosingCircle(contour)
+    res = op.minimize(distance_to_hexagon, (xc, yc, radius, 0), args=contour)
+    (xc, yc, r, theta) = res.x
+    _, hex_corners = hexagon(xc, yc, r, theta)
+    return hex_corners
+
+
+def distance_to_hexagon(params, contour):
+    xc, yc, r, theta = params
+    hex, _ = hexagon(xc, yc, r, theta)
+    dists = []
+    for pnt in contour:
+        dists.append(hex.distance(Point(pnt)))
+    return np.sum(dists)
+
+
+def hexagon(xc, yc, r, theta):
+    points = [[xc + r*cos(t + theta), yc + r*sin(t + theta)] for t in [0, pi/3, 2*pi/3, pi, 4*pi/3, 5*pi/3]]
+    hex = Polygon(points)
+    return hex, np.array(points)
 
 
 
