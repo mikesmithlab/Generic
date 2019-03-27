@@ -87,23 +87,21 @@ def fit_hex(contour):
     res = op.minimize(distance_to_hexagon, (xc, yc, radius, 0), args=contour)
     (xc, yc, r, theta) = res.x
     _, hex_corners = hexagon(xc, yc, r, theta)
-    return hex_corners
+    return np.array(hex_corners)
 
 
 def distance_to_hexagon(params, contour):
     xc, yc, r, theta = params
     hex, _ = hexagon(xc, yc, r, theta)
-    dists = []
-    for pnt in contour:
-        dists.append(hex.distance(Point(pnt)))
+    dists = [hex.distance(Point(pnt)) for pnt in contour]
     return np.sum(dists)
 
 
 def hexagon(xc, yc, r, theta):
-    points = [[xc + r*cos(t + theta), yc + r*sin(t + theta)] for t in [0, pi/3, 2*pi/3, pi, 4*pi/3, 5*pi/3]]
+    points = [[xc + r*cos(t + theta), yc + r*sin(t + theta)]
+              for t in [0, pi/3, 2*pi/3, pi, 4*pi/3, 5*pi/3]]
     hex = Polygon(points)
-    return hex, np.array(points)
-
+    return hex, points
 
 
 
