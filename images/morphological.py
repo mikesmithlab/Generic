@@ -1,7 +1,7 @@
 import cv2
 
 
-__all__ = ['dilate', 'erode', 'closing', 'opening']
+__all__ = ['dilate', 'erode', 'closing', 'opening', 'opening_slider', 'closing_slider']
 
 
 def dilate(img, kernel=(3, 3), kernel_type=None, iterations=1):
@@ -124,3 +124,51 @@ def opening(img, kernel=(3, 3), kernel_type=None, iterations=1):
         kernel = cv2.getStructuringElement(kernel_type, kernel)
     out = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=iterations)
     return out
+
+
+class opening_slider:
+
+    def __init__(self, img, type=cv2.THRESH_BINARY):
+        self.im = img
+        self.im0 = img.copy()
+        self.k = 0
+        self.type = type
+        cv2.namedWindow('image', cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow('image', 960, 540)
+        cv2.createTrackbar('kernel (odd)', 'image', 0, 31, self.change)
+        while(1):
+            cv2.imshow('image', self.im)
+            k = cv2.waitKey(1) & 0xFF
+            if k == 32:
+                break
+        cv2.destroyAllWindows()
+
+    def change(self, k):
+        if k % 2 == 0:
+            k += 1
+        self.im = opening(self.im0, kernel=(k, k))
+        self.k = k
+
+
+class closing_slider:
+
+    def __init__(self, img, type=cv2.THRESH_BINARY):
+        self.im = img
+        self.im0 = img.copy()
+        self.k = 0
+        self.type = type
+        cv2.namedWindow('image', cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow('image', 960, 540)
+        cv2.createTrackbar('kernel (odd)', 'image', 0, 31, self.change)
+        while(1):
+            cv2.imshow('image', self.im)
+            k = cv2.waitKey(1) & 0xFF
+            if k == 32:
+                break
+        cv2.destroyAllWindows()
+
+    def change(self, k):
+        if k % 2 == 0:
+            k += 1
+        self.im = closing(self.im0, kernel=(k, k))
+        self.k = k
