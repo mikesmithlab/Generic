@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 __all__ = ['display', 'plot', 'read_img', 'load', 'read', 'write_img', 'save', 'write',
            'get_width_and_height', 'dimensions', 'get_height', 'height',
-           'get_width', 'width', 'bgr_2_grayscale', 'to_uint8']
+           'get_width', 'width', 'bgr_2_grayscale', 'to_uint8', 'stack_3']
 
 
 def display(image, title=''):
@@ -157,3 +157,10 @@ height = get_height
 def bgr_2_grayscale(img):
     """Converts a BGR image to grayscale"""
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+
+def stack_3(img):
+    """Stacks a grayscale image to 3 depths so that coloured objects
+    can be drawn on top"""
+    im = np.dstack((img, img, img))
+    return im
