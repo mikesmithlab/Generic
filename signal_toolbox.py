@@ -173,7 +173,7 @@ def correlation(x1=None, x2=None, time_step=1.0, show=False):
     :return: returns the lags and correlation coeffs as numpy arrays
     '''
     len_data = np.shape(x1)[0]
-    if x2 == None:
+    if x2 is None:
         x2 = x1.copy()
     time = time_step*np.arange(len_data)
     lags = time.copy()
