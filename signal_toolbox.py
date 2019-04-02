@@ -73,7 +73,7 @@ def smooth(xdata, window_len=0, window='bartlett', show=False):
     else:
         # If window_len < 3 leave unchanged
         print('window_len < 3 leaves the data unchanged')
-        return x_data
+        return xdata
 
 
 def fft_power_spectrum(tdata, ydata, limits=None, show=True):
