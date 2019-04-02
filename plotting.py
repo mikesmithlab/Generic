@@ -123,8 +123,6 @@ def histogram(data, bins=10, marker='rx', normalise=False, ax=None, show=False):
     if normalise:
         freq=freq/np.sum(freq)
 
-    print(np.sum(freq))
-
     bins = 0.5*(binedges[:-1]+binedges[1:])
     ax.plot(bins, freq, marker)
     if show:
