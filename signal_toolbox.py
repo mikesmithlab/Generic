@@ -75,6 +75,18 @@ def smooth(xdata, window_len=0, window='bartlett', show=False):
         print('window_len < 3 leaves the data unchanged')
         return xdata
 
+def moving_filter(data, type='median', window=10):
+    '''
+
+    :param data: signal to be filtered
+    :param type: 'median'
+    :param window: number points before and after data point on which filter is calculated
+    :return: filt_signal: filtered signal
+    '''
+    if type is 'median':
+        filt_signal = signal.medfilt(data,kernel_size=window)
+    return filt_signal
+
 
 def fft_power_spectrum(tdata, ydata, limits=None, show=True):
     """
