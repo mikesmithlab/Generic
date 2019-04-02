@@ -119,7 +119,7 @@ def histogram(data, bins=10, marker='rx', normalise=False, ax=None, show=False):
     '''
     if ax is None:
         fig, ax = plt.subplots()
-    freq, binedges = np.histogram(data,bins=bins,density=normalise)
+    freq, binedges = np.histogram(data, bins=bins,density=normalise)
     if normalise:
         freq=freq/np.sum(freq)
 
