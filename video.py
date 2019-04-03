@@ -1,9 +1,13 @@
 import numpy as np
 import cv2
+import pims as pims
 import Generic.filedialogs as fd
 import subprocess
 import os
+import tiffcapture as tc
 import ffmpeg
+
+#FFMPEG implementation
 
 def crop_video(
         filename,
@@ -36,6 +40,43 @@ def crop_video(
         video_bitrate=bit_rate)
     stream = ffmpeg.overwrite_output(stream)
     ffmpeg.run(stream, quiet=True)
+
+
+def get_video_dimensions(filename):
+    command_w = ['ffprobe',
+                '-v', 'error',
+                '-show_entries',
+                'stream=width',
+                '-of',
+                'csv=p=0:s=x',
+                filename]
+    command_h = ['ffprobe',
+                 '-v', 'error',
+                 '-show_entries',
+                 'stream=height',
+                 '-of',
+                 'csv=p=0:s=x',
+                 filename]
+    width_out = subprocess.check_output(command_w)
+    width = int(width_out.decode("utf-8"))
+    height_out = subprocess.check_output(command_h)
+    height = int(height_out.decode("utf-8"))
+    return width, height
+
+
+def resize_video(input_filename, output_filename, scale=0.5):
+    width, height = get_video_dimensions(input_filename)
+    new_width = round(width * scale / 2) * 2
+    new_height = round(height * scale / 2) * 2
+
+    command = ['ffmpeg',
+               '-i',
+               input_filename,
+               '-vf',
+               'scale={}:{}'.format(new_width, new_height),
+               output_filename]
+    subprocess.call(command)
+
 
 
 class ReadVideoFFMPEG:
@@ -129,6 +170,9 @@ class WriteVideoFFMPEG:
         self.process.stdin.close()
         self.process.wait()
 
+
+
+#Opencv implementation
 
 class WriteVideo:
     '''
@@ -285,31 +329,61 @@ class ReadVideo:
         if filename = None user must select filename with dialogue
         '''
         if filename == None:
-            filename = fd.load_filename(caption='select movie filename', file_filter='*.avi;;*.mp4;;*.*')
+            filename = fd.load_filename(caption='select movie filename', file_filter='*.avi;;*.mp4;;*.tif;;*.jpg;;*.*')
         self.filename = filename
+        self._detect_file_type()
         self.open_video()
         self.get_vid_props()
+
+    def _detect_file_type(self):
+        _, self.ext = os.path.splitext(self.filename)
+        if self.ext in ['.mp4', '.avi']:
+            self.filetype = 'video'
+
+        elif self.ext in ['.tif']:
+            self.filetype = 'img_seq'
+        else:
+            print('sequence format not supported, '
+                  'test and add to list if necessary in _detect_file_type')
         
     def open_video(self):
         '''Creates a video Object for reading'''
         self.frame_num = 0
-        self.read_vid = cv2.VideoCapture(self.filename)
+        if self.filetype == 'video':
+            self.read_vid = cv2.VideoCapture(self.filename)
+        elif self.filetype == 'img_seq':
+            self.read_vid = pims.open(self.filename)
+        else:
+            print('Error in open_video')
 
-    def get_vid_props(self,show = False):
-        self.frame_num = self.read_vid.get(cv2.CAP_PROP_POS_FRAMES)
-        self.num_frames = int(self.read_vid.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.current_time = self.read_vid.get(cv2.CAP_PROP_POS_MSEC)
-        self.width = int(self.read_vid.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.read_vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.fps = self.read_vid.get(cv2.CAP_PROP_FPS)
-        self.format = self.read_vid.get(cv2.CAP_PROP_FORMAT)
-        self.codec = self.read_vid.get(cv2.CAP_PROP_FOURCC)
+    def get_vid_props(self, show=False):
+
+        if self.filetype is 'video':
+            self.frame_num = self.read_vid.get(cv2.CAP_PROP_POS_FRAMES)
+            self.num_frames = int(self.read_vid.get(cv2.CAP_PROP_FRAME_COUNT))
+            self.current_time = self.read_vid.get(cv2.CAP_PROP_POS_MSEC)
+            self.width = int(self.read_vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.height = int(self.read_vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            self.fps = self.read_vid.get(cv2.CAP_PROP_FPS)
+            self.format = self.read_vid.get(cv2.CAP_PROP_FORMAT)
+            self.codec = self.read_vid.get(cv2.CAP_PROP_FOURCC)
+        elif self.filetype is 'img_seq':
+            self.num_frames = np.shape(self.read_vid)[0]
+            self.width = np.shape(self.read_vid)[2]
+            self.height = np.shape(self.read_vid)[1]
+            self.current_time = 0
+            self.fps = 0
+            self.format = 0
+            self.codec = 0
+
+
         self.file_extension = self.filename.split('.')[1]
         
         if show:
             print('----------------------------')
             print('List of Video Properties')
             print('----------------------------')
+            print('file_type : ',self.filetype)
             print('frame_num : ',self.frame_num)
             print('num_frames : ',self.num_frames)
             print('current_time (ms) : ',self.current_time)
@@ -325,23 +399,34 @@ class ReadVideo:
                   
     def read_next_frame(self):
         '''reads the next available frame'''
-        ret,img = self.read_vid.read() 
-        self.frame_num = self.frame_num + 1      
+        if self.filetype == 'video':
+            ret,img = self.read_vid.read()
+        elif self.filetype == 'img_seq':
+            ret = True
+            img = self.read_vid[self.frame_num]
+        else:
+            ret = False
+        self.frame_num = self.frame_num + 1
         if ret:
             return img
         else:
             print('Error reading the frame. Check path and filename carefully')
 
-    def find_frame(self,frame_num):
+    def find_frame(self, frame_num):
         '''searches for specific frame and reads it'''
         self.set_frame(frame_num)
-        self.frame_num = frame_num
         img=self.read_next_frame()
+        self.frame_num = frame_num
         return img
 
     def set_frame(self, frame_num):
-        """Moves the video reader to the given frame"""
-        self.read_vid.set(cv2.CAP_PROP_POS_FRAMES, float(frame_num))
+        if self.filetype == 'video':
+            """Moves the video reader to the given frame"""
+            self.read_vid.set(cv2.CAP_PROP_POS_FRAMES, float(frame_num))
+        elif self.filetype == 'img_seq':
+            self.frame_num = frame_num
+        else:
+            print('Error in set_frame')
         self.frame_num = frame_num
         
     def generate_frame_filename(self,ext='.png'):
@@ -355,8 +440,12 @@ class ReadVideo:
         return filename_string
         
     def close(self):
-        self.read_vid.release()
-        #print('Video closed for reading')
+        if self.filetype == 'video':
+            self.read_vid.release()
+        elif self.filetype == 'img_seq':
+            self.read_vid.close()
+
+
         
 
 class ImageShapeError(Exception):
@@ -389,42 +478,6 @@ class ArgumentsMissing(Exception):
         print('In this case: ', arguments_missing)
 
 
-def get_video_dimensions(filename):
-    command_w = ['ffprobe',
-                '-v', 'error',
-                '-show_entries',
-                'stream=width',
-                '-of',
-                'csv=p=0:s=x',
-                filename]
-    command_h = ['ffprobe',
-                 '-v', 'error',
-                 '-show_entries',
-                 'stream=height',
-                 '-of',
-                 'csv=p=0:s=x',
-                 filename]
-    width_out = subprocess.check_output(command_w)
-    width = int(width_out.decode("utf-8"))
-    height_out = subprocess.check_output(command_h)
-    height = int(height_out.decode("utf-8"))
-    return width, height
-
-
-def resize_video(input_filename, output_filename, scale=0.5):
-    width, height = get_video_dimensions(input_filename)
-    new_width = round(width * scale / 2) * 2
-    new_height = round(height * scale / 2) * 2
-
-    command = ['ffmpeg',
-               '-i',
-               input_filename,
-               '-vf',
-               'scale={}:{}'.format(new_width, new_height),
-               output_filename]
-    subprocess.call(command)
-
-
 
 if __name__ == '__main__':
     '''Test opencv read/write'''
@@ -446,6 +499,26 @@ if __name__ == '__main__':
     # read_vid.close()
     # write_vid.close()
 
+    from Generic.images import basics
+
+    filename_avi = '/media/ppzmis/data/ActiveMatter/bacteria_plastic/swimming.avi'
+    filename_tiffstack = '/media/ppzmis/data/ActiveMatter/bacteria_plastic/swimming.tif'
+
+    read_vid = ReadVideo(filename_avi)
+    read_vid.open_video()
+    read_vid.get_vid_props(show=True)
+    img = read_vid.find_frame(5)
+    basics.display(img)
+    read_vid.close()
+
+    read_tiffstack = ReadVideo(filename_tiffstack)
+    read_tiffstack.open_video()
+    read_tiffstack.get_vid_props(show=True)
+    img = read_tiffstack.find_frame(4)
+    basics.display(img)
+    read_tiffstack.close()
+
+
     '''Test FFMPEG read/write'''
     # in_file = "/home/ppxjd3/Videos/short.mp4"
     # out_file = "/home/ppxjd3/Videos/short_ffmpeg.mp4"
@@ -464,15 +537,11 @@ if __name__ == '__main__':
     # print(time.time() - s)
 
     '''Test Crop Read/write'''
+    '''
     in_file = "/home/ppxjd3/Videos/short.mp4"
     out_file = "/home/ppxjd3/Videos/short_crop.mp4"
     import time
     s = time.time()
     crop_video(in_file, 430, 2680, 26, 1962, out_file)
     print(time.time() - s)
-        
-        
-        
-        
-        
-        
+    '''
