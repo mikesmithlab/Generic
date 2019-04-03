@@ -125,3 +125,12 @@ class Circle_GUI:
 
 
 find_color = find_colour
+
+if __name__ == '__main__':
+    from video import ReadVideo
+
+    read_vid = ReadVideo()
+    read_vid.open_video()
+    img = read_vid.read_next_frame()
+
+    gui_circle = Circle_GUI(img)
