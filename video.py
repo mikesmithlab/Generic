@@ -328,7 +328,7 @@ class ReadVideo:
         if filename = None user must select filename with dialogue
         '''
         if filename == None:
-            filename = fd.load_filename(caption='select movie filename', file_filter='*.avi;;*.mp4;;*.tif;;*.jpg;;*.*')
+            filename = fd.load_filename(caption='select movie filename', file_filter='*.avi;;*.MP4;;*.mp4;;*.tif;;*.*')
         self.filename = filename
         self._detect_file_type()
         self.open_video()
