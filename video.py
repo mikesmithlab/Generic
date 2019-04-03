@@ -4,7 +4,6 @@ import pims as pims
 import Generic.filedialogs as fd
 import subprocess
 import os
-import tiffcapture as tc
 import ffmpeg
 
 #FFMPEG implementation

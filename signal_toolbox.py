@@ -75,12 +75,12 @@ def smooth(xdata, window_len=0, window='bartlett', show=False):
         print('window_len < 3 leaves the data unchanged')
         return xdata
 
-def moving_filter(data, type='median', window=10):
+def moving_filter(data, type='median', window=11):
     '''
 
     :param data: signal to be filtered
     :param type: 'median'
-    :param window: number points before and after data point on which filter is calculated
+    :param window: number points before and after data point on which filter is calculated. Should be odd number
     :return: filt_signal: filtered signal
     '''
     if type is 'median':
