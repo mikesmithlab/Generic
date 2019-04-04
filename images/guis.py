@@ -2,7 +2,7 @@ from . import *
 import cv2
 import numpy as np
 
-__all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui']
+__all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui', 'ContoursGui']
 
 
 class ParamGui:
@@ -97,6 +97,21 @@ class InrangeGui(ParamGui):
 
         self.im = cv2.inRange(self.im0, self.param_dict['bottom'],
                               self.param_dict['top'])
+
+class ContoursGui(AdaptiveThresholdGui):
+    '''
+    This applies adaptive threshold (this is what you are adjusting and is the
+    value on the slider. It then applies findcontours and draws them to display result
+    '''
+    def __init__(self, img):
+        AdaptiveThresholdGui.__init__(self, img)
+
+    def update(self):
+        super().update()
+        contours = find_contours(self.im)
+        self.im = draw_contours(self.im,contours,(0,255,0),2)
+
+
 
 
 if __name__ == "__main__":

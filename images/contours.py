@@ -14,7 +14,6 @@ def find_contours(img, hierarchy=False):
     else:
         return contours
 
-
 def sort_contours(cnts):
     """
     Sorts contours by area from smallest to largest.
