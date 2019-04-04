@@ -1,12 +1,14 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from . import *
 
-__all__ = ['extract_biggest_object', 'find_circles', 'find_colour',
-           'find_color', 'histogram_peak', 'Circle_GUI']
+#from . import *
+from Generic.images.drawing import draw_circles
 
+#__all__ = ['extract_biggest_object', 'find_circles', 'find_colour',
+ #          'find_color', 'histogram_peak', 'Circle_GUI']
 
+'''
 def extract_biggest_object(img):
     output = cv2.connectedComponentsWithStats(img, 4, cv2.CV_32S)
     labels = output[1]
@@ -21,7 +23,7 @@ def extract_biggest_object(img):
         print(output[0])
         display(img)
     return out
-
+'''
 
 def find_circles(img, min_dist, p1, p2, min_rad, max_rad):
     circles = cv2.HoughCircles(
@@ -47,7 +49,7 @@ def histogram_peak(im, disp=False):
 
 
 
-
+'''
 def find_colour(image, col):
     """
     LAB colorspace allows finding colours somewhat independent of
@@ -63,7 +65,8 @@ def find_colour(image, col):
         blue = threshold(b, thresh=peak-8, mode=cv2.THRESH_BINARY)
         return ~blue
 
-
+'''
+'''
 class Circle_GUI:
 
     def __init__(self, img):
@@ -121,10 +124,52 @@ class Circle_GUI:
         self.im = self.im0.copy()
         self.im = draw_circles(np.dstack((self.im, self.im, self.im)), circles)
 
+'''
+class ParamGUI:
+    def __init__(self, img):
+        self.im = img
+        self.im0 = img.copy()
+
+        cv2.namedWindow('image', cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow('image', 960, 540)
+        for key in self.param_dict:
+            cv2.createTrackbar(key, 'image', 5, 51, self._update_dict)
+
+        while(1):
+            cv2.imshow('image', self.im)
+            k = cv2.waitKey(1) & 0xFF
+            if k == 32:
+                break
+        cv2.destroyAllWindows()
+
+    def _update_dict(self, new_value):
+        for key in self.param_dict:
+            self.param_dict[key] = cv2.getTrackbarPos(key, 'image')
+        self.im = self.im0.copy()
+        self.update()
 
 
 
-find_color = find_colour
+
+
+class Circle_GUI(ParamGUI):
+    def __init__(self, img):
+        self.param_dict = {
+                    'distance':5,
+                    'thresh1': 200,
+                    'thresh2':5,
+                    'min_rad':3,
+                    'max_rad':7
+                    }
+        ParamGUI.__init__(self, img)
+
+    def update(self):
+        circles = find_circles(self.im0, self.param_dict['distance'],
+                               self.param_dict['thresh1'], self.param_dict['thresh2'],
+                               self.param_dict['min_rad'], self.param_dict['max_rad'])
+        self.im = draw_circles(np.dstack((self.im, self.im, self.im)), circles)
+
+#find_color = find_colour
 
 if __name__ == '__main__':
     from video import ReadVideo
