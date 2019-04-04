@@ -125,7 +125,7 @@ class Circle_GUI:
         self.im = draw_circles(np.dstack((self.im, self.im, self.im)), circles)
 
 '''
-class ParamGUI:
+class ParamGUI:#
     def __init__(self, img):
         self.im = img
         self.im0 = img.copy()
