@@ -7,6 +7,9 @@ __all__ = ['find_contours', 'sort_contours', 'find_contour_corners', 'fit_hex']
 
 
 def find_contours(img, hierarchy=False):
+    '''
+    contours is a tuple containing (img, contours)
+    '''
     contours, hier = cv2.findContours(
         img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if hierarchy:

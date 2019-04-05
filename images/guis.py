@@ -25,13 +25,22 @@ class ParamGui:
 
     def _update_dict(self, new_value):
         for key in self.param_dict:
-            self.param_dict[key] = cv2.getTrackbarPos(key, 'image')
+            self.param_dict[key] = (cv2.getTrackbarPos(key, 'image'),self.param_dict[key][1])
         self.im = self.im0.copy()
         self.update()
 
     def _update_trackbars(self):
         for key in self.param_dict:
-            cv2.setTrackbarPos(key, 'image', self.param_dict[key])
+            cv2.setTrackbarPos(key, 'image', self.param_dict[key][0])
+
+    def params(self, show=False):
+        print('--------------------')
+        print('Parameters:')
+        print('--------------------')
+        for key in self.param_dict:
+            print(key, self.param_dict[key])
+        print('--------------------')
+        return self.param_dict
 
 
 class CircleGui(ParamGui):
@@ -46,38 +55,83 @@ class CircleGui(ParamGui):
         ParamGui.__init__(self, img)
 
     def update(self):
-        circles = find_circles(self.im0, self.param_dict['distance'],
-                               self.param_dict['thresh1'], self.param_dict['thresh2'],
-                               self.param_dict['min_rad'], self.param_dict['max_rad'])
+        circles = find_circles(self.im0, self.param_dict['distance'][0],
+                               self.param_dict['thresh1'][0], self.param_dict['thresh2'][0],
+                               self.param_dict['min_rad'][0], self.param_dict['max_rad'][0])
         self.im = draw_circles(np.dstack((self.im, self.im, self.im)), circles)
 
 
 class ThresholdGui(ParamGui):
 
     def __init__(self, img):
-        self.param_dict = {'threshold': (1, 255)}
+        self.param_dict = {'threshold': (1, 255),
+                           'invert': (0,1)}
         ParamGui.__init__(self, img)
 
     def update(self):
-        self.im = threshold(self.im0, thresh=self.param_dict['threshold'])
+        if self.param_dict['invert'][0] == 0:
+            self.im = threshold(self.im0, thresh=self.param_dict['threshold'][0])
+        else:
+            self.im = threshold(self.im0, thresh=self.param_dict['threshold'][0],
+                                type=cv2.THRESH_BINARY_INV)
 
 
 class AdaptiveThresholdGui(ParamGui):
 
     def __init__(self, img):
         self.param_dict = {'window': (1, 101),
-                           'constant+30': (0, 60)}
+                           'constant+30': (0, 60),
+                           'invert': (0, 1)}
         ParamGui.__init__(self, img)
 
     def update(self):
-        window = self.param_dict['window']
+        window = self.param_dict['window'][0]
         if window % 2 == 0:
             window += 1
-            self.param_dict['window'] = window
+            self.param_dict['window'] = (window,self.param_dict['window'][1])
+            self._update_trackbars()
+        print('that')
+
+        if self.param_dict['invert'] == 0:
+            self.im = adaptive_threshold(self.im0, self.param_dict['window'][0],
+                                     self.param_dict['constant+30'][0]-30)
+        else:
+            self.im = adaptive_threshold(self.im0, self.param_dict['window'][0],
+                                         self.param_dict['constant+30'][0] - 30,
+                                         type=cv2.THRESH_BINARY_INV)
+
+
+
+
+
+class ContoursGui(ParamGui):
+    '''
+    This applies adaptive threshold (this is what you are adjusting and is the
+    value on the slider. It then applies findcontours and draws them to display result
+    '''
+    def __init__(self, img, thresh_vals):
+        self.param_dict = thresh_vals
+        ParamGui.__init__(self, img)
+
+
+    def update(self):
+        window = self.param_dict['window'][0]
+        if window % 2 == 0:
+            window += 1
+            self.param_dict['window'] = (window, self.param_dict['window'][1])
             self._update_trackbars()
 
-        self.im = adaptive_threshold(self.im0, self.param_dict['window'],
-                                     self.param_dict['constant+30']-30)
+        if self.param_dict['invert'][0] == 0:
+            thresh = adaptive_threshold(self.im0, self.param_dict['window'][0],
+                                     self.param_dict['constant+30'][0] - 30)
+        else:
+            thresh = adaptive_threshold(self.im0, self.param_dict['window'][0],
+                                         self.param_dict['constant+30'][0] - 30,
+                                         type=cv2.THRESH_BINARY_INV)
+
+        contours = find_contours(thresh)
+        print(contours)
+        self.im = draw_contours(self.im0.copy(), contours)
 
 
 class InrangeGui(ParamGui):
@@ -88,31 +142,15 @@ class InrangeGui(ParamGui):
         ParamGui.__init__(self, img)
 
     def update(self):
-        bottom = self.param_dict['bottom']
-        top = self.param_dict['top']
+        bottom = self.param_dict['bottom'][0]
+        top = self.param_dict['top'][0]
         if top <= bottom:
             top = bottom + 1
-        self.param_dict['top'] = top
+        self.param_dict['top'] = (top,self.param_dict['top'][1])
         self._update_trackbars()
 
-        self.im = cv2.inRange(self.im0, self.param_dict['bottom'],
-                              self.param_dict['top'])
-
-class ContoursGui(AdaptiveThresholdGui):
-    '''
-    This applies adaptive threshold (this is what you are adjusting and is the
-    value on the slider. It then applies findcontours and draws them to display result
-    '''
-    def __init__(self, img):
-        AdaptiveThresholdGui.__init__(self, img)
-
-    def update(self):
-        super().update()
-        contours = find_contours(self.im)
-        self.im = draw_contours(self.im,contours,(0,255,0),2)
-
-
-
+        self.im = cv2.inRange(self.im0, self.param_dict['bottom'][0],
+                              self.param_dict['top'][0])
 
 if __name__ == "__main__":
     from Generic import video
