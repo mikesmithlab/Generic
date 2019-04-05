@@ -108,11 +108,13 @@ class ContoursGui(ParamGui):
     This applies adaptive threshold (this is what you are adjusting and is the
     value on the slider. It then applies findcontours and draws them to display result
     '''
-    def __init__(self, img):
+    def __init__(self, img, thickness=2):
 
         self.param_dict = {'window': (1, 101),
                            'constant+30': (0, 60),
                            'invert': (0, 1)}
+
+        self.thickness = thickness
         blurred_img = gaussian_blur(img)
         self.blurred_img = blurred_img
         self.orig_img = img
@@ -142,9 +144,69 @@ class ContoursGui(ParamGui):
                                          self.param_dict['constant+30'][0] - 30,
                                          type=cv2.THRESH_BINARY_INV)
         contours = find_contours(thresh)
-        contour_img = draw_contours(stack_3(self.orig_img0.copy()), contours)
+        contour_img = draw_contours(stack_3(self.orig_img0.copy()), contours, thickness=self.thickness)
         self.im = np.hstack((stack_3(thresh), contour_img))
 
+class WatershedGui(ParamGui):
+    def __init__(self, img):
+
+        self.param_dict = {'window': (1, 101),
+                           'constant+30': (0, 60),
+                           'invert': (0, 1)}
+        self.orig_img = img
+        self.orig_img0 = img.copy()
+        self.blurred_img = img.copy()
+        img = np.hstack((img, img))
+        ParamGui.__init__(self, img)
+        self.update()
+
+
+    def update(self):
+        window = self.param_dict['window'][0]
+        if window % 2 == 0:
+            window += 1
+            self.param_dict['window'] = (window, self.param_dict['window'][1])
+            self._update_trackbars()
+        const = self.param_dict['constant+30'][0]
+        if const % 2 == 0:
+            const += 1
+            self.param_dict['constant+30'] = (const, self.param_dict['constant+30'][1])
+
+        if self.param_dict['invert'][0] == 0:
+            thresh = adaptive_threshold(self.blurred_img, self.param_dict['window'][0],
+                                     self.param_dict['constant+30'][0] - 30)
+        else:
+            thresh = adaptive_threshold(self.blurred_img, self.param_dict['window'][0],
+                                         self.param_dict['constant+30'][0] - 30,
+                                         type=cv2.THRESH_BINARY_INV)
+
+        # noise removal
+        kernel = np.ones((3, 3), np.uint8)
+        opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+
+        # sure background area
+        sure_bg = cv2.dilate(opening, kernel, iterations=3)
+
+        # Finding sure foreground area
+        dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
+        ret, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
+
+        # Finding unknown region
+        sure_fg = np.uint8(sure_fg)
+        unknown = cv2.subtract(sure_bg, sure_fg)
+        # Marker labelling
+        ret, markers = cv2.connectedComponents(sure_fg)
+
+        # Add one to all labels so that sure background is not 0, but 1
+        markers = markers + 1
+
+        # Now, mark the region of unknown with zero
+        markers[unknown == 255] = 0
+
+        markers = cv2.watershed(img, markers)
+        self.im2 = self.orig_img0.copy()
+        self.im2[markers == -1] = [255, 0, 0]
+        self.im = np.hstack((stack_3(thresh), self.im2))
 
 class InrangeGui(ParamGui):
 
