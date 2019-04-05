@@ -156,7 +156,12 @@ height = get_height
 
 def bgr_2_grayscale(img):
     """Converts a BGR image to grayscale"""
-    return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    sz = np.shape(img)
+    if np.shape(sz)[0] == 3:
+        return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    if np.shape(sz)[0] == 2:
+        print('Image is already grayscale')
+        return img
 
 
 def stack_3(img):

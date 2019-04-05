@@ -25,8 +25,8 @@ class ParamGui:
 
     def _update_dict(self, new_value):
         for key in self.param_dict:
-            self.param_dict[key] = (cv2.getTrackbarPos(key, 'image'),self.param_dict[key][1])
-        self.im = self.im0.copy()
+            self.param_dict[key] = (cv2.getTrackbarPos(key, 'image'),
+                                    self.param_dict[key][1])
         self.update()
 
     def _update_trackbars(self):
@@ -65,7 +65,7 @@ class ThresholdGui(ParamGui):
 
     def __init__(self, img):
         self.param_dict = {'threshold': (1, 255),
-                           'invert': (0,1)}
+                           'invert': (0, 1)}
         ParamGui.__init__(self, img)
 
     def update(self):
@@ -90,7 +90,6 @@ class AdaptiveThresholdGui(ParamGui):
             window += 1
             self.param_dict['window'] = (window,self.param_dict['window'][1])
             self._update_trackbars()
-        print('that')
 
         if self.param_dict['invert'] == 0:
             self.im = adaptive_threshold(self.im0, self.param_dict['window'][0],
@@ -109,9 +108,19 @@ class ContoursGui(ParamGui):
     This applies adaptive threshold (this is what you are adjusting and is the
     value on the slider. It then applies findcontours and draws them to display result
     '''
-    def __init__(self, img, thresh_vals):
-        self.param_dict = thresh_vals
+    def __init__(self, img):
+
+        self.param_dict = {'window': (1, 101),
+                           'constant+30': (0, 60),
+                           'invert': (0, 1)}
+        blurred_img = gaussian_blur(img)
+        self.blurred_img = blurred_img
+        self.orig_img = img
+
+        self.orig_img0 = img.copy()
+        img = np.hstack((img, img))
         ParamGui.__init__(self, img)
+        self.update()
 
 
     def update(self):
@@ -120,18 +129,21 @@ class ContoursGui(ParamGui):
             window += 1
             self.param_dict['window'] = (window, self.param_dict['window'][1])
             self._update_trackbars()
+        const = self.param_dict['constant+30'][0]
+        if const % 2 == 0:
+            const += 1
+            self.param_dict['constant+30'] = (const, self.param_dict['constant+30'][1])
 
         if self.param_dict['invert'][0] == 0:
-            thresh = adaptive_threshold(self.im0, self.param_dict['window'][0],
+            thresh = adaptive_threshold(self.blurred_img, self.param_dict['window'][0],
                                      self.param_dict['constant+30'][0] - 30)
         else:
-            thresh = adaptive_threshold(self.im0, self.param_dict['window'][0],
+            thresh = adaptive_threshold(self.blurred_img, self.param_dict['window'][0],
                                          self.param_dict['constant+30'][0] - 30,
                                          type=cv2.THRESH_BINARY_INV)
-
         contours = find_contours(thresh)
-        print(contours)
-        self.im = draw_contours(self.im0.copy(), contours)
+        contour_img = draw_contours(stack_3(self.orig_img0.copy()), contours)
+        self.im = np.hstack((stack_3(thresh), contour_img))
 
 
 class InrangeGui(ParamGui):
