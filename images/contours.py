@@ -6,16 +6,17 @@ import scipy.optimize as op
 __all__ = ['find_contours', 'sort_contours', 'find_contour_corners', 'fit_hex']
 
 
-def find_contours(img, just_contours=True):
+def find_contours(img, hierarchy=False):
     '''
     contours is a tuple containing (img, contours)
     '''
-    contour_pts,contours,num_contours= cv2.findContours(
+    contours, hier = cv2.findContours(
         img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    if just_contours:
-        return contours
+    if hierarchy:
+        return contours, hier
     else:
-        return contour_pts,contours,num_contours
+        return contours
+
 
 def sort_contours(cnts):
     """

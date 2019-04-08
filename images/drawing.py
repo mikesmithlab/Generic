@@ -169,8 +169,5 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
 def draw_contours(img, contours, col=RED, thickness=1):
     if len(np.shape(img)) == 2:
         img = np.dstack((img, img, img))
-    print('contours')
-    print(np.shape(contours))
     img = cv2.drawContours(img, contours, -1, col, thickness)
-    print(np.shape(img))
     return img
