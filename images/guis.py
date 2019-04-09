@@ -1,7 +1,8 @@
 from . import *
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QApplication, QSlider, QHBoxLayout
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QApplication,
+                             QSlider, QHBoxLayout)
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import sys
@@ -36,7 +37,7 @@ class ParamGui:
 
         self.add_sliders()
 
-        self.win.setWindowTitle('DEMO')
+        self.win.setWindowTitle('ParamGui')
         self.win.setLayout(self.vbox)
         self.win.show()
         sys.exit(app.exec_())
@@ -64,7 +65,7 @@ class ParamGui:
             else:
                 slider.setRange(bottom, top)
                 slider.setValue(val)
-            slider.valueChanged.connect(self._update)
+            slider.valueChanged.connect(self._update_sliders)
 
             hbox.addWidget(lbl)
             hbox.addWidget(slider)
@@ -73,7 +74,7 @@ class ParamGui:
             widget.setLayout(hbox)
             self.vbox.addWidget(widget)
 
-    def _update(self):
+    def _update_sliders(self):
         for key in self.param_dict:
             params = self.param_dict[key]
             val, bottom, top, step = params
@@ -245,16 +246,15 @@ if __name__ == "__main__":
     """
     Relative import will break when running this file as top-level
     
-    Always run functions from import in these tests
+    Run functions from images as images.function_name
     """
     from Generic import video
     from Generic import images
     vid = video.ReadVideo()
     frame = vid.read_next_frame()
     frame = images.bgr_2_grayscale(frame)
-    # images.CircleGui(frame)
-    # images.ThresholdGui(frame)
-    # images.AdaptiveThresholdGui(frame)
-    # images.ContoursGui(frame)
+    images.CircleGui(frame)
+    images.ThresholdGui(frame)
+    images.AdaptiveThresholdGui(frame)
+    images.ContoursGui(frame)
     images.InrangeGui(frame)
-    # images.TestGui(frame)
