@@ -25,7 +25,7 @@ class ParamGui:
     Currently step sizes can only be 1 or 2.
     """
     def __init__(self, img_or_vid):
-        if isinstance(img_or_vid, video.ReadVideo):
+        if isinstance(img_or_vid, video.ReadVideo):#
             self.read_vid = img_or_vid
             self.frame_no = 0
             self.num_frames = self.read_vid.num_frames
