@@ -23,7 +23,7 @@ def resize(img, percent=25.0):
 
     """
     width, height = get_width_and_height(img)
-    dim = (int(height * percent / 100), int(width * percent / 100))
+    dim = (int(width * percent / 100), int(height * percent / 100))
     return cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
 
 
