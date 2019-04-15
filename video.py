@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import pims as pims
 import Generic.filedialogs as fd
+from Generic import images
 import subprocess
 import os
 import ffmpeg
@@ -322,7 +323,7 @@ class ReadVideo:
         vid.close()               
     '''
     
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, grayscale=False):
         '''
         Initialise video reading object
         if filename = None user must select filename with dialogue
@@ -330,6 +331,7 @@ class ReadVideo:
         if filename is None:
             filename = fd.load_filename(caption='select movie filename', file_filter='*.avi;;*.MP4;;*.mp4;;*.tif;;*.*')
         self.filename = filename
+        self.grayscale = grayscale
         self._detect_file_type()
         self.open_video()
         self.get_vid_props()
@@ -407,7 +409,10 @@ class ReadVideo:
             ret = False
         self.frame_num = self.frame_num + 1
         if ret:
-            return img
+            if self.grayscale:
+                return images.bgr_2_grayscale(img)
+            else:
+                return img
         else:
             print('Error reading the frame. Check path and filename carefully')
 

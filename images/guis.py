@@ -1,13 +1,15 @@
-from . import *
+import sys
+
 import cv2
 import numpy as np
+import qimage2ndarray as qim
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QApplication,
                              QSlider, QHBoxLayout)
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
-import sys
-import qimage2ndarray as qim
 from skimage import filters
+from Generic import video
+from . import *
 
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
            'ContoursGui', 'ParamGui']
@@ -22,9 +24,21 @@ class ParamGui:
         [initial value, lowest value, highest value, step size]
     Currently step sizes can only be 1 or 2.
     """
-    def __init__(self, img):
-        self.im = img
-        self.im0 = img.copy()
+    def __init__(self, img_or_vid):
+        if isinstance(img_or_vid, video.ReadVideo):
+            self.read_vid = img_or_vid
+            self.frame_no = 0
+            self.num_frames = self.read_vid.num_frames
+            self.read_vid.grayscale = self.grayscale
+            self.im = self.read_vid.find_frame(self.frame_no)
+            self.type = 'multiframe'
+        else:
+            if self.grayscale:
+                self.im = bgr_2_grayscale(img_or_vid)
+            else:
+                self.im = img_or_vid
+            self.type = 'singleframe'
+        self.im0 = self.im.copy()
 
         self.init_ui()
 
@@ -48,7 +62,22 @@ class ParamGui:
         self.sliders = {}
         self.labels = {}
 
-        for key in self.param_dict:
+        if self.type == 'multiframe':
+            widget = QWidget()
+            hbox = QHBoxLayout()
+            self.frame_lbl = QLabel()
+            self.frame_lbl.setText('frame: ' + str(0))
+
+            self.frame_slider = QSlider(Qt.Horizontal)
+            self.frame_slider.setRange(0, self.num_frames)
+            self.frame_slider.setValue(0)
+            self.frame_slider.valueChanged.connect(self._update_sliders)
+            hbox.addWidget(self.frame_lbl)
+            hbox.addWidget(self.frame_slider)
+            widget.setLayout(hbox)
+            self.vbox.addWidget(widget)
+
+        for key in sorted(self.param_dict.keys()):
             widget = QWidget()
             hbox = QHBoxLayout()
 
@@ -76,6 +105,10 @@ class ParamGui:
             self.vbox.addWidget(widget)
 
     def _update_sliders(self):
+        if self.type == 'multiframe':
+            frame_no = self.frame_slider.value()
+            self.frame_lbl.setText('frame: ' + str(frame_no))
+            self.im0 = self.read_vid.read_next_frame()
         for key in self.param_dict:
             params = self.param_dict[key]
             val, bottom, top, step = params
@@ -95,6 +128,7 @@ class ParamGui:
 
 class CircleGui(ParamGui):
     def __init__(self, img):
+        self.grayscale = True
         self.param_dict = {
                     'distance': [25, 3, 51, 2],
                     'thresh1': [200, 0, 255, 1],
@@ -116,6 +150,7 @@ class CircleGui(ParamGui):
 class ThresholdGui(ParamGui):
 
     def __init__(self, img):
+        self.grayscale = True
         self.param_dict = {'threshold': [1, 0, 255, 1],
                            'invert': [0, 0, 1, 1]}
         ParamGui.__init__(self, img)
@@ -133,6 +168,7 @@ class ThresholdGui(ParamGui):
 class AdaptiveThresholdGui(ParamGui):
 
     def __init__(self, img):
+        self.grayscale = True
         self.param_dict = {'window': [3, 3, 101, 2],
                            'constant': [0, -30, 30, 1]}
         ParamGui.__init__(self, img)
@@ -235,6 +271,7 @@ class WatershedGui(ParamGui):
 class InrangeGui(ParamGui):
 
     def __init__(self, img):
+        self.grayscale = True
         self.param_dict = {'bottom': [1, 0, 255, 1],
                            'top': [200, 0, 255, 1]}
         ParamGui.__init__(self, img)
@@ -251,11 +288,11 @@ if __name__ == "__main__":
     """
     from Generic import video
     from Generic import images
-    vid = video.ReadVideo("/home/ppzmis/Documents/PythonScripts/ParticleTracking/test_video.mp4")
-    frame = vid.read_next_frame()
-    frame = images.bgr_2_grayscale(frame)
-    # images.CircleGui(frame)
-    images.ThresholdGui(frame)
+    vid = video.ReadVideo()
+    # frame = vid.read_next_frame()
+    # frame = images.bgr_2_grayscale(frame)
+    # images.CircleGui(vid)
+    images.ThresholdGui(vid)
     # images.AdaptiveThresholdGui(frame)
     # images.ContoursGui(frame)
     # images.InrangeGui(frame)
