@@ -80,7 +80,7 @@ def distance_transform(img):
     Pedro Felzenszwalb and Daniel Huttenlocher. Distance transforms of sampled
     functions. Technical report, Cornell University, 2004.
     """
-    out = cv2.distanceTransform(img, cv2.DIST_L2, 3)
+    out = cv2.distanceTransform(img, cv2.DIST_L2, 5)
     return out
 
 
