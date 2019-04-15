@@ -12,7 +12,7 @@ from Generic import video
 from . import *
 
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
-           'ContoursGui', 'ParamGui']
+           'ContoursGui', 'WatershedGui', 'ParamGui']
 
 '''
 ------------------------------------------------------------------------------
@@ -29,9 +29,14 @@ class ParamGui:
         [initial value, lowest value, highest value, step size]
     Currently step sizes can only be 1 or 2.
     """
-    def __init__(self, img_or_vid):
+    def __init__(self, img_or_vid, num_imgs=1):
+        self.num_imgs = num_imgs
         self._file_setup(img_or_vid)
         self.im0 = self.im.copy()
+        if num_imgs == 1:
+            self._display_img(self.im0)
+        elif num_imgs == 2:
+            self._display_img(self.im0, img2=self.im0)
         self.init_ui()
 
     def _file_setup(self, img_or_vid):
@@ -115,7 +120,7 @@ class ParamGui:
         if self.type == 'multiframe':
             frame_no = self.frame_slider.value()
             self.frame_lbl.setText('frame: ' + str(frame_no))
-            self.im0 = self.read_vid.read_next_frame()
+            self.im0 = self.read_vid.find_frame(frame_no)
         for key in self.param_dict:
             params = self.param_dict[key]
             val, bottom, top, step = params
@@ -128,7 +133,7 @@ class ParamGui:
         self.update()
         self._update_im()
 
-    def _display_img(self,img1,img2=None):
+    def _display_img(self, img1, img2=None):
         if img2 is None:
             self.im = img1
         else:
@@ -136,7 +141,7 @@ class ParamGui:
                 img1 = stack_3(img1)
             if np.size(np.shape(img2)) == 2:
                 img2 = stack_3(img2)
-            self.im = np.hstack(img1, img2)
+            self.im = np.hstack((img1, img2))
 
     def _update_im(self):
         pixmap = QPixmap.fromImage(qim.array2qimage(self.im))
@@ -209,6 +214,21 @@ class AdaptiveThresholdGui(ParamGui):
                                                  self.param_dict['constant'][0],
                                                  mode=cv2.THRESH_BINARY_INV)
                               )
+
+
+class InrangeGui(ParamGui):
+
+    def __init__(self, img):
+        self.grayscale = True
+        self.param_dict = {'bottom': [1, 0, 255, 1],
+                           'top': [200, 0, 255, 1]}
+        ParamGui.__init__(self, img)
+
+    def update(self):
+        self.im = cv2.inRange(self.im0, self.param_dict['bottom'][0],
+                              self.param_dict['top'][0])
+
+
 '''
 ------------------------------------------------------------------------------
 Double image display
@@ -227,95 +247,69 @@ class ContoursGui(ParamGui):
                            'invert': [0, 0, 1, 1]}
         self.thickness = thickness
         self.grayscale = True
-        ParamGui.__init__(self, img)
+        ParamGui.__init__(self, img, num_imgs=2)
         self.blurred_img = self.im.copy()
-        #self.orig_img0 = img.copy()
         self.update()
 
     def update(self):
-        self.blurred_img = gaussian_blur(self.im0)
+        self.blurred_img = gaussian_blur(self.im0.copy())
         thresh = adaptive_threshold(self.blurred_img,
                                     self.param_dict['window'][0],
                                     self.param_dict['constant'][0],
                                     self.param_dict['invert'][0])
         contours = find_contours(thresh)
-        self._display_img(thresh, draw_contours(stack_3(self.orig_img0.copy()), contours, thickness=self.thickness))
+        self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),contours, thickness=self.thickness))
 
 
+class DistanceTransformGui(ParamGui):
+    def __init__(self, img):
+
+        self.param_dict = {'window': [3, 3, 101, 2],
+                           'constant': [0, -30, 30, 1],
+                           'invert': [0, 0, 1, 1]}
+        self.grayscale = True
+        ParamGui.__init__(self, img, num_imgs=2)
+        self.blurred_img = self.im.copy()
+
+    def update(self):
+        self.blurred_img = gaussian_blur(self.im0.copy())
+        thresh = adaptive_threshold(self.blurred_img,
+                                    self.param_dict['window'][0],
+                                    self.param_dict['constant'][0],
+                                    self.param_dict['invert'][0])
+        contours = find_contours(thresh)
+        self._display_img(thresh,
+                          draw_contours(stack_3(self.im0.copy()), contours,
+                                        thickness=self.thickness))
 
 
 class WatershedGui(ParamGui):
     def __init__(self, img):
-
-        self.param_dict = {'window': (1, 101),
-                           'constant+30': (0, 60),
-                           'invert': (0, 1)}
-        self.orig_img = img
-        self.orig_img0 = img.copy()
-        self.blurred_img = img.copy()
-        img = np.hstack((img, img))
-        ParamGui.__init__(self, img)
+        self.blurred_img = gaussian_blur(self.im0.copy())
+        self.param_dict = {'window': [3, 3, 101, 2],
+                           'constant': [0, -30, 30, 1],
+                           'invert': [0, 0, 1, 1],
+                           'watershed_thresh':[1, 0, 255, 1]
+                            }
+        self.grayscale = True
+        ParamGui.__init__(self, img, num_imgs=2)
+        self.blurred_img = self.im.copy()
         self.update()
 
     def update(self):
-        window = self.param_dict['window'][0]
-        if window % 2 == 0:
-            window += 1
-            self.param_dict['window'] = (window, self.param_dict['window'][1])
-            self._update_trackbars()
-        const = self.param_dict['constant+30'][0]
-        if const % 2 == 0:
-            const += 1
-            self.param_dict['constant+30'] = (const, self.param_dict['constant+30'][1])
+        self.blurred_img = gaussian_blur(self.im0.copy())
+        thresh = adaptive_threshold(self.blurred_img,
+                                    self.param_dict['window'][0],
+                                    self.param_dict['constant'][0],
+                                    self.param_dict['invert'][0],
+                                    self.param_dict['watershed_thresh'][0])
 
-        if self.param_dict['invert'][0] == 0:
-            thresh = adaptive_threshold(self.blurred_img, self.param_dict['window'][0],
-                                     self.param_dict['constant+30'][0] - 30)
-        else:
-            thresh = adaptive_threshold(self.blurred_img, self.param_dict['window'][0],
-                                         self.param_dict['constant+30'][0] - 30,
-                                         type=cv2.THRESH_BINARY_INV)
-
-        # noise removal
-        kernel = np.ones((3, 3), np.uint8)
-        opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
-
-        # sure background area
-        sure_bg = cv2.dilate(opening, kernel, iterations=3)
-
-        # Finding sure foreground area
-        dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
-        ret, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
-
-        # Finding unknown region
-        sure_fg = np.uint8(sure_fg)
-        unknown = cv2.subtract(sure_bg, sure_fg)
-        # Marker labelling
-        ret, markers = cv2.connectedComponents(sure_fg)
-
-        # Add one to all labels so that sure background is not 0, but 1
-        markers = markers + 1
-
-        # Now, mark the region of unknown with zero
-        markers[unknown == 255] = 0
-
-        markers = cv2.watershed(img, markers)
-        self.im2 = self.orig_img0.copy()
-        self.im2[markers == -1] = [255, 0, 0]
-        self.im = np.hstack((stack_3(thresh), self.im2))
+        watershed_img = watershed(self.im0.copy())
+        self._display_img(thresh, watershed_img)
 
 
-class InrangeGui(ParamGui):
 
-    def __init__(self, img):
-        self.grayscale = True
-        self.param_dict = {'bottom': [1, 0, 255, 1],
-                           'top': [200, 0, 255, 1]}
-        ParamGui.__init__(self, img)
 
-    def update(self):
-        self.im = cv2.inRange(self.im0, self.param_dict['bottom'][0],
-                              self.param_dict['top'][0])
 
 if __name__ == "__main__":
     """
@@ -331,5 +325,6 @@ if __name__ == "__main__":
     #images.CircleGui(vid)
     #images.ThresholdGui(vid)
     #images.AdaptiveThresholdGui(vid)
-    images.ContoursGui(vid)
-    # images.InrangeGui(frame)
+    #images.ContoursGui(vid)
+    #images.InrangeGui(vid)
+    images.WatershedGui(vid)

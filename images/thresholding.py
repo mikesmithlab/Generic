@@ -1,7 +1,9 @@
 import cv2
+import numpy as np
+from Generic import images
 
 
-__all__ = ['threshold', 'adaptive_threshold', 'distance_transform']
+__all__ = ['threshold', 'adaptive_threshold', 'distance_transform', 'watershed']
 
 
 def threshold(img, thresh=None, mode=cv2.THRESH_BINARY):
@@ -57,7 +59,40 @@ def adaptive_threshold(img, block_size=5, constant=0, mode=cv2.THRESH_BINARY):
     return out
 
 
-def distance_transform(img):
+
+def watershed(img, watershed_threshold = 0.1, block_size=5,constant=0,mode=cv2.THRESH_BINARY):
+    grayscale_img = images.bgr_2_grayscale(img)
+    binary_img = adaptive_threshold(grayscale_img,block_size=block_size, constant=constant, mode=mode)
+
+    # noise removal
+    kernel = np.ones((3, 3), np.uint8)
+    opening = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, kernel,
+                               iterations=2)
+    # sure background area
+    sure_bg = cv2.dilate(opening, kernel, iterations=3)
+    dist_transform_img = distance_transform(binary_img)
+    #sure foreground area
+    ret, sure_fg = threshold(dist_transform_img, threshold=watershed_threshold)
+    sure_fg = np.uint8(sure_fg)
+
+    # Finding unknown region
+    unknown = cv2.subtract(sure_bg, sure_fg)
+
+    # Marker labelling
+    ret, markers = cv2.connectedComponents(sure_fg)
+
+    # Add one to all labels so that sure background is not 0, but 1
+    markers = markers + 1
+
+    # Now, mark the region of unknown with zero
+    markers[unknown == 255] = 0
+    markers = cv2.watershed(img, markers)
+    img[markers == -1] = [255, 0, 0]
+
+    return img
+
+
+def distance_transform(binary_img):
     """
     Calculates the distance to the closest zero pixel for each pixel.
 
@@ -80,8 +115,8 @@ def distance_transform(img):
     Pedro Felzenszwalb and Daniel Huttenlocher. Distance transforms of sampled
     functions. Technical report, Cornell University, 2004.
     """
-    out = cv2.distanceTransform(img, cv2.DIST_L2, 5)
-    return out
+    dist_transform = cv2.distanceTransform(binary_img, cv2.DIST_L2, 5)
+    return dist_transform
 
 
 class threshold_slider:
@@ -106,3 +141,12 @@ class threshold_slider:
         if g != self.g:
             self.im = threshold(self.im0, thresh=g, mode=self.type)
             self.g = g
+
+if __name__ == '__main__':
+    from Generic.images import basics
+    from Generic import video
+
+    read_vid = video.ReadVideo('/media/ppzmis/data/ActiveMatter/bacteria_plastic/bacteria.avi')
+    im = read_vid.read_next_frame()
+
+    basics.display(im, title='a')
