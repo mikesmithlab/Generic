@@ -251,11 +251,11 @@ if __name__ == "__main__":
     """
     from Generic import video
     from Generic import images
-    vid = video.ReadVideo()
+    vid = video.ReadVideo("/home/ppzmis/Documents/PythonScripts/ParticleTracking/test_video.mp4")
     frame = vid.read_next_frame()
     frame = images.bgr_2_grayscale(frame)
-    images.CircleGui(frame)
+    # images.CircleGui(frame)
     images.ThresholdGui(frame)
-    images.AdaptiveThresholdGui(frame)
-    images.ContoursGui(frame)
-    images.InrangeGui(frame)
+    # images.AdaptiveThresholdGui(frame)
+    # images.ContoursGui(frame)
+    # images.InrangeGui(frame)
