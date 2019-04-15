@@ -7,9 +7,10 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import sys
 import qimage2ndarray as qim
+from skimage import filters
 
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
-           'ContoursGui']
+           'ContoursGui', 'ParamGui']
 
 
 class ParamGui:
