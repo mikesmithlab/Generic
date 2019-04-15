@@ -14,6 +14,11 @@ from . import *
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
            'ContoursGui', 'ParamGui']
 
+'''
+------------------------------------------------------------------------------
+Parent class
+------------------------------------------------------------------------------
+'''
 
 class ParamGui:
     """
@@ -25,7 +30,12 @@ class ParamGui:
     Currently step sizes can only be 1 or 2.
     """
     def __init__(self, img_or_vid):
-        if isinstance(img_or_vid, video.ReadVideo):#
+        self._file_setup(img_or_vid)
+        self.im0 = self.im.copy()
+        self.init_ui()
+
+    def _file_setup(self, img_or_vid):
+        if isinstance(img_or_vid, video.ReadVideo):
             self.read_vid = img_or_vid
             self.frame_no = 0
             self.num_frames = self.read_vid.num_frames
@@ -38,9 +48,6 @@ class ParamGui:
             else:
                 self.im = img_or_vid
             self.type = 'singleframe'
-        self.im0 = self.im.copy()
-
-        self.init_ui()
 
     def init_ui(self):
         app = QApplication(sys.argv)
@@ -121,10 +128,25 @@ class ParamGui:
         self.update()
         self._update_im()
 
+    def _display_img(self,img1,img2=None):
+        if img2 is None:
+            self.im = img1
+        else:
+            if np.size(np.shape(img1)) == 2:
+                img1 = stack_3(img1)
+            if np.size(np.shape(img2)) == 2:
+                img2 = stack_3(img2)
+            self.im = np.hstack(img1, img2)
+
     def _update_im(self):
         pixmap = QPixmap.fromImage(qim.array2qimage(self.im))
         self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
 
+'''
+------------------------------------------------------------------------------
+Single image display
+------------------------------------------------------------------------------
+'''
 
 class CircleGui(ParamGui):
     def __init__(self, img):
@@ -144,7 +166,8 @@ class CircleGui(ParamGui):
                                self.param_dict['thresh2'][0],
                                self.param_dict['min_rad'][0],
                                self.param_dict['max_rad'][0])
-        self.im = draw_circles(stack_3(self.im0), circles)
+        self._display_img(draw_circles(stack_3(self.im0), circles))
+
 
 
 class ThresholdGui(ParamGui):
@@ -157,12 +180,12 @@ class ThresholdGui(ParamGui):
 
     def update(self):
         if self.param_dict['invert'][0] == 0:
-            self.im = threshold(self.im0,
-                                thresh=self.param_dict['threshold'][0])
+            self._display_img(threshold(self.im0,
+                                thresh=self.param_dict['threshold'][0]))
         else:
-            self.im = threshold(self.im0,
+            self._display_img(threshold(self.im0,
                                 thresh=self.param_dict['threshold'][0],
-                                mode=cv2.THRESH_BINARY_INV)
+                                mode=cv2.THRESH_BINARY_INV))
 
 
 class AdaptiveThresholdGui(ParamGui):
@@ -170,13 +193,27 @@ class AdaptiveThresholdGui(ParamGui):
     def __init__(self, img):
         self.grayscale = True
         self.param_dict = {'window': [3, 3, 101, 2],
-                           'constant': [0, -30, 30, 1]}
+                           'constant': [0, -30, 30, 1],
+                           'invert': [0, 0, 1, 1]}
         ParamGui.__init__(self, img)
 
     def update(self):
-        self.im = adaptive_threshold(self.im0, self.param_dict['window'][0],
-                                 self.param_dict['constant'][0])
-
+        if self.param_dict['invert'][0] == 0:
+            self._display_img(adaptive_threshold(self.im0,
+                                                 self.param_dict['window'][0],
+                                                 self.param_dict['constant'][0])
+                              )
+        else:
+            self._display_img(adaptive_threshold(self.im0,
+                                                 self.param_dict['window'][0],
+                                                 self.param_dict['constant'][0],
+                                                 mode=cv2.THRESH_BINARY_INV)
+                              )
+'''
+------------------------------------------------------------------------------
+Double image display
+------------------------------------------------------------------------------
+'''
 
 class ContoursGui(ParamGui):
     '''
@@ -186,25 +223,25 @@ class ContoursGui(ParamGui):
     def __init__(self, img, thickness=2):
 
         self.param_dict = {'window': [3, 3, 101, 2],
-                           'constant': [0, -30, 30, 1]}
-
+                           'constant': [0, -30, 30, 1],
+                           'invert': [0, 0, 1, 1]}
         self.thickness = thickness
-        blurred_img = gaussian_blur(img)
-        self.blurred_img = blurred_img
-        self.orig_img = img
-
-        self.orig_img0 = img.copy()
-        img = np.hstack((img, img))
+        self.grayscale = True
         ParamGui.__init__(self, img)
+        self.blurred_img = self.im.copy()
+        #self.orig_img0 = img.copy()
         self.update()
 
     def update(self):
+        self.blurred_img = gaussian_blur(self.im0)
         thresh = adaptive_threshold(self.blurred_img,
                                     self.param_dict['window'][0],
-                                    self.param_dict['constant'][0])
+                                    self.param_dict['constant'][0],
+                                    self.param_dict['invert'][0])
         contours = find_contours(thresh)
-        contour_img = draw_contours(stack_3(self.orig_img0.copy()), contours, thickness=self.thickness)
-        self.im = np.hstack((stack_3(thresh), contour_img))
+        self._display_img(thresh, draw_contours(stack_3(self.orig_img0.copy()), contours, thickness=self.thickness))
+
+
 
 
 class WatershedGui(ParamGui):
@@ -288,11 +325,11 @@ if __name__ == "__main__":
     """
     from Generic import video
     from Generic import images
-    vid = video.ReadVideo()
+    vid = video.ReadVideo(filename='/home/ppzmis/Documents/PythonScripts/ParticleTracking/test_video.mp4')
     # frame = vid.read_next_frame()
     # frame = images.bgr_2_grayscale(frame)
-    # images.CircleGui(vid)
-    images.ThresholdGui(vid)
-    # images.AdaptiveThresholdGui(frame)
-    # images.ContoursGui(frame)
+    #images.CircleGui(vid)
+    #images.ThresholdGui(vid)
+    #images.AdaptiveThresholdGui(vid)
+    images.ContoursGui(vid)
     # images.InrangeGui(frame)

@@ -26,7 +26,7 @@ def threshold(img, thresh=None, mode=cv2.THRESH_BINARY):
     return out
 
 
-def adaptive_threshold(img, block_size=5, constant=0, type=cv2.THRESH_BINARY):
+def adaptive_threshold(img, block_size=5, constant=0, mode=cv2.THRESH_BINARY):
     """
     Performs an adaptive threshold on an image
 
@@ -50,7 +50,7 @@ def adaptive_threshold(img, block_size=5, constant=0, type=cv2.THRESH_BINARY):
             img,
             255,
             cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-            type,
+            mode,
             block_size,
             constant
             )
