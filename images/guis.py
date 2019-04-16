@@ -8,11 +8,11 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QApplication,
                              QSlider, QHBoxLayout)
 from skimage import filters
-from Generic import video
+from Generic import video, images
 from . import *
 
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
-           'ContoursGui', 'WatershedGui', 'ParamGui']
+           'ContoursGui', 'DistanceTransformGui','WatershedGui', 'ParamGui']
 
 '''
 ------------------------------------------------------------------------------
@@ -145,7 +145,11 @@ class ParamGui:
 
     def _update_im(self):
         pixmap = QPixmap.fromImage(qim.array2qimage(self.im))
-        self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
+        if self.num_imgs == 1:
+            self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
+        elif self.num_imgs == 2:
+            self.lbl.setPixmap(pixmap.scaled(4060, 1200, Qt.KeepAspectRatio))
+
 
 '''
 ------------------------------------------------------------------------------
@@ -241,7 +245,6 @@ class ContoursGui(ParamGui):
     value on the slider. It then applies findcontours and draws them to display result
     '''
     def __init__(self, img, thickness=2):
-
         self.param_dict = {'window': [3, 3, 101, 2],
                            'constant': [0, -30, 30, 1],
                            'invert': [0, 0, 1, 1]}
@@ -263,33 +266,37 @@ class ContoursGui(ParamGui):
 
 class DistanceTransformGui(ParamGui):
     def __init__(self, img):
-
         self.param_dict = {'window': [3, 3, 101, 2],
                            'constant': [0, -30, 30, 1],
-                           'invert': [0, 0, 1, 1]}
+                           'invert': [0, 0, 1, 1],
+                           'watershed_thresh': [1, 0, 255, 1]
+                           }
         self.grayscale = True
         ParamGui.__init__(self, img, num_imgs=2)
         self.blurred_img = self.im.copy()
+        self.update()
 
     def update(self):
         self.blurred_img = gaussian_blur(self.im0.copy())
         thresh = adaptive_threshold(self.blurred_img,
                                     self.param_dict['window'][0],
                                     self.param_dict['constant'][0],
-                                    self.param_dict['invert'][0])
-        contours = find_contours(thresh)
-        self._display_img(thresh,
-                          draw_contours(stack_3(self.im0.copy()), contours,
-                                        thickness=self.thickness))
+                                    self.param_dict['invert'][0]
+                                    )
+
+        dist_transform_img = distance_transform(self.im0.copy(),
+                                                preprocess=False
+                                                )
+        self._display_img(thresh, dist_transform_img)
 
 
 class WatershedGui(ParamGui):
     def __init__(self, img):
-        self.blurred_img = gaussian_blur(self.im0.copy())
+
         self.param_dict = {'window': [3, 3, 101, 2],
                            'constant': [0, -30, 30, 1],
                            'invert': [0, 0, 1, 1],
-                           'watershed_thresh':[1, 0, 255, 1]
+                           'watershed_thresh': [1, 0, 255, 1]
                             }
         self.grayscale = True
         ParamGui.__init__(self, img, num_imgs=2)
@@ -301,10 +308,15 @@ class WatershedGui(ParamGui):
         thresh = adaptive_threshold(self.blurred_img,
                                     self.param_dict['window'][0],
                                     self.param_dict['constant'][0],
-                                    self.param_dict['invert'][0],
-                                    self.param_dict['watershed_thresh'][0])
+                                    self.param_dict['invert'][0]
+                                    )
 
-        watershed_img = watershed(self.im0.copy())
+        watershed_img = watershed(self.im0.copy(),
+                                  watershed_threshold=self.param_dict['watershed_thresh'][0],
+                                  block_size=self.param_dict['window'][0],
+                                  constant=self.param_dict['constant'][0],
+                                  mode=self.param_dict['invert'][0]
+                                  )
         self._display_img(thresh, watershed_img)
 
 
@@ -320,11 +332,12 @@ if __name__ == "__main__":
     from Generic import video
     from Generic import images
     vid = video.ReadVideo(filename='/home/ppzmis/Documents/PythonScripts/ParticleTracking/test_video.mp4')
-    # frame = vid.read_next_frame()
+
     # frame = images.bgr_2_grayscale(frame)
     #images.CircleGui(vid)
     #images.ThresholdGui(vid)
     #images.AdaptiveThresholdGui(vid)
     #images.ContoursGui(vid)
     #images.InrangeGui(vid)
+    #images.DistanceTransformGui(vid)
     images.WatershedGui(vid)
