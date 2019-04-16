@@ -1,10 +1,9 @@
 import sys
-
 import cv2
 import numpy as np
 import qimage2ndarray as qim
 from PyQt5.QtCore import Qt, pyqtSignal, QRectF, QT_VERSION_STR
-from PyQt5.QtGui import QPixmap, QImage, QPainterPath
+from PyQt5.QtGui import QPixmap, QImage, QPainterPath, QCloseEvent
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QApplication,
                              QSlider, QHBoxLayout, QGraphicsView, QGraphicsScene,
                              QFileDialog)
@@ -58,9 +57,6 @@ class ParamGui:
     def init_ui(self):
         app = QApplication(sys.argv)
         self.win = QWidgetMod(self.param_dict)
-        self.lbl = QLabel()
-        self.win = QWidget()
-
         self.viewer = QtImageViewer()
         self.viewer.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.viewer.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
