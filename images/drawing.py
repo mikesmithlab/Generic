@@ -167,7 +167,21 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
 
 
 def draw_contours(img, contours, col=RED, thickness=1):
+    """
+
+    :param img:
+    :param contours:
+    :param col: Can be a defined colour in colors.py or a list of tuples(3,1) of colors of length contours
+    :param thickness: -1 fills the contour.
+    :return:
+    """
+
     if len(np.shape(img)) == 2:
         img = np.dstack((img, img, img))
-    img = cv2.drawContours(img, contours, -1, col, thickness)
+
+    if np.size(np.shape(col)) == 1:
+        img = cv2.drawContours(img, contours, -1, col, thickness)
+    else:
+        for i, contour in enumerate(contours):
+            img = cv2.drawContours(img, contour, -1, col[i], thickness)
     return img

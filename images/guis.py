@@ -251,8 +251,8 @@ class ContoursGui(ParamGui):
     value on the slider. It then applies findcontours and draws them to display result
     '''
     def __init__(self, img, thickness=2):
-        self.param_dict = {'window': [3, 3, 101, 2],
-                           'constant': [0, -30, 30, 1],
+        self.param_dict = {'window': [53, 3, 101, 2],
+                           'constant': [-26, -30, 30, 1],
                            'invert': [0, 0, 1, 1]}
         self.thickness = thickness
         self.grayscale = True
@@ -275,7 +275,6 @@ class DistanceTransformGui(ParamGui):
         self.param_dict = {'window': [3, 3, 101, 2],
                            'constant': [0, -30, 30, 1],
                            'invert': [0, 0, 1, 1],
-                           'watershed_thresh': [1, 0, 255, 1]
                            }
         self.grayscale = True
         ParamGui.__init__(self, img, num_imgs=2)
@@ -290,17 +289,21 @@ class DistanceTransformGui(ParamGui):
                                     self.param_dict['invert'][0]
                                     )
 
-        dist_transform_img = distance_transform(self.im0.copy(),
-                                                preprocess=False
+        dist_transform_img = distance_transform(self.blurred_img,
+                                                preprocess=True,
+                                                block_size=self.param_dict['window'][0],
+                                                constant=self.param_dict['constant'][0],
+                                                mode=self.param_dict['invert'][0]
                                                 )
+        dist_transform_img = 255*dist_transform_img/np.max(dist_transform_img)
         self._display_img(thresh, dist_transform_img)
 
 
 class WatershedGui(ParamGui):
     def __init__(self, img):
 
-        self.param_dict = {'window': [3, 3, 101, 2],
-                           'constant': [0, -30, 30, 1],
+        self.param_dict = {'window': [41, 3, 101, 2],
+                           'constant': [-26, -30, 30, 1],
                            'invert': [0, 0, 1, 1],
                            'watershed_thresh': [1, 0, 255, 1]
                             }
@@ -522,7 +525,7 @@ if __name__ == "__main__":
     #images.CircleGui(vid)
     # images.ThresholdGui(vid)
     # images.AdaptiveThresholdGui(vid)
-    images.ContoursGui(vid)
+    #images.ContoursGui(vid,thickness=-1)
     #images.InrangeGui(vid)
-    # images.DistanceTransformGui(vid)
+    images.DistanceTransformGui(vid)
     #images.WatershedGui(vid)
