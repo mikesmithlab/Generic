@@ -1,7 +1,8 @@
 import numpy as np
 import ffmpeg
 
-__all__ = ["ReadVideoFFMPEG", "WriteVideoFFMPEG"]
+__all__ = ['ReadVideoFFMPEG', 'WriteVideoFFMPEG']
+
 
 class ReadVideoFFMPEG:
 
@@ -83,7 +84,7 @@ class WriteVideoFFMPEG:
                 vcodec='libx264',
                 preset=self.preset,
                 video_bitrate=self.video_bitrate,
-                r=60 # framerate
+                r=60  # framerate
             )
             .overwrite_output()
             .run_async(
