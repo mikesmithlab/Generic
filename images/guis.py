@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import qimage2ndarray as qim
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QCloseEvent
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QApplication,
                              QSlider, QHBoxLayout)
 from skimage import filters
@@ -19,6 +19,22 @@ __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
 Parent class
 ------------------------------------------------------------------------------
 '''
+
+class QWidgetMod(QWidget):
+    """
+    Overrides the closeEvent method of QWidget to print out the parameters set
+    in the gui.
+    """
+    def __init__(self,param_dict):
+        QWidget.__init__(self)
+        self.param_dict = param_dict
+
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        print('Final Parameters')
+        print('------------------------------')
+        for key in sorted(self.param_dict.keys()):
+            print(key + ' : ' +  str(self.param_dict[key][0]))
+        print('------------------------------')
 
 class ParamGui:
     """
@@ -56,7 +72,7 @@ class ParamGui:
 
     def init_ui(self):
         app = QApplication(sys.argv)
-        self.win = QWidget()
+        self.win = QWidgetMod(self.param_dict)
         self.lbl = QLabel()
         self._update_im()
         self.vbox = QVBoxLayout(self.win)
@@ -338,7 +354,7 @@ if __name__ == "__main__":
     #images.CircleGui(vid)
     #images.ThresholdGui(vid)
     #images.AdaptiveThresholdGui(vid)
-    #images.ContoursGui(vid)
+    images.ContoursGui(vid)
     #images.InrangeGui(vid)
     # images.DistanceTransformGui(vid)
-    images.WatershedGui(vid)
+    #images.WatershedGui(vid)
