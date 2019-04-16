@@ -155,21 +155,7 @@ class ParamGui:
         # elif self.num_imgs == 2:
         #     self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
 
-class QWidgetMod(QWidget):
-    """
-    Overrides the closeEvent method of QWidget to print out the parameters set
-    in the gui. Is used by ParamGui.
-    """
-    def __init__(self,param_dict):
-        QWidget.__init__(self)
-        self.param_dict = param_dict
 
-    def closeEvent(self, a0: QCloseEvent) -> None:
-        print('Final Parameters')
-        print('------------------------------')
-        for key in sorted(self.param_dict.keys()):
-            print(key + ' : ' +  str(self.param_dict[key][0]))
-        print('------------------------------')
 
 '''
 ------------------------------------------------------------------------------
@@ -339,7 +325,24 @@ class WatershedGui(ParamGui):
                                   )
         self._display_img(thresh, watershed_img)
 
+"""
+QT classes or subclasses
+"""
+class QWidgetMod(QWidget):
+    """
+    Overrides the closeEvent method of QWidget to print out the parameters set
+    in the gui. Is used by ParamGui.
+    """
+    def __init__(self,param_dict):
+        QWidget.__init__(self)
+        self.param_dict = param_dict
 
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        print('Final Parameters')
+        print('------------------------------')
+        for key in sorted(self.param_dict.keys()):
+            print(key + ' : ' +  str(self.param_dict[key][0]))
+        print('------------------------------')
 
 class QtImageViewer(QGraphicsView):
     """ PyQt image viewer widget for a QPixmap in a QGraphicsView scene with mouse zooming and panning.
@@ -519,7 +522,7 @@ if __name__ == "__main__":
     #images.CircleGui(vid)
     # images.ThresholdGui(vid)
     # images.AdaptiveThresholdGui(vid)
-    #images.ContoursGui(vid)
+    images.ContoursGui(vid)
     #images.InrangeGui(vid)
     # images.DistanceTransformGui(vid)
-    images.WatershedGui(vid)
+    #images.WatershedGui(vid)
