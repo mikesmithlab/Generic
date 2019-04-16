@@ -3,12 +3,7 @@ import numpy as np
 import Generic.filedialogs as fd
 
 
-
-
-
-
-
-class Plotter():
+class Plotter:
     """
     Generic plotting object which allows multipanel graphs in x,y format
 
@@ -23,7 +18,8 @@ class Plotter():
 
 
     methods:
-    add_plot  =  add single dataset to a subplot
+    add_plot  =  add single scatter to a subplot
+    add_bar = add bar graph to subplot
     remove_plot = remove the dataset specified by num_of_plot from the subplot
     list_plots = access to dictionary indicating num_of_plot: subplot numbers, markers used for data
     configure.... = access to the various labels
@@ -35,7 +31,7 @@ class Plotter():
 
 
     """
-    def __init__(self, figsize=(8,6), dpi=80, subplot=None, sharex='none', sharey='none'):
+    def __init__(self, figsize=(8, 6), dpi=80, subplot=None, sharex='none', sharey='none'):
 
         if (subplot is None):
             subplot = (1, 1)
@@ -44,20 +40,44 @@ class Plotter():
         self.fig, self._subplot_handles = plt.subplots(subplot[0], subplot[1],
                                                       sharex=sharex, sharey=sharey,
                                                       figsize=figsize, dpi=dpi)
+        self.nrows = subplot[0]
+        self.ncols = subplot[1]
         if subplot == (1, 1):
             #This is to force _subplot_handles to be a list and prevent
             #code failing when we try to index it
-            self._subplot_handles = [self._subplot_handles,'dummy_var']
+            self._subplot_handles = [self._subplot_handles, 'dummy_var']
         self._plots = -1
         self._dict_plots = {}
 
-    def add_plot(self, xdata, ydata, marker='rx', subplot=0):
+    def add_plot(self, xdata, ydata, marker='rx', subplot=0, polar=False, **kwargs):
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
-            plot_handle = self._subplot_handles[subplot].plot(xdata, ydata, marker)
+            if polar:
+                self.set_subplot_polar(subplot)
+            plot_handle = self._subplot_handles[subplot].errorbar(
+                xdata, ydata, fmt=marker, **kwargs)
             self._plots += 1
             self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
+
+    def add_bar(self, xdata, ydata, subplot=0, polar=False, **kwargs):
+        if subplot > self._num_subplots:
+            print('subplot does not exist')
+        else:
+            if polar:
+                self.set_subplot_polar(subplot)
+            plot_handle = self._subplot_handles[subplot].bar(
+                xdata, ydata, width=xdata[1]-xdata[0], align='edge', **kwargs)
+            self._plots += 1
+            self._dict_plots[self._plots] = (subplot, 'bar', plot_handle)
+
+    def add_hexbin(self, xdata, ydata, subplot=0, **kwargs):
+        if subplot > self._num_subplots:
+            print('subplot does not exist')
+        else:
+            plot_handle = self.ax[subplot].hexbin(xdata, ydata, **kwargs)
+            self._plots += 1
+            self._dict_plots[self._plots] = (subplot, 'hexbin', plot_handle)
 
     def remove_plot(self, num_of_plot):
         self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[0].remove()
@@ -65,7 +85,7 @@ class Plotter():
         self.fig.canvas.flush_events()
         del self._dict_plots[num_of_plot]
 
-    def add_img(self, matrix, subplot=0,normalise=True):
+    def add_img(self, matrix, subplot=0, normalise=True):
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
@@ -87,6 +107,10 @@ class Plotter():
         for key in self._dict_plots.keys():
             print(key, ':', self._dict_plots[key][0], ',', self._dict_plots[key][1])
 
+    def set_subplot_polar(self, subplot):
+        self._subplot_handles[subplot].remove()
+        self._subplot_handles[subplot] = self.fig.add_subplot(
+            self.nrows, self.ncols, subplot + 1, projection='polar')
 
     def configure_title(self, title='', fontsize=20):
         self.fig.suptitle(title, fontsize=fontsize)
@@ -143,24 +167,33 @@ def next_type(index):
 
 
 if __name__=='__main__':
-    X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
-    y2, y1 = np.cos(X), np.sin(X)
-
-    f = Plotter(subplot=(2, 1), sharey = True)
-    f.add_plot(X, y1, marker='r-')
-    f.add_plot(X, y2, marker='b-')
-    f.add_plot(X, y2, marker='g-', subplot=0)
-    f.save_figure()
-
-    f.remove_plot(0)
-    f.add_plot(X, y2, marker='b-',subplot=1)
-    print(f._subplot_handles)
-    f.configure_title('test_title')
-    f.configure_xaxis(subplot=1,xlim=(0,1))
-    f.configure_yaxis()
-    f.list_plots()
+    # X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
+    # y2, y1 = np.cos(X), np.sin(X)
+    #
+    # f = Plotter(subplot=(2, 1), sharey = True)
+    # f.add_plot(X, y1, marker='r-')
+    # f.add_plot(X, y2, marker='b-')
+    # f.add_plot(X, y2, marker='g-', subplot=0)
+    # f.save_figure()
+    #
+    # f.remove_plot(0)
+    # f.add_plot(X, y2, marker='b-',subplot=1)
+    # print(f._subplot_handles)
+    # f.configure_title('test_title')
+    # f.configure_xaxis(subplot=1,xlim=(0,1))
+    # f.configure_yaxis()
+    # f.list_plots()
+    # f.show_figure()
+    x = np.arange(0, 10)
+    y = x ** 2
+    im = np.random.rand(50, 50)
+    f = Plotter(subplot=(1, 4))
+    f.add_plot(x, y, yerr=y/2)
+    f.add_plot(x, y, polar=True, subplot=1)
+    # f.add_polar_scatter(x, y, subplot=1)
+    f.add_img(im, subplot=2)
     f.show_figure()
-
+    f.list_plots()
 
 
 
