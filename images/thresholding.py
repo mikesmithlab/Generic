@@ -89,8 +89,8 @@ def watershed(img, watershed_threshold = 0.1, block_size=5,constant=0,mode=cv2.T
 
     # Now, mark the region of unknown with zero
     markers[unknown == 255] = 0
+    markers = cv2.watershed(img, markers)
     img[markers == -1] = [255,0,0]
-
 
     return img
 
@@ -136,29 +136,6 @@ def distance_transform(img, preprocess=False, block_size=5,constant=0,mode=cv2.T
     dist_transform = cv2.distanceTransform(binary_img, cv2.DIST_L2, 5)
     return dist_transform
 
-
-class threshold_slider:
-
-    def __init__(self, img, type=cv2.THRESH_BINARY):
-        self.im = img
-        self.im0 = img.copy()
-        self.g = 0
-        self.type = type
-        cv2.namedWindow('image', cv2.WINDOW_KEEPRATIO)
-        cv2.resizeWindow('image', 960, 540)
-        cv2.createTrackbar('thresh', 'image', 0, 255, self.change)
-        while(1):
-            cv2.imshow('image', self.im)
-            k = cv2.waitKey(1) & 0xFF
-            if k == 32:
-                break
-        cv2.destroyAllWindows()
-
-    def change(self, g):
-        # g = cv2.getTrackbarPos('thresh')
-        if g != self.g:
-            self.im = threshold(self.im0, thresh=g, mode=self.type)
-            self.g = g
 
 if __name__ == '__main__':
     from Generic import images

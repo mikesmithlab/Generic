@@ -148,7 +148,7 @@ class ParamGui:
         if self.num_imgs == 1:
             self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
         elif self.num_imgs == 2:
-            self.lbl.setPixmap(pixmap.scaled(4060, 1200, Qt.KeepAspectRatio))
+            self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
 
 
 '''
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     """
     from Generic import video
     from Generic import images
-    vid = video.ReadVideo(filename='/home/ppzmis/Documents/PythonScripts/ParticleTracking/test_video.mp4')
+    vid = video.ReadVideo()
 
     # frame = images.bgr_2_grayscale(frame)
     #images.CircleGui(vid)
@@ -339,5 +339,5 @@ if __name__ == "__main__":
     #images.AdaptiveThresholdGui(vid)
     #images.ContoursGui(vid)
     #images.InrangeGui(vid)
-    #images.DistanceTransformGui(vid)
+    # images.DistanceTransformGui(vid)
     images.WatershedGui(vid)
