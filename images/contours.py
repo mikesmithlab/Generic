@@ -3,7 +3,7 @@ import numpy as np
 from math import pi, cos, sin
 import scipy.optimize as op
 
-__all__ = ['find_contours', 'sort_contours', 'find_contour_corners', 'fit_hex']
+__all__ = ['find_contours','rotated_bounding_rectangle', 'sort_contours', 'find_contour_corners', 'fit_hex']
 
 
 def find_contours(img, hierarchy=False):
@@ -21,6 +21,14 @@ def find_contours(img, hierarchy=False):
         return contours, hier
     else:
         return contours
+
+def rotated_bounding_rectangle(contours):
+    rect = cv2.minAreaRect(contours)
+    box = cv2.boxPoints(rect)
+    box = np.int0(box)
+    return box
+
+
 
 
 def sort_contours(cnts):

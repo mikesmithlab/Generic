@@ -33,3 +33,5 @@ def find_connected_components(thresh_img,connectivity=4, option=cv2.CV_32S):
     centroids = output[3]
 
     return labels, stats, centroids
+
+

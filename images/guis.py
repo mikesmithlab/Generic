@@ -12,7 +12,7 @@ from Generic import video, images
 from . import *
 
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
-           'ContoursGui', 'DistanceTransformGui','WatershedGui', 'ParamGui']
+           'ContoursGui', 'RotatedBoxGui','DistanceTransformGui','WatershedGui', 'ParamGui']
 
 '''
 ------------------------------------------------------------------------------
@@ -266,8 +266,40 @@ class ContoursGui(ParamGui):
                                     self.param_dict['window'][0],
                                     self.param_dict['constant'][0],
                                     self.param_dict['invert'][0])
+
         contours = find_contours(thresh)
         self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),contours, thickness=self.thickness))
+
+class RotatedBoxGui(ParamGui):
+    '''
+    This applies adaptive threshold (this is what you are adjusting and is the
+    value on the slider. It then applies findcontours and draws them to display result
+    '''
+    def __init__(self, img, thickness=2):
+        self.param_dict = {'window': [53, 3, 101, 2],
+                           'constant': [-26, -30, 30, 1],
+                           'invert': [0, 0, 1, 1]}
+        self.thickness = thickness
+        self.grayscale = True
+        ParamGui.__init__(self, img, num_imgs=2)
+        self.blurred_img = self.im.copy()
+        self.update()
+
+    def update(self):
+        self.blurred_img = gaussian_blur(self.im0.copy())
+        thresh = adaptive_threshold(self.blurred_img,
+                                    self.param_dict['window'][0],
+                                    self.param_dict['constant'][0],
+                                    self.param_dict['invert'][0])
+
+        contours = images.find_contours(thresh)
+        print(contours)
+        print(np.shape(contours))
+        box=np.array([])
+        for contour in contours:
+            box = np.vstack(box,(images.rotated_bounding_rectangle(contour)))
+        print(box)
+        self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),[box], thickness=self.thickness))
 
 
 class DistanceTransformGui(ParamGui):
@@ -525,7 +557,8 @@ if __name__ == "__main__":
     #images.CircleGui(vid)
     # images.ThresholdGui(vid)
     # images.AdaptiveThresholdGui(vid)
-    images.ContoursGui(vid,thickness=-1)
+    #images.ContoursGui(vid,thickness=-1)
     #images.InrangeGui(vid)
     #images.DistanceTransformGui(vid)
     #images.WatershedGui(vid)
+    images.RotatedBoxGui(vid)
