@@ -2,8 +2,11 @@ import cv2
 import numpy as np
 from math import pi, cos, sin
 import scipy.optimize as op
+from skimage.transform import hough_ellipse
+from Generic import images
+import matplotlib.pyplot as plt
 
-__all__ = ['find_contours','rotated_bounding_rectangle', 'sort_contours', 'find_contour_corners', 'fit_hex']
+__all__ = ['find_contours','rotated_bounding_rectangle','separate_rects', 'sort_contours', 'find_contour_corners', 'fit_hex']
 
 
 def find_contours(img, hierarchy=False):
@@ -22,13 +25,45 @@ def find_contours(img, hierarchy=False):
     else:
         return contours
 
-def rotated_bounding_rectangle(contours):
-    rect = cv2.minAreaRect(contours)
+def rotated_bounding_rectangle(contour):
+    rect = cv2.minAreaRect(contour)
     box = cv2.boxPoints(rect)
     box = np.int0(box)
-    return box
+    #cv2.rotatedRectangleIntersection(rect1, rect2)
+    return box, rect
+
+def separate_rects(contour, box):
+    """
+
+    :param contour:
+    :param crop: crop is the box coords
+    :return:
+    """
+    print(contour)
+
+    crop = cv2.boundingRect(box)
+    print(crop)
+    img = np.zeros((crop[3],crop[2]),dtype=np.uint8)
+    temp_contour = []
+    for pt in contour:
+        temp_contour.append([pt[0]-crop[0],pt[1]-crop[1]])
+    img = images.draw_contours(img, contour, thickness=-1)
+    plt.figure()
+    plt.imshow(img)
+    plt.show()
+    img = images.skeleton(img)
+    return img
 
 
+
+def hough_ellipse(img, a,b):
+    """
+    https://scikit-image.org/docs/dev/auto_examples/edges/plot_circular_elliptical_hough_transform.html
+    :param img: grayscale image
+    :param a: = max_size ellipse
+    :param b: = min_size ellipse
+    :return:
+    """
 
 
 def sort_contours(cnts):

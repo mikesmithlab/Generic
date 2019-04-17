@@ -184,7 +184,6 @@ class CircleGui(ParamGui):
         self._display_img(draw_circles(stack_3(self.im0), circles))
 
 
-
 class ThresholdGui(ParamGui):
 
     def __init__(self, img):
@@ -293,13 +292,19 @@ class RotatedBoxGui(ParamGui):
                                     self.param_dict['invert'][0])
 
         contours = images.find_contours(thresh)
-        print(contours)
-        print(np.shape(contours))
-        box=np.array([])
+        box=[]
         for contour in contours:
-            box = np.vstack(box,(images.rotated_bounding_rectangle(contour)))
-        print(box)
-        self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),[box], thickness=self.thickness))
+            box_guess, rect_guess = images.rotated_bounding_rectangle(contour)
+            print(rect_guess[1][0])
+            if rect_guess[1][0] < 15:
+                box.append(box_guess)
+            else:
+                img = separate_rects(contour, box_guess)
+
+
+
+        box = np.array(box)
+        self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),box, thickness=self.thickness))
 
 
 class DistanceTransformGui(ParamGui):
@@ -551,7 +556,7 @@ if __name__ == "__main__":
     """
     from Generic import video
     from Generic import images
-    vid = video.ReadVideo()
+    vid = video.ReadVideo(filename='/media/ppzmis/data/ActiveMatter/bacteria_plastic/bacteria.avi')
 
     # frame = images.bgr_2_grayscale(frame)
     #images.CircleGui(vid)
@@ -560,5 +565,5 @@ if __name__ == "__main__":
     #images.ContoursGui(vid,thickness=-1)
     #images.InrangeGui(vid)
     #images.DistanceTransformGui(vid)
-    #images.WatershedGui(vid)
+    # images.WatershedGui(vid)
     images.RotatedBoxGui(vid)
