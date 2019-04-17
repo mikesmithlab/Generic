@@ -18,3 +18,4 @@ from .smoothing import *
 from .features import *
 from .colors import *
 from .guis import *
+from .objectdetection import *
