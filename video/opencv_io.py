@@ -246,6 +246,16 @@ class ReadVideo:
         else:
             print('Error reading the frame. Check path and filename carefully')
 
+    def frames(self, start=None, n=None):
+        """Iterator for frames"""
+        if start != None:
+            self.set_frame(start)
+        if n == None:
+            n = self.num_frames
+        for f in range(n):
+            frame = self.read_next_frame()
+            yield frame
+
     def find_frame(self, frame_num):
         '''searches for specific frame and reads it'''
         self.set_frame(frame_num)
