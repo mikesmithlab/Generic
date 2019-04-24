@@ -1,7 +1,10 @@
 import cv2
+import numpy as np
+from Generic import images
+import matplotlib.pyplot as plt
 
 
-__all__ = ['dilate', 'erode', 'closing', 'opening', 'opening_slider', 'closing_slider']
+__all__ = ['dilate', 'erode', 'closing', 'opening','skeleton', 'opening_slider', 'closing_slider']
 
 
 def dilate(img, kernel=(3, 3), kernel_type=None, iterations=1):
@@ -125,6 +128,25 @@ def opening(img, kernel=(3, 3), kernel_type=None, iterations=1):
     out = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=iterations)
     return out
 
+def skeleton(img):
+    element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+    done=False
+    size=np.shape(img)
+    skel=np.zeros(size,dtype=np.uint8)
+
+
+    while (not done):
+        eroded = cv2.erode(img, element)
+        temp = cv2.dilate(eroded, element)
+        temp = cv2.subtract(img, temp)
+        skel = cv2.bitwise_or(skel, temp)
+        img = eroded.copy()
+
+
+        #zeros = size - cv2.countNonZero(img)
+        if zeros == size:
+            done = True
+    return skel
 
 class opening_slider:
 
