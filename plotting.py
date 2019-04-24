@@ -50,6 +50,14 @@ class Plotter:
         self._dict_plots = {}
 
     def add_plot(self, xdata, ydata, subplot=0, polar=False, **kwargs):
+        """
+        Descriptions of kwargs can be found here:
+           https://matplotlib.org/api/_as_gen/matplotlib.pyplot.errorbar.html
+
+        and then here:
+            https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
+
+        """
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
@@ -67,6 +75,10 @@ class Plotter:
             self._dict_plots[self._plots] = (subplot, key, plot_handle)
 
     def add_bar(self, xdata, ydata, subplot=0, polar=False, **kwargs):
+        """
+        Descriptions of kwargs can be found here:
+            https://matplotlib.org/api/_as_gen/matplotlib.pyplot.bar.html
+        """
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
@@ -78,6 +90,10 @@ class Plotter:
             self._dict_plots[self._plots] = (subplot, 'bar', plot_handle)
 
     def add_hexbin(self, xdata, ydata, subplot=0, **kwargs):
+        """
+        Descriptions of kwargs can be found here:
+            https://matplotlib.org/api/_as_gen/matplotlib.pyplot.hexbin.html
+        """
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
