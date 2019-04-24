@@ -49,16 +49,22 @@ class Plotter:
         self._plots = -1
         self._dict_plots = {}
 
-    def add_plot(self, xdata, ydata, marker='rx', subplot=0, polar=False, **kwargs):
+    def add_plot(self, xdata, ydata, subplot=0, polar=False, **kwargs):
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
             if polar:
                 self.set_subplot_polar(subplot)
             plot_handle = self._subplot_handles[subplot].errorbar(
-                xdata, ydata, fmt=marker, **kwargs)
+                xdata, ydata, **kwargs)
+            line_handle = plot_handle.get_children()[0]
+            c = line_handle.get_color()
+            m = line_handle.get_marker()
+            ls = line_handle.get_linestyle()
+            key = get_key(m, ls, c)
+            print(key)
             self._plots += 1
-            self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
+            self._dict_plots[self._plots] = (subplot, key, plot_handle)
 
     def add_bar(self, xdata, ydata, subplot=0, polar=False, **kwargs):
         if subplot > self._num_subplots:
@@ -128,6 +134,9 @@ class Plotter:
         if (ylim[0] is not None) or (ylim[1] is not None):
             self._subplot_handles[subplot].set_ylim(bottom=ylim[0], top=ylim[1])
 
+    def configure_legend(self, subplot=0, **kwargs):
+        self._subplot_handles[subplot].legend(**kwargs)
+
     def save_figure(self, filename='*.png', initialdir='~ppzmis/Documents', dpi=80):
         if filename == '*.png':
             filename = fd.save_filename(caption='select filename', file_filter='*.png;;*.jpg;;*.tiff')
@@ -135,6 +144,21 @@ class Plotter:
 
     def show_figure(self):
         plt.show()
+
+
+def get_key(marker, linestyle, color):
+    if marker == 'None':
+        if linestyle == 'None':
+            key = ''
+        else:
+            key = linestyle
+    else:
+        if linestyle == 'None':
+            key = marker
+        else:
+            key = marker+linestyle
+    key = color + key
+    return key
 
 
 def histogram(data, bins=10, marker='rx', normalise=False, ax=None, show=False):
@@ -167,33 +191,33 @@ def next_type(index):
 
 
 if __name__=='__main__':
-    # X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
-    # y2, y1 = np.cos(X), np.sin(X)
-    #
-    # f = Plotter(subplot=(2, 1), sharey = True)
-    # f.add_plot(X, y1, marker='r-')
-    # f.add_plot(X, y2, marker='b-')
-    # f.add_plot(X, y2, marker='g-', subplot=0)
+    X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
+    y2, y1 = np.cos(X), np.sin(X)
+
+    f = Plotter(subplot=(2, 1), sharey = True)
+    f.add_plot(X, y1, fmt='r-')
+    f.add_plot(X, y2, fmt='b-')
+    f.add_plot(X, y2, fmt='g-', subplot=0)
     # f.save_figure()
-    #
-    # f.remove_plot(0)
-    # f.add_plot(X, y2, marker='b-',subplot=1)
-    # print(f._subplot_handles)
-    # f.configure_title('test_title')
-    # f.configure_xaxis(subplot=1,xlim=(0,1))
-    # f.configure_yaxis()
-    # f.list_plots()
-    # f.show_figure()
-    x = np.arange(0, 10)
-    y = x ** 2
-    im = np.random.rand(50, 50)
-    f = Plotter(subplot=(1, 4))
-    f.add_plot(x, y, yerr=y/2)
-    f.add_plot(x, y, polar=True, subplot=1)
-    # f.add_polar_scatter(x, y, subplot=1)
-    f.add_img(im, subplot=2)
-    f.show_figure()
+
+    f.remove_plot(0)
+    f.add_plot(X, y2, fmt='b-',subplot=1)
+    print(f._subplot_handles)
+    f.configure_title('test_title')
+    f.configure_xaxis(subplot=1, xlim=(0,1))
+    f.configure_yaxis()
     f.list_plots()
+    f.show_figure()
+    # x = np.arange(0, 10)
+    # y = x ** 2
+    # im = np.random.rand(50, 50)
+    # f = Plotter(subplot=(1, 4))
+    # f.add_plot(x, y, yerr=y/2)
+    # f.add_plot(x, y, polar=True, subplot=1)
+    # # f.add_polar_scatter(x, y, subplot=1)
+    # f.add_img(im, subplot=2)
+    # f.show_figure()
+    # f.list_plots()
 
 
 
