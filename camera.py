@@ -1,5 +1,5 @@
 import cv2
-import tkinter as tk
+from Generic.filedialogs import save_filename, load_filename
 import time
 import Generic.video as video
 import os
@@ -110,10 +110,8 @@ class Camera:
 
     def write_to_vid(self, filename=None, fps=30.0):
         if filename is None:
-            filename = tk.filedialog.asksaveasfilename(
-                defaultextension=extensions[0][1],
-                filetypes=extensions
-            )
+            filename = save_filename()
+
         self.vid = video.WriteVideo(
                 filename=filename,
                 frame_size=(self.frame_size[1],
@@ -166,10 +164,7 @@ class Camera:
 
     def single_pic_img(self, filename=None, show_pic=False):
         if filename == None:
-            filename = tk.filedialog.asksaveasfilename(
-                defaultextension=extensions[0][1],
-                filetypes=extensions
-            )
+            filename = save_filename()
         '''writes single image to picture file '''
         ret, frame = self.cam.read()
         cv2.imwrite(filename, frame)
@@ -261,9 +256,7 @@ class Camera:
 
     def save_cam_settings(self, filename=None):
         if filename is None:
-            filename = tk.filedialog.asksaveasfilename(
-                    defaultextension='.camlog',
-                    filetypes=[('CAM', '.camsettingslog')])
+            filename = save_filename(file_filter='*.camlog')
 
         self.get_cam_props(show=True)
         settings = (
@@ -275,9 +268,7 @@ class Camera:
 
     def load_cam_settings(self, filename=None):
         if filename is None:
-            filename = tk.filedialog.askopenfilename(
-                    defaultextension='.camlog',
-                    filetypes=[('CAM', '.camsettingslog')])
+            filename = load_filename(file_filter='*.camlog')
 
         with open(filename, 'r') as settings_file:
             settings_list = settings_file.read().splitlines()
