@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRectF, QT_VERSION_STR
 from PyQt5.QtGui import QPixmap, QImage, QPainterPath, QCloseEvent
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QApplication,
                              QSlider, QHBoxLayout, QGraphicsView, QGraphicsScene,
-                             QFileDialog)
+                             QFileDialog, QCheckBox)
 from skimage import filters
 from Generic import video, images
 from . import *
@@ -55,19 +55,31 @@ class ParamGui:
             self.type = 'singleframe'
 
     def init_ui(self):
+        # Create window and layout
         app = QApplication(sys.argv)
         self.win = QWidgetMod(self.param_dict)
+        self.vbox = QVBoxLayout(self.win)
+
+        # Create Image viewer
         self.viewer = QtImageViewer()
         self.viewer.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.viewer.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.viewer.canZoom = True
         self.viewer.canPan = True
         self._update_im()
-        self.vbox = QVBoxLayout(self.win)
         self.vbox.addWidget(self.viewer)
 
+        # Create live update checkbox
+        cb = QCheckBox('Update')
+        cb.toggle()
+        cb.stateChanged.connect(self._update_cb)
+        self.live_update = True
+        self.vbox.addWidget(cb)
+
+        # Add sliders
         self.add_sliders()
 
+        # Finalise window
         self.win.setWindowTitle('ParamGui')
         self.win.setLayout(self.vbox)
         self.win.show()
@@ -92,6 +104,7 @@ class ParamGui:
             hbox.addWidget(self.frame_slider)
             widget.setLayout(hbox)
             self.vbox.addWidget(widget)
+
 
         for key in sorted(self.param_dict.keys()):
             widget = QWidget()
@@ -120,6 +133,13 @@ class ParamGui:
             widget.setLayout(hbox)
             self.vbox.addWidget(widget)
 
+    def _update_cb(self, state):
+        if state == Qt.Checked:
+            self.live_update = True
+            self._update_sliders()
+        else:
+            self.live_update = False
+
     def _update_sliders(self):
         if self.type == 'multiframe':
             frame_no = self.frame_slider.value()
@@ -134,8 +154,9 @@ class ParamGui:
                 val = 2*val + bottom
             self.labels[key].setText(key + ': ' + str(val))
             self.param_dict[key][0] = val
-        self.update()
-        self._update_im()
+        if self.live_update == True:
+            self.update()
+            self._update_im()
 
     def _display_img(self, img1, img2=None):
         if img2 is None:
