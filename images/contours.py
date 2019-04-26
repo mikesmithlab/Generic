@@ -6,7 +6,7 @@ from skimage.transform import hough_ellipse
 from Generic import images
 import matplotlib.pyplot as plt
 
-__all__ = ['find_contours','rotated_bounding_rectangle','separate_rects', 'sort_contours', 'find_contour_corners', 'fit_hex']
+__all__ = ['find_contours','rotated_bounding_rectangle','sort_contours', 'find_contour_corners', 'fit_hex']
 
 
 def find_contours(img, hierarchy=False):
@@ -31,28 +31,6 @@ def rotated_bounding_rectangle(contour):
     box = np.int0(box)
     #cv2.rotatedRectangleIntersection(rect1, rect2)
     return box, rect
-
-def separate_rects(contour, box):
-    """
-
-    :param contour:
-    :param crop: crop is the box coords
-    :return:
-    """
-    print(contour)
-
-    crop = cv2.boundingRect(box)
-    print(crop)
-    img = np.zeros((crop[3],crop[2]),dtype=np.uint8)
-    temp_contour = []
-    for pt in contour:
-        temp_contour.append([pt[0]-crop[0],pt[1]-crop[1]])
-    img = images.draw_contours(img, contour, thickness=-1)
-    plt.figure()
-    plt.imshow(img)
-    plt.show()
-    img = images.skeleton(img)
-    return img
 
 
 
