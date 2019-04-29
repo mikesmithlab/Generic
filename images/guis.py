@@ -64,6 +64,7 @@ class ParamGui:
         self.viewer = QtImageViewer()
         self.viewer.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.viewer.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.viewer.leftMouseButtonPressed.connect(self.get_coords)
         self.viewer.canZoom = True
         self.viewer.canPan = True
         self._update_im()
@@ -158,11 +159,8 @@ class ParamGui:
             self.update()
             self._update_im()
 
-    # def _display_img(self, img1, img2=None):
-    #     if img2 is None:
-    #         self.im = img1
-    #     else:
-    #         self.im = hstack(img1, img2)
+    def get_coords(self, x, y):
+        print('cursor position (x, y) = ({}, {})'.format(int(x), int(y)))
 
     def _display_img(self, *ims):
         if len(ims) == 1:
@@ -577,8 +575,8 @@ if __name__ == "__main__":
     file = filedialogs.load_filename('Load a video')
     vid = video.ReadVideo(file)
     # frame = images.bgr_2_grayscale(frame)
-    #images.CircleGui(vid)
-    images.ThresholdGui(vid)
+    images.CircleGui(vid)
+    # images.ThresholdGui(vid)
     # images.AdaptiveThresholdGui(vid)
     #images.ContoursGui(vid,thickness=-1)
     #images.InrangeGui(vid)
