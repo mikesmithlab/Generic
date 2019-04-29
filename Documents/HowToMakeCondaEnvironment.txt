@@ -1,0 +1,16 @@
+From the terminal move to directory containing environment.yml
+
+Run:
+conda env create -f environment.yml
+
+To activate:
+Open settings (Ctrl+Alt+S)
+On left menu navigate to Project then project interpreter
+Click the cog next to the drop down menu and click add
+Navigate to CondaEnv on left menu
+Click existing environment radio button and click the three dots to open file dialog
+Navigate to:
+    /$AnacondaSource$/envs/ParticleTracking/bin/python3.7
+
+
+
