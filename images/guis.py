@@ -36,7 +36,7 @@ class ParamGui:
         if num_imgs == 1:
             self._display_img(self.im0)
         elif num_imgs == 2:
-            self._display_img(self.im0, img2=self.im0)
+            self._display_img(self.im0, self.im0)
         self.init_ui()
 
     def _file_setup(self, img_or_vid):
@@ -158,11 +158,17 @@ class ParamGui:
             self.update()
             self._update_im()
 
-    def _display_img(self, img1, img2=None):
-        if img2 is None:
-            self.im = img1
+    # def _display_img(self, img1, img2=None):
+    #     if img2 is None:
+    #         self.im = img1
+    #     else:
+    #         self.im = hstack(img1, img2)
+
+    def _display_img(self, *ims):
+        if len(ims) == 1:
+            self.im = ims[0]
         else:
-            self.im = hstack(img1, img2)
+            self.im = hstack(*ims)
 
     def _update_im(self):
         pixmap = QPixmap.fromImage(qim.array2qimage(self.im))
