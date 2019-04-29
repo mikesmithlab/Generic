@@ -174,7 +174,10 @@ def stack_3(img):
     return im
 
 def grayscale_2_bgr(img):
-    return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    if len(np.shape(img)) == 3:
+        return img
+    else:
+        return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 
 def get_depth(img):
