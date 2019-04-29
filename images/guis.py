@@ -194,7 +194,7 @@ class CircleGui(ParamGui):
                                self.param_dict['thresh2'][0],
                                self.param_dict['min_rad'][0],
                                self.param_dict['max_rad'][0])
-        self._display_img(draw_circles(stack_3(self.im0), circles))
+        self._display_img(draw_circles(self.im0, circles))
 
 
 class ThresholdGui(ParamGui):
@@ -280,7 +280,7 @@ class ContoursGui(ParamGui):
                                     self.param_dict['invert'][0])
 
         contours = find_contours(thresh)
-        self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),contours, thickness=self.thickness))
+        self._display_img(thresh, draw_contours(self.im0.copy(), contours, thickness=self.thickness))
 
 class RotatedBoxGui(ParamGui):
     '''
@@ -317,7 +317,7 @@ class RotatedBoxGui(ParamGui):
 
 
         box = np.array(box)
-        self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),box, thickness=self.thickness))
+        self._display_img(thresh, draw_contours(self.im0.copy(), box, thickness=self.thickness))
 
 
 class DistanceTransformGui(ParamGui):
