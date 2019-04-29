@@ -3,6 +3,8 @@ From the terminal move to directory containing environment.yml
 Run:
 conda env create -f environment.yml
 
+If conda command is not found then type 'bash' into terminal to activate bash
+
 To activate:
 Open settings (Ctrl+Alt+S)
 On left menu navigate to Project then project interpreter
