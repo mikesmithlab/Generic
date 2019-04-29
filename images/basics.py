@@ -173,8 +173,10 @@ def stack_3(img):
     im = np.dstack((img, img, img))
     return im
 
+
 def grayscale_2_bgr(img):
     if len(np.shape(img)) == 3:
+        print('Image is already 3 channels')
         return img
     else:
         return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
