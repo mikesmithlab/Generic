@@ -2,8 +2,9 @@ import numpy as np
 import cv2
 from .basics import *
 from .colors import *
+import math
 
-__all__ = ['resize', 'rotate', 'horizontal_stack', 'hstack']
+__all__ = ['resize', 'rotate', 'hstack', 'vstack']
 
 def resize(img, percent=25.0):
     """
@@ -83,3 +84,18 @@ def hstack(*args):
     else:
         ims = [grayscale_2_bgr(im) for im in args]
         return np.hstack(ims)
+
+
+def vstack(*args):
+    """
+    Stacks images vertically
+
+    If image depths are mismatched then converts grayscale images to bgr before stacking
+    """
+    depths = [get_depth(im) for im in args]
+    gray = [d == 1 for d in depths]
+    if all(gray):
+        return np.vstack(args)
+    else:
+        ims = [grayscale_2_bgr(im) for im in args]
+        return np.vstack(ims)
