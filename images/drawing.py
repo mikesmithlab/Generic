@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import pygame
+from matplotlib import cm
 from . import *
 from .colors import *
 
@@ -8,7 +10,7 @@ import scipy.spatial as sp
 
 __all__ = ['draw_voronoi_cells', 'draw_polygons', 'draw_polygon',
            'draw_delaunay_tess', 'draw_circle', 'draw_circles',
-           'draw_contours', 'check_image_depth']
+           'draw_contours', 'check_image_depth', 'pygame_draw_circles']
 
 
 def draw_voronoi_cells(img, points):
@@ -171,6 +173,18 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
     except IndexError as error:
         print('no circles', error)
     return img
+
+
+def pygame_draw_circles(surface, circles, color=YELLOW):
+    if np.shape(circles)[1] == 3:
+        for xi, yi, r in circles:
+            pygame.draw.circle(surface, color, (int(xi), int(yi)), int(r), 3)
+    else:
+        for xi, yi, r, param in circles:
+            col = np.multiply(cm.viridis(param), 255)
+            pygame.draw.circle(
+                surface, col, (int(xi), int(yi)), int(r))
+    return surface
 
 
 def draw_contours(img, contours, col=RED, thickness=1):
