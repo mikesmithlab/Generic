@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from . import *
 from .colors import *
 
 import scipy.spatial as sp
@@ -29,6 +30,7 @@ def draw_voronoi_cells(img, points):
     ing: annotated image
         Same shape and type as input image
     """
+    img = check_image_depth(img)
     voro = sp.Voronoi(points)
     ridge_vertices = voro.ridge_vertices
     new_ridge_vertices = []
@@ -62,6 +64,7 @@ def draw_polygons(img, polygons, color=RED):
     img: annotated image
         Same shape and type as input image
     """
+    img = check_image_depth(img)
     for vertices in polygons:
         img = draw_polygon(img, vertices, color)
     return img
@@ -92,6 +95,7 @@ def draw_polygon(img, vertices, color=RED, thickness=1):
     out: output image
         Same shape and type as input image
     """
+    img = check_image_depth(img)
     vertices = vertices.astype(np.int32)
     out = cv2.polylines(img, [vertices], True, color, thickness=thickness)
     return out
@@ -116,6 +120,7 @@ def draw_delaunay_tess(img, points):
     ing: annotated image
         Same shape and type as input image
     """
+    img = check_image_depth(img)
     tess = sp.Delaunay(points)
     img = draw_polygons(img,
                         points[tess.simplices],
@@ -124,6 +129,7 @@ def draw_delaunay_tess(img, points):
 
 
 def draw_circle(img, cx, cy, rad, color=YELLOW, thickness=2):
+    img = check_image_depth(img)
     cv2.circle(img, (int(cx), int(cy)), int(rad), color, thickness)
     return img
 
@@ -154,6 +160,7 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
     img: image with annotated circles
         Same height, width and channels as input image
     """
+    img = check_image_depth(img)
     try:
         if np.shape(circles)[1] == 3:
             for x, y, rad in circles:
@@ -176,8 +183,7 @@ def draw_contours(img, contours, col=RED, thickness=1):
     :return:
     """
 
-    if len(np.shape(img)) == 2:
-        img = np.dstack((img, img, img))
+    img = check_image_depth(img)
 
     if np.size(np.shape(col)) == 1:
         img = cv2.drawContours(img, contours, -1, col, thickness)
@@ -185,3 +191,11 @@ def draw_contours(img, contours, col=RED, thickness=1):
         for i, contour in enumerate(contours):
             img = cv2.drawContours(img, contour, -1, col[i], thickness)
     return img
+
+
+def check_image_depth(img):
+    depth = get_depth(img)
+    if depth == 1:
+        return grayscale_2_bgr(img)
+    else:
+        return img
