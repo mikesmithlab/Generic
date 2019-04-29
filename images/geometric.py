@@ -6,6 +6,7 @@ import math
 
 __all__ = ['resize', 'rotate', 'hstack', 'vstack']
 
+
 def resize(img, percent=25.0):
     """
     Resizes an image to a given percentage
