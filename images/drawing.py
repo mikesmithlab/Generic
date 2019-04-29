@@ -8,7 +8,7 @@ import scipy.spatial as sp
 
 __all__ = ['draw_voronoi_cells', 'draw_polygons', 'draw_polygon',
            'draw_delaunay_tess', 'draw_circle', 'draw_circles',
-           'draw_contours']
+           'draw_contours', 'check_image_depth']
 
 
 def draw_voronoi_cells(img, points):

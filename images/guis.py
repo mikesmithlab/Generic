@@ -162,19 +162,11 @@ class ParamGui:
         if img2 is None:
             self.im = img1
         else:
-            if np.size(np.shape(img1)) == 2:
-                img1 = stack_3(img1)
-            if np.size(np.shape(img2)) == 2:
-                img2 = stack_3(img2)
-            self.im = np.hstack((img1, img2))
+            self.im = hstack(img1, img2)
 
     def _update_im(self):
         pixmap = QPixmap.fromImage(qim.array2qimage(self.im))
         self.viewer.setImage(pixmap)
-        # if self.num_imgs == 1:
-        #     self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
-        # elif self.num_imgs == 2:
-        #     self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
 
 
 
@@ -575,16 +567,15 @@ if __name__ == "__main__":
 
     Run functions from images as images.function_name
     """
-    from Generic import video
-    from Generic import images
-    vid = video.ReadVideo(filename='/media/ppzmis/data/ActiveMatter/bacteria_plastic/bacteria.avi')
-
+    from Generic import video, images, filedialogs
+    file = filedialogs.load_filename('Load a video')
+    vid = video.ReadVideo(file)
     # frame = images.bgr_2_grayscale(frame)
     #images.CircleGui(vid)
-    # images.ThresholdGui(vid)
+    images.ThresholdGui(vid)
     # images.AdaptiveThresholdGui(vid)
     #images.ContoursGui(vid,thickness=-1)
     #images.InrangeGui(vid)
     #images.DistanceTransformGui(vid)
     # images.WatershedGui(vid)
-    images.RotatedBoxGui(vid)
+    # images.RotatedBoxGui(vid)
