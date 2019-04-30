@@ -32,7 +32,7 @@ class Plotter:
 
     """
 
-    def __init__(self, figsize=(8, 6), dpi=80, subplot=None, sharex='none',
+    def __init__(self, figsize=(16, 9), dpi=80, subplot=None, sharex='none',
                  sharey='none'):
 
         if subplot is None:
@@ -42,16 +42,12 @@ class Plotter:
         self.fig, self._subplot_handles = plt.subplots(subplot[0], subplot[1],
                                                        sharex=sharex,
                                                        sharey=sharey,
-                                                       figsize=figsize, dpi=dpi)
-        self.nrows = subplot[0]
-        self.ncols = subplot[1]
-        if subplot == (1, 1):
-            # This is to force _subplot_handles to be a list and prevent
-            # code failing when we try to index it
-            self._subplot_handles = [self._subplot_handles, 'dummy_var']
+                                                       figsize=figsize,
+                                                       dpi=dpi,
+                                                       squeeze=False)
+        self.nrows, self.ncols = subplot
         self._subplot_handles = [item for sublist in self._subplot_handles
                                  for item in sublist]
-        print(self._subplot_handles)
         self._plots = -1
         self._dict_plots = {}
 
@@ -202,9 +198,9 @@ def get_key(marker, linestyle, color):
 
 
 def histogram(data, bins=10, marker='rx', normalise=False, ax=None, show=False):
-    '''
+    """
     If you feed a sequence to bins it will use these as the binedges
-    '''
+    """
     if ax is None:
         fig, ax = plt.subplots()
     freq, binedges = np.histogram(data, bins=bins, density=normalise)
@@ -233,34 +229,38 @@ def next_type(index):
 
 
 if __name__ == '__main__':
-    X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
-    y2, y1 = np.cos(X), np.sin(X)
+    # X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
+    # y2, y1 = np.cos(X), np.sin(X)
+
+    # f = Plotter(subplot=(2, 2))
+    # f.add_plot(X, y1, fmt='r-')
+    # f.add_plot(X, y2, fmt='b-')
+    # f.add_plot(X, y2, fmt='g-', subplot=0)
+    # # f.save_figure()
+    #
+    # f.remove_plot(0)
+    # f.add_plot(X, y2, fmt='b-', subplot=1)
+    # f.configure_title('test_title')
+    # f.configure_xaxis(subplot=1, xlim=(0, 1))
+    # f.configure_yaxis()
+
+    x = np.arange(0, 10)
+    y = x ** 2
+    im = np.random.rand(50, 50)
 
     f = Plotter(subplot=(2, 2))
-    f.add_plot(X, y1, fmt='r-')
-    f.add_plot(X, y2, fmt='b-')
-    f.add_plot(X, y2, fmt='g-', subplot=0)
-    # f.save_figure()
-
-    f.remove_plot(0)
-    f.add_plot(X, y2, fmt='b-', subplot=1)
-    f.configure_title('test_title')
-    f.configure_xaxis(subplot=1, xlim=(0, 1))
-    f.configure_yaxis()
-    # x = np.arange(0, 10)
-    # y = x ** 2
-    # im = np.random.rand(50, 50)
-    # f = Plotter(subplot=(1, 4))
-    # f.add_plot(x, y, yerr=y/2)
-    # f.add_plot(x, y, polar=True, subplot=1)
-    # # f.add_polar_scatter(x, y, subplot=1)
-    # f.add_img(im, subplot=2)
-    # f.show_figure()
-    # f.list_plots()
-
-    X, Y = np.meshgrid(np.arange(0, 2 * np.pi, .2), np.arange(0, 2 * np.pi, .2))
-    U = np.cos(X)
-    V = np.sin(Y)
-    f.add_quiver(X, Y, U, V, subplot=2)
+    f.add_plot(x, y, yerr=y/2)
+    f.add_plot(x, y, polar=True, subplot=1)
+    f.add_img(im, subplot=3)
     f.show_figure()
-
+    f.list_plots()
+    #
+    # X, Y = np.meshgrid(np.arange(0, 2 * np.pi, .2), np.arange(0, 2 * np.pi, .2))
+    # U = np.cos(X)
+    # V = np.sin(Y)
+    # f.add_quiver(X, Y, U, V, subplot=2)
+    # f.show_figure()
+    #
+    # f = Plotter()
+    # f.add_plot(X, y1)
+    # f.show_figure()
