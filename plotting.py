@@ -109,7 +109,8 @@ class Plotter:
         if subplot > self._num_subplots:
             print('subplot does not exist')
         else:
-            plot_handle = self.ax[subplot].hexbin(xdata, ydata, **kwargs)
+            plot_handle = self._subplot_handles[subplot].hexbin(
+                xdata, ydata, **kwargs)
             self._plots += 1
             self._dict_plots[self._plots] = (subplot, 'hexbin', plot_handle)
 
