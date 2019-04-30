@@ -31,20 +31,23 @@ class Plotter:
 
 
     """
-    def __init__(self, figsize=(8, 6), dpi=80, subplot=None, sharex='none', sharey='none'):
 
-        if (subplot is None):
+    def __init__(self, figsize=(8, 6), dpi=80, subplot=None, sharex='none',
+                 sharey='none'):
+
+        if subplot is None:
             subplot = (1, 1)
-        self._num_subplots = subplot[0]*subplot[1]
+        self._num_subplots = subplot[0] * subplot[1]
         # row and column sharing
         self.fig, self._subplot_handles = plt.subplots(subplot[0], subplot[1],
-                                                      sharex=sharex, sharey=sharey,
-                                                      figsize=figsize, dpi=dpi)
+                                                       sharex=sharex,
+                                                       sharey=sharey,
+                                                       figsize=figsize, dpi=dpi)
         self.nrows = subplot[0]
         self.ncols = subplot[1]
         if subplot == (1, 1):
-            #This is to force _subplot_handles to be a list and prevent
-            #code failing when we try to index it
+            # This is to force _subplot_handles to be a list and prevent
+            # code failing when we try to index it
             self._subplot_handles = [self._subplot_handles, 'dummy_var']
         self._plots = -1
         self._dict_plots = {}
@@ -85,7 +88,7 @@ class Plotter:
             if polar:
                 self.set_subplot_polar(subplot)
             plot_handle = self._subplot_handles[subplot].bar(
-                xdata, ydata, width=xdata[1]-xdata[0], align='edge', **kwargs)
+                xdata, ydata, width=xdata[1] - xdata[0], align='edge', **kwargs)
             self._plots += 1
             self._dict_plots[self._plots] = (subplot, 'bar', plot_handle)
 
@@ -102,7 +105,8 @@ class Plotter:
             self._dict_plots[self._plots] = (subplot, 'hexbin', plot_handle)
 
     def remove_plot(self, num_of_plot):
-        self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[0].remove()
+        self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[
+            0].remove()
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
         del self._dict_plots[num_of_plot]
@@ -112,14 +116,16 @@ class Plotter:
             print('subplot does not exist')
         else:
             if normalise:
-                matrix = 255*matrix / np.max(np.max(matrix))
-            marker='img'
-            plot_handle = self._subplot_handles[subplot].imshow(matrix.astype(np.uint8))
+                matrix = 255 * matrix / np.max(np.max(matrix))
+            marker = 'img'
+            plot_handle = self._subplot_handles[subplot].imshow(
+                matrix.astype(np.uint8))
             self._plots += 1
-            self._dict_plots[self._plots] = (subplot,  marker, plot_handle)
+            self._dict_plots[self._plots] = (subplot, marker, plot_handle)
 
     def remove_img(self, num_of_plot):
-        self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[0].remove()
+        self._subplot_handles[self._dict_plots[int(num_of_plot)][0]].lines[
+            0].remove()
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
         del self._dict_plots[num_of_plot]
@@ -127,7 +133,8 @@ class Plotter:
     def list_plots(self):
         print('plot number : subplot number , marker')
         for key in self._dict_plots.keys():
-            print(key, ':', self._dict_plots[key][0], ',', self._dict_plots[key][1])
+            print(key, ':', self._dict_plots[key][0], ',',
+                  self._dict_plots[key][1])
 
     def set_subplot_polar(self, subplot):
         self._subplot_handles[subplot].remove()
@@ -140,12 +147,14 @@ class Plotter:
     def configure_subplot_title(self, subplot=0, title='', fontsize=20):
         self._subplot_handles[subplot].set_title(title, fontsize=fontsize)
 
-    def configure_xaxis(self, subplot=0, xlabel='x', fontsize=20, xlim=(None, None)):
+    def configure_xaxis(self, subplot=0, xlabel='x', fontsize=20,
+                        xlim=(None, None)):
         self._subplot_handles[subplot].set_xlabel(xlabel, fontsize=fontsize)
         if (xlim[0] is not None) or (xlim[1] is not None):
             self._subplot_handles[subplot].set_xlim(left=xlim[0], right=xlim[1])
 
-    def configure_yaxis(self, subplot=0, ylabel='y', fontsize=20, ylim=(None, None)):
+    def configure_yaxis(self, subplot=0, ylabel='y', fontsize=20,
+                        ylim=(None, None)):
         self._subplot_handles[subplot].set_ylabel(ylabel, fontsize=fontsize)
         if (ylim[0] is not None) or (ylim[1] is not None):
             self._subplot_handles[subplot].set_ylim(bottom=ylim[0], top=ylim[1])
@@ -153,9 +162,11 @@ class Plotter:
     def configure_legend(self, subplot=0, **kwargs):
         self._subplot_handles[subplot].legend(**kwargs)
 
-    def save_figure(self, filename='*.png', initialdir='~ppzmis/Documents', dpi=80):
+    def save_figure(self, filename='*.png', initialdir='~ppzmis/Documents',
+                    dpi=80):
         if filename == '*.png':
-            filename = fd.save_filename(caption='select filename', file_filter='*.png;;*.jpg;;*.tiff')
+            filename = fd.save_filename(caption='select filename',
+                                        file_filter='*.png;;*.jpg;;*.tiff')
         self.fig.savefig(filename, dpi=dpi)
 
     def show_figure(self):
@@ -172,7 +183,7 @@ def get_key(marker, linestyle, color):
         if linestyle == 'None':
             key = marker
         else:
-            key = marker+linestyle
+            key = marker + linestyle
     key = color + key
     return key
 
@@ -183,44 +194,46 @@ def histogram(data, bins=10, marker='rx', normalise=False, ax=None, show=False):
     '''
     if ax is None:
         fig, ax = plt.subplots()
-    freq, binedges = np.histogram(data, bins=bins,density=normalise)
+    freq, binedges = np.histogram(data, bins=bins, density=normalise)
     if normalise:
-        freq=freq/np.sum(freq)
+        freq = freq / np.sum(freq)
 
-    bins = 0.5*(binedges[:-1]+binedges[1:])
+    bins = 0.5 * (binedges[:-1] + binedges[1:])
     ax.plot(bins, freq, marker)
     if show:
         plt.show()
     return ax, bins, freq
 
+
 def next_colour(colour):
-    colour_vals = ['r','b','g','y','k','m','c']
+    colour_vals = ['r', 'b', 'g', 'y', 'k', 'm', 'c']
     if colour >= len(colour_vals):
         colour = colour % len(colour_vals)
     return colour_vals[colour]
 
+
 def next_type(index):
     type_vals = ['x', 'o', '+', '.']
     if index >= len(type_vals):
-       index = index % len(type_vals)
+        index = index % len(type_vals)
     return type_vals[index]
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
     y2, y1 = np.cos(X), np.sin(X)
 
-    f = Plotter(subplot=(2, 1), sharey = True)
+    f = Plotter(subplot=(2, 1), sharey=True)
     f.add_plot(X, y1, fmt='r-')
     f.add_plot(X, y2, fmt='b-')
     f.add_plot(X, y2, fmt='g-', subplot=0)
     # f.save_figure()
 
     f.remove_plot(0)
-    f.add_plot(X, y2, fmt='b-',subplot=1)
+    f.add_plot(X, y2, fmt='b-', subplot=1)
     print(f._subplot_handles)
     f.configure_title('test_title')
-    f.configure_xaxis(subplot=1, xlim=(0,1))
+    f.configure_xaxis(subplot=1, xlim=(0, 1))
     f.configure_yaxis()
     f.list_plots()
     f.show_figure()
@@ -234,8 +247,3 @@ if __name__=='__main__':
     # f.add_img(im, subplot=2)
     # f.show_figure()
     # f.list_plots()
-
-
-
-
-
