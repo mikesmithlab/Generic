@@ -73,7 +73,6 @@ class Plotter:
             m = line_handle.get_marker()
             ls = line_handle.get_linestyle()
             key = get_key(m, ls, c)
-            print(key)
             self._plots += 1
             self._dict_plots[self._plots] = (subplot, key, plot_handle)
 
@@ -91,6 +90,17 @@ class Plotter:
                 xdata, ydata, width=xdata[1] - xdata[0], align='edge', **kwargs)
             self._plots += 1
             self._dict_plots[self._plots] = (subplot, 'bar', plot_handle)
+
+    def add_quiver(self, x, y, u, v, subplot=0, polar=False, **kwargs):
+        if subplot > self._num_subplots:
+            print('subplot does not exist')
+        else:
+            if polar:
+                self.set_subplot_polar(subplot)
+            plot_handle = self._subplot_handles[subplot].quiver(
+                x, y, u, v, **kwargs)
+            self._plots += 1
+            self._dict_plots[self._plots] = (subplot, 'quiver', plot_handle)
 
     def add_hexbin(self, xdata, ydata, subplot=0, **kwargs):
         """
@@ -223,7 +233,7 @@ if __name__ == '__main__':
     X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
     y2, y1 = np.cos(X), np.sin(X)
 
-    f = Plotter(subplot=(2, 1), sharey=True)
+    f = Plotter(subplot=(3, 1))
     f.add_plot(X, y1, fmt='r-')
     f.add_plot(X, y2, fmt='b-')
     f.add_plot(X, y2, fmt='g-', subplot=0)
@@ -231,12 +241,9 @@ if __name__ == '__main__':
 
     f.remove_plot(0)
     f.add_plot(X, y2, fmt='b-', subplot=1)
-    print(f._subplot_handles)
     f.configure_title('test_title')
     f.configure_xaxis(subplot=1, xlim=(0, 1))
     f.configure_yaxis()
-    f.list_plots()
-    f.show_figure()
     # x = np.arange(0, 10)
     # y = x ** 2
     # im = np.random.rand(50, 50)
@@ -247,3 +254,10 @@ if __name__ == '__main__':
     # f.add_img(im, subplot=2)
     # f.show_figure()
     # f.list_plots()
+
+    X, Y = np.meshgrid(np.arange(0, 2 * np.pi, .2), np.arange(0, 2 * np.pi, .2))
+    U = np.cos(X)
+    V = np.sin(Y)
+    f.add_quiver(X, Y, U, V, subplot=2)
+    f.show_figure()
+
