@@ -49,6 +49,9 @@ class Plotter:
             # This is to force _subplot_handles to be a list and prevent
             # code failing when we try to index it
             self._subplot_handles = [self._subplot_handles, 'dummy_var']
+        self._subplot_handles = [item for sublist in self._subplot_handles
+                                 for item in sublist]
+        print(self._subplot_handles)
         self._plots = -1
         self._dict_plots = {}
 
@@ -233,7 +236,7 @@ if __name__ == '__main__':
     X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
     y2, y1 = np.cos(X), np.sin(X)
 
-    f = Plotter(subplot=(3, 1))
+    f = Plotter(subplot=(2, 2))
     f.add_plot(X, y1, fmt='r-')
     f.add_plot(X, y2, fmt='b-')
     f.add_plot(X, y2, fmt='g-', subplot=0)
