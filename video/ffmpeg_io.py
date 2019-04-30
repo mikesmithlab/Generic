@@ -27,7 +27,7 @@ class ReadVideoFFMPEG:
             ffmpeg
             .input(self.filename)
             .output('pipe:', format='rawvideo', pix_fmt='rgb24')
-            .run_async(pipe_stdout=True)
+            .run_async(pipe_stdout=True, quiet=True)
             )
 
     def _get_info(self):
@@ -88,7 +88,8 @@ class WriteVideoFFMPEG:
             )
             .overwrite_output()
             .run_async(
-                pipe_stdin=True
+                pipe_stdin=True,
+                quiet=True
             )
         )
 
