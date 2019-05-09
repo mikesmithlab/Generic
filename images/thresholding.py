@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from Generic import images
+from . import *
 
 
 __all__ = ['threshold', 'adaptive_threshold', 'distance_transform', 'watershed']
@@ -61,11 +61,12 @@ def adaptive_threshold(img, block_size=5, constant=0, mode=cv2.THRESH_BINARY):
 
 
 def watershed(img, watershed_threshold = 0.1, block_size=5,constant=0,mode=cv2.THRESH_BINARY):
-    if np.size(np.shape(img)) == 3:
-        grayscale_img = images.bgr_2_grayscale(img)
+    depth = get_depth(img)
+    if depth == 3:
+        grayscale_img = bgr_2_grayscale(img)
     else:
         grayscale_img = img.copy()
-        img = images.stack_3(img)
+        img = grayscale_2_bgr(img)
     binary_img = adaptive_threshold(grayscale_img,block_size=block_size, constant=constant, mode=mode)
 
     # noise removal

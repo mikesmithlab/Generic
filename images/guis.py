@@ -36,7 +36,7 @@ class ParamGui:
         if num_imgs == 1:
             self._display_img(self.im0)
         elif num_imgs == 2:
-            self._display_img(self.im0, img2=self.im0)
+            self._display_img(self.im0, self.im0)
         self.init_ui()
 
     def _file_setup(self, img_or_vid):
@@ -64,6 +64,7 @@ class ParamGui:
         self.viewer = QtImageViewer()
         self.viewer.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.viewer.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.viewer.leftMouseButtonPressed.connect(self.get_coords)
         self.viewer.canZoom = True
         self.viewer.canPan = True
         self._update_im()
@@ -158,23 +159,18 @@ class ParamGui:
             self.update()
             self._update_im()
 
-    def _display_img(self, img1, img2=None):
-        if img2 is None:
-            self.im = img1
+    def get_coords(self, x, y):
+        print('cursor position (x, y) = ({}, {})'.format(int(x), int(y)))
+
+    def _display_img(self, *ims):
+        if len(ims) == 1:
+            self.im = ims[0]
         else:
-            if np.size(np.shape(img1)) == 2:
-                img1 = stack_3(img1)
-            if np.size(np.shape(img2)) == 2:
-                img2 = stack_3(img2)
-            self.im = np.hstack((img1, img2))
+            self.im = hstack(*ims)
 
     def _update_im(self):
         pixmap = QPixmap.fromImage(qim.array2qimage(self.im))
         self.viewer.setImage(pixmap)
-        # if self.num_imgs == 1:
-        #     self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
-        # elif self.num_imgs == 2:
-        #     self.lbl.setPixmap(pixmap.scaled(1280, 720, Qt.KeepAspectRatio))
 
 
 
@@ -202,7 +198,7 @@ class CircleGui(ParamGui):
                                self.param_dict['thresh2'][0],
                                self.param_dict['min_rad'][0],
                                self.param_dict['max_rad'][0])
-        self._display_img(draw_circles(stack_3(self.im0), circles))
+        self._display_img(draw_circles(self.im0, circles))
 
 
 class ThresholdGui(ParamGui):
@@ -288,7 +284,7 @@ class ContoursGui(ParamGui):
                                     self.param_dict['invert'][0])
 
         contours = find_contours(thresh)
-        self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),contours, thickness=self.thickness))
+        self._display_img(thresh, draw_contours(self.im0.copy(), contours, thickness=self.thickness))
 
 class RotatedBoxGui(ParamGui):
     '''
@@ -325,7 +321,7 @@ class RotatedBoxGui(ParamGui):
 
 
         box = np.array(box)
-        self._display_img(thresh, draw_contours(stack_3(self.im0.copy()),box, thickness=self.thickness))
+        self._display_img(thresh, draw_contours(self.im0.copy(), box, thickness=self.thickness))
 
 
 class DistanceTransformGui(ParamGui):
@@ -575,16 +571,15 @@ if __name__ == "__main__":
 
     Run functions from images as images.function_name
     """
-    from Generic import video
-    from Generic import images
-    vid = video.ReadVideo(filename='/media/ppzmis/data/ActiveMatter/bacteria_plastic/bacteria.avi')
-
+    from Generic import video, images, filedialogs
+    file = filedialogs.load_filename('Load a video')
+    vid = video.ReadVideo(file)
     # frame = images.bgr_2_grayscale(frame)
-    #images.CircleGui(vid)
+    images.CircleGui(vid)
     # images.ThresholdGui(vid)
     # images.AdaptiveThresholdGui(vid)
     #images.ContoursGui(vid,thickness=-1)
     #images.InrangeGui(vid)
     #images.DistanceTransformGui(vid)
     # images.WatershedGui(vid)
-    images.RotatedBoxGui(vid)
+    # images.RotatedBoxGui(vid)

@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 
 __all__ = ['display', 'plot', 'read_img', 'load', 'read', 'write_img', 'save', 'write',
            'get_width_and_height', 'dimensions', 'get_height', 'height',
-           'get_width', 'width', 'bgr_2_grayscale', 'to_uint8', 'stack_3']
+           'get_width', 'width', 'bgr_2_grayscale', 'to_uint8', 'stack_3',
+           'get_depth', 'grayscale_2_bgr']
 
 
 def display(image, title=''):
@@ -171,3 +172,19 @@ def stack_3(img):
     can be drawn on top"""
     im = np.dstack((img, img, img))
     return im
+
+
+def grayscale_2_bgr(img):
+    if len(np.shape(img)) == 3:
+        print('Image is already 3 channels')
+        return img
+    else:
+        return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+
+def get_depth(img):
+    shp = np.shape(img)
+    if len(shp) == 2:
+        return 1
+    else:
+        return shp[2]

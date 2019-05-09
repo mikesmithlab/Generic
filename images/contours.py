@@ -2,17 +2,18 @@ import cv2
 import numpy as np
 from math import pi, cos, sin
 import scipy.optimize as op
-from skimage.transform import hough_ellipse
-from Generic import images
-import matplotlib.pyplot as plt
 
-__all__ = ['find_contours','rotated_bounding_rectangle','sort_contours', 'find_contour_corners', 'fit_hex']
+__all__ = ['find_contours',
+           'rotated_bounding_rectangle',
+           'sort_contours',
+           'find_contour_corners',
+           'fit_hex']
 
 
 def find_contours(img, hierarchy=False):
-    '''
+    """
     contours is a tuple containing (img, contours)
-    '''
+    """
     # work for any version of opencv
     try:
         im, contours, hier = cv2.findContours(
@@ -24,6 +25,7 @@ def find_contours(img, hierarchy=False):
         return contours, hier
     else:
         return contours
+
 
 def rotated_bounding_rectangle(contour):
     rect = cv2.minAreaRect(contour)

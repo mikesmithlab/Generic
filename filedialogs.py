@@ -24,10 +24,9 @@ def open_directory(caption='Select Directory',
     return output
 
 
-
 def save_filename(caption='Save File',
-              directory='/home/ppxjd3/Code/Generic/',
-              file_filter='*.mp4;;*.avi'):
+                  directory='/home/ppxjd3/Code/Generic/',
+                  file_filter='*.mp4;;*.avi'):
     """
     Choose a save filename using a dialog.
 
@@ -49,9 +48,9 @@ def save_filename(caption='Save File',
     """
     app = QApplication(sys.argv)
     output = QFileDialog.getSaveFileName(parent=None,
-                                           caption=caption,
-                                           directory=directory,
-                                           filter=file_filter)
+                                         caption=caption,
+                                         directory=directory,
+                                         filter=file_filter)
     file, extension = os.path.splitext(output[0])
     if extension != "":
         filename = output[0]
@@ -61,9 +60,9 @@ def save_filename(caption='Save File',
 
 
 def load_filename(caption='Find a filename',
-                 directory='/home/ppxjd3/Code/Generic/',
-                 file_filter='*.*;;*.png;;*.jpg',
-                 remove_ext=False):
+                  directory='/home/ppxjd3/Code/Generic/',
+                  file_filter='*.*;;*.png;;*.jpg',
+                  remove_ext=False):
     """
     Choose a load filename using a dialog.
 
@@ -93,8 +92,9 @@ def load_filename(caption='Find a filename',
         filename = os.path.splitext(filename)[0]
     return filename
 
+
 def get_files_directory(path, full_filenames=True):
-    '''
+    """
     Gets list of files from a directory
 
     Given a path it will return a list of all files as a list
@@ -115,7 +115,7 @@ def get_files_directory(path, full_filenames=True):
     Example
     -------
     file_list = get_files_directory('~/*.png')
-    '''
+    """
     filename_list = glob.glob(path)
     if full_filenames == True:
         return filename_list
@@ -140,18 +140,18 @@ class BatchProcess:
        load file for processing
        function_of_script(filename)
     """
-    def __init__(self,pathfilter=None):
+
+    def __init__(self, pathfilter=None):
         if pathfilter is None:
             filename = load_filename(caption='Select file in directory')
             path = os.path.split(filename)[0]
             file, extension = os.path.splitext(filename)
-            extension='*' + extension
+            extension = '*' + extension
             pathfilter = os.path.join(path, extension)
 
         self.filenames = get_files_directory(pathfilter)
         self.num_files = len(self.filenames)
         self.current = 0
-
 
     def __iter__(self):
         return self
@@ -165,21 +165,20 @@ class BatchProcess:
         return filename
 
 
-
 if __name__ == "__main__":
-    #file = load_filename()
-    #print('load file = ', file)
+    # file = load_filename()
+    # print('load file = ', file)
 
-    #new_file = save_filename()
-    #print('save_file = ', new_file)
+    # new_file = save_filename()
+    # print('save_file = ', new_file)
 
-    #2 possibilities for using BatchProcess()
+    # 2 possibilities for using BatchProcess()
     for filename in BatchProcess(pathfilter='/home/ppzmis/*.bib'):
-       print(filename)
-       #call your script with filename, load file whatever
-       #Script can take a filefilter e.g '~/ppzmis/*ball*.txt' to filter files in generator
+        print(filename)
+        # call your script with filename, load file whatever
+        # Script can take a filefilter e.g '~/ppzmis/*ball*.txt' to filter files in generator
 
-    #use it like a normal generator expression.
+    # use it like a normal generator expression.
     batch = BatchProcess()
     filename = next(batch)
     print(filename)
