@@ -355,7 +355,7 @@ class Fit:
 
     def plot_data(self):
         self.plot_obj = Plotter()
-        self.plot_obj.add_plot(self.x, self.y, marker='bx')
+        self.plot_obj.add_plot(self.x, self.y, fmt='bx')
         self.plot_obj.configure_xaxis(xlabel=self.xlabel)
         self.plot_obj.configure_yaxis(ylabel=self.ylabel)
         self.plot_obj.configure_title(title=self.title)
@@ -389,15 +389,15 @@ class Fit:
             self.plot_obj = Plotter(subplot=(2, 1))
         else:
             self.plot_obj = Plotter(subplot=(1, 1))
-        self.plot_obj.add_plot(self.x, self.y, marker='rx')
-        self.plot_obj.add_plot(self.fx, self.fy, marker='bx')
-        self.plot_obj.add_plot(self.fit_x, self.fit_y, marker='g-')
+        self.plot_obj.add_plot(self.x, self.y, fmt='rx')
+        self.plot_obj.add_plot(self.fx, self.fy, fmt='bx')
+        self.plot_obj.add_plot(self.fit_x, self.fit_y, fmt='g-')
         self.plot_obj.configure_xaxis(xlabel=self.xlabel)
         self.plot_obj.configure_yaxis(ylim=(self._plot_limits(self.y,lower=True),self._plot_limits(self.y,lower=False)),ylabel=self.ylabel)
         self.plot_obj.configure_title(title=self.title)
 
         if residuals:
-            self.plot_obj.add_plot(self.fx, self.fit_residuals, marker='rx',subplot=1)
+            self.plot_obj.add_plot(self.fx, self.fit_residuals, fmt='rx',subplot=1)
             self.plot_obj.configure_yaxis(ylabel='Residuals')
 
         if save:
