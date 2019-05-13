@@ -254,7 +254,7 @@ class ReadVideo:
             n = self.num_frames
         for f in range(n):
             frame = self.read_next_frame()
-            yield frame
+            yield frame, f
 
     def find_frame(self, frame_num):
         '''searches for specific frame and reads it'''
