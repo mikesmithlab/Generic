@@ -19,9 +19,9 @@ def digitise(sig):
 
 def fourier_transform_peak(sig, time_step):
     """Find the peak frequency in a signal"""
-    ft = abs(np.fft.fft(sig, n=10000))
+    ft = abs(np.fft.fft(sig, n=50000))
     # freq = np.fft.fftfreq(len(sig), time_step)
-    freq = np.fft.fftfreq(10000, time_step*2)
+    freq = np.fft.fftfreq(50000, time_step*2)
     peak = np.argmax(ft)
     return abs(freq[peak])
 
