@@ -175,13 +175,13 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
     return img
 
 
-def pygame_draw_circles(surface, circles, color=YELLOW):
+def pygame_draw_circles(surface, circles, color=YELLOW, cmap=cm.tab10):
     if np.shape(circles)[1] == 3:
         for xi, yi, r in circles:
             pygame.draw.circle(surface, color, (int(xi), int(yi)), int(r), 3)
     else:
         for xi, yi, r, param in circles:
-            col = np.multiply(cm.viridis(param), 255)
+            col = np.multiply(cmap(param), 255)
             pygame.draw.circle(
                 surface, col, (int(xi), int(yi)), int(r))
     return surface
