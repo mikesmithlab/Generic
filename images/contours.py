@@ -4,6 +4,7 @@ from math import pi, cos, sin
 import scipy.optimize as op
 
 __all__ = ['find_contours',
+            'find_contour_centre',
            'rotated_bounding_rectangle',
            'sort_contours',
            'find_contour_corners',
@@ -26,13 +27,26 @@ def find_contours(img, hierarchy=False):
     else:
         return contours
 
+def find_contour_centre(contour):
+    if np.shape(contour)[0] > 3:
+        M = cv2.moments(contour)
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+    else:
+        print('contour not long enough. implement check before sending'
+              'to this function.')
+    return cX, cY
+
 
 def rotated_bounding_rectangle(contour):
     rect = cv2.minAreaRect(contour)
     box = cv2.boxPoints(rect)
     box = np.int0(box)
-    #cv2.rotatedRectangleIntersection(rect1, rect2)
-    return box, rect
+    dim = np.sort(rect[1])
+
+    #[centrex, centrey, length, width, angle_of long_axis, box_corners]
+    info = [rect[0][0], rect[0][1], rect[2], dim[0], dim[1], box]
+    return info
 
 
 
@@ -140,3 +154,18 @@ def hex_dist(params, contour):
 
 
 
+if __name__ == '__main__':
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    pts = [[5,5],[6,6],[7,5],[7,4]]
+    contours = np.array(pts)
+    output = rotated_bounding_rectangle(contours)
+
+    plt.figure()
+    for i in range(4):
+        plt.plot(pts[i][0],pts[i][1],'rx')
+        plt.plot(output[5][i][0],output[5][i][1],'bx')
+
+
+    plt.show()

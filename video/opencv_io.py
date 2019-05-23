@@ -2,7 +2,7 @@ from Generic import images
 from Generic import filedialogs as fd
 import numpy as np
 import os
-import pims
+#import pims
 import cv2
 
 __all__ = ["WriteVideo", "ReadVideo", ]
@@ -184,7 +184,8 @@ class ReadVideo:
         if self.filetype == 'video':
             self.read_vid = cv2.VideoCapture(self.filename)
         elif self.filetype == 'img_seq':
-            self.read_vid = pims.open(self.filename)
+            pass
+            #self.read_vid = pims.open(self.filename)
         else:
             print('Error in open_video')
 

@@ -96,3 +96,11 @@ class WriteVideoFFMPEG:
     def close(self):
         self.process.stdin.close()
         self.process.wait()
+
+if __name__ == "__main__":
+    from Generic import images
+    input_video = '/media/ppzmis/data/ActiveMatter/bacteria_plastic/bacteria.mp4'
+    vid = ReadVideoFFMPEG(input_video)
+    for f in range(10):
+        frame = vid.read_frame()
+        images.display(frame)

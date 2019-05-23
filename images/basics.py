@@ -12,7 +12,6 @@ def display(image, title=''):
     """Uses cv2 to display an image then wait for a button press"""
 
     cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
-    print('test')
     cv2.resizeWindow(title, 960, 540)
     cv2.imshow(title, image)
     cv2.waitKey(0)

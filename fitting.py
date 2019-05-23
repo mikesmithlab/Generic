@@ -112,9 +112,6 @@ def dbl_gaussian_guess(x, y):
     return [a, b, c, d, e, f]
 
 
-def poisson(x, a, b, c):
-    return a*(b**c)*np.exp(-b)/factorial(c)
-
 
 '''
 sin wave fitting is incredibly sensitive to phase c so use the following form
