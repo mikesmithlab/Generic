@@ -6,6 +6,7 @@ import scipy.optimize as op
 __all__ = ['find_contours',
             'find_contour_centre',
            'rotated_bounding_rectangle',
+           'cut_out_object',
            'sort_contours',
            'find_contour_corners',
            'fit_hex']
@@ -44,11 +45,23 @@ def rotated_bounding_rectangle(contour):
     box = np.int0(box)
     dim = np.sort(rect[1])
 
-    #[centrex, centrey, length, width, angle_of long_axis, box_corners]
+    #[centrex, centrey, angle, length, width, box_corners]
     info = [rect[0][0], rect[0][1], rect[2], dim[0], dim[1], box]
     return info
 
-
+def cut_out_object(im, contour, buffer=3):
+    '''
+    This one is oriented horizontally
+    :param contour:
+    :return:
+    '''
+    x,y,w,h = cv2.boundingRect(contour)
+    x=x-buffer
+    y=y-buffer
+    w=w+2*buffer
+    h=h+2*buffer
+    cut_img = im[y:y+h, x:x+w, :]
+    return cut_img, (x,y,w,h)
 
 def hough_ellipse(img, a,b):
     """

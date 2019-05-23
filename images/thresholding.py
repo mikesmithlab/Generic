@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from . import *
+from Generic import images
 
 
 __all__ = ['threshold', 'adaptive_threshold', 'distance_transform', 'watershed']
@@ -60,38 +61,37 @@ def adaptive_threshold(img, block_size=5, constant=0, mode=cv2.THRESH_BINARY):
 
 
 
-def watershed(img, watershed_threshold = 0.1, block_size=5,constant=0,mode=cv2.THRESH_BINARY):
-    depth = get_depth(img)
-    if depth == 3:
-        grayscale_img = bgr_2_grayscale(img)
-    else:
-        grayscale_img = img.copy()
-        img = grayscale_2_bgr(img)
-    binary_img = adaptive_threshold(grayscale_img,block_size=block_size, constant=constant, mode=mode)
+def watershed(img, watershed_threshold = 0.1, block=11,constant=1,mode=cv2.ADAPTIVE_THRESH_GAUSSIAN_C):
 
-    # noise removal
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    images.display(gray)
+    thresh = cv2.adaptiveThreshold(gray, 255, mode, cv2.THRESH_BINARY, block, constant)
+    images.display(thresh)
     kernel = np.ones((3, 3), np.uint8)
-    opening = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, kernel,
-                               iterations=2)
+    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+    images.display(opening)
     # sure background area
     sure_bg = cv2.dilate(opening, kernel, iterations=3)
-    dist_transform_img = distance_transform(binary_img)
-    #sure foreground area
-    sure_fg = threshold(dist_transform_img, thresh=watershed_threshold)
-    sure_fg = np.uint8(sure_fg)
+    images.display(sure_bg)
+    # Finding sure foreground area
+    dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
+    images.display(dist_transform)
+    ret, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(),
+                                 255, 0)
 
     # Finding unknown region
+    sure_fg = np.uint8(sure_fg)
     unknown = cv2.subtract(sure_bg, sure_fg)
+
     # Marker labelling
     ret, markers = cv2.connectedComponents(sure_fg)
-
     # Add one to all labels so that sure background is not 0, but 1
     markers = markers + 1
-
     # Now, mark the region of unknown with zero
     markers[unknown == 255] = 0
     markers = cv2.watershed(img, markers)
-    img[markers == -1] = [255,0,0]
+    img[markers == -1] = [255, 0, 0]
+    images.display(img)
 
     return img
 
