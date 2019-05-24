@@ -60,7 +60,7 @@ def cut_out_object(im, contour, buffer=3):
     y=y-buffer
     w=w+2*buffer
     h=h+2*buffer
-    cut_img = im[y:y+h, x:x+w, :]
+    cut_img = im[y:y+h, x:x+w]
     return cut_img, (x,y,w,h)
 
 def hough_ellipse(img, a,b):
