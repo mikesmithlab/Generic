@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from math import pi, cos, sin
+from Generic import images
 import scipy.optimize as op
 
 __all__ = ['find_contours',
@@ -49,18 +50,51 @@ def rotated_bounding_rectangle(contour):
     info = [rect[0][0], rect[0][1], rect[2], dim[0], dim[1], box]
     return info
 
-def cut_out_object(im, contour, buffer=3):
+def cut_out_object(im, contour, buffer=3, setsurroundblack=False):
     '''
     This one is oriented horizontally
     :param contour:
     :return:
     '''
+    colordepth = images.get_depth(im)
+
     x,y,w,h = cv2.boundingRect(contour)
+    #Add buffer zone round img
     x=x-buffer
-    y=y-buffer
+    y = y - buffer
     w=w+2*buffer
     h=h+2*buffer
-    cut_img = im[y:y+h, x:x+w]
+    #Check not outside original images
+    if colordepth == 1:
+        maxx, maxy = np.shape(im)
+    else:
+        maxx, maxy, _ = np.shape(im)
+    if x < 0:
+        x = 0
+    if y < 0:
+        y = 0
+    if y+h > maxy:
+        h = maxy - y
+    if x+w > maxx:
+        w = maxx - x
+
+    if colordepth == 1:
+        cut_img = im[y:y+h, x:x+w]
+        if setsurroundblack:
+            cut_img[0, :] = 0
+            cut_img[:, 0] = 0
+            cut_img[:, -1] = 0
+            cut_img[-1, :] = 0
+    else:
+        print('please check this option is operating correctly before use')
+        cut_img = im[y:y + h, x:x + w,:]
+        if setsurroundblack:
+            cut_img[0, :,:] = 0
+            cut_img[:, 0,:] = 0
+            cut_img[:, -1,:] = 0
+            cut_img[-1, :,:] = 0
+
+
     return cut_img, (x,y,w,h)
 
 def hough_ellipse(img, a,b):
@@ -72,6 +106,8 @@ def hough_ellipse(img, a,b):
     :return:
     """
 
+def biggest_contour(cnts):
+    pass
 
 def sort_contours(cnts):
     """

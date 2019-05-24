@@ -196,11 +196,9 @@ def draw_contours(img, contours, col=RED, thickness=1):
     :param thickness: -1 fills the contour.
     :return:
     """
-    if np.size(col) == 1:
-        print('in')
+    if (np.size(np.shape(col)) == 0) | (np.size(np.shape(col)) == 1):
         img = cv2.drawContours(img, contours, -1, col, thickness)
     else:
-        img = check_image_depth(img)
         for i, contour in enumerate(contours):
             img = cv2.drawContours(img, contour, -1, col[i], thickness)
     return img
