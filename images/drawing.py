@@ -10,8 +10,22 @@ import scipy.spatial as sp
 
 __all__ = ['draw_voronoi_cells', 'draw_polygons', 'draw_polygon',
            'draw_delaunay_tess', 'draw_circle', 'draw_circles',
-           'draw_contours', 'check_image_depth', 'pygame_draw_circles']
+           'draw_contours', 'check_image_depth', 'pygame_draw_circles', 'add_colorbar']
 
+
+def add_colorbar(im, cmap=cm.viridis):
+    shp = np.shape(im)
+    im2 = np.zeros((shp[0], shp[1] // 20, 3), dtype=np.uint8)
+    bins = np.linspace(0, shp[1], 1000)
+    for b in bins[:-1]:
+        im2[int(b):, :, :] = np.multiply(cmap(b / shp[0])[:3], 255)
+
+    labels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    for lbl in labels:
+        im2 = cv2.putText(im2, str(lbl), (shp[1] // 400, int(lbl * shp[0])),
+                          cv2.FONT_HERSHEY_SIMPLEX, 2, BLACK, 2,
+                          cv2.LINE_AA)
+    return np.hstack((im, im2))
 
 def draw_voronoi_cells(img, points):
     """
@@ -170,6 +184,12 @@ def draw_circles(img, circles, color=YELLOW, thickness=2):
         elif np.shape(circles)[1] == 2:
             for x, y in circles:
                 cv2.circle(img, (int(x), int(y)), int(5), color, thickness)
+        elif np.shape(circles)[1] == 4:
+            cmap = cm.viridis
+            for xi, yi, r, param in circles:
+                col = np.multiply(cmap(param), 255)
+                # col = np.flip(col)
+                cv2.circle(img, (int(xi), int(yi)), int(r), col, thickness)
     except IndexError as error:
         print('no circles', error)
     return img
