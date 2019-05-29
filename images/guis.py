@@ -143,9 +143,9 @@ class ParamGui:
 
     def _update_sliders(self):
         if self.type == 'multiframe':
-            frame_no = self.frame_slider.value()
-            self.frame_lbl.setText('frame: ' + str(frame_no))
-            self.im0 = self.read_vid.find_frame(frame_no)
+            self.frame_no = self.frame_slider.value()
+            self.frame_lbl.setText('frame: ' + str(self.frame_no))
+            self.im0 = self.read_vid.find_frame(self.frame_no)
         for key in self.param_dict:
             params = self.param_dict[key]
             val, bottom, top, step = params
