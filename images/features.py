@@ -25,10 +25,10 @@ def extract_biggest_object(img):
     return out
 
 
-def find_circles(img, min_dist, p1, p2, min_rad, max_rad):
+def find_circles(img, min_dist, p1, p2, min_rad, max_rad, dp=1):
     circles = cv2.HoughCircles(
         img,
-        cv2.HOUGH_GRADIENT, 1,
+        cv2.HOUGH_GRADIENT, dp,
         min_dist,
         param1=p1,
         param2=p2,
