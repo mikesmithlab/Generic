@@ -12,7 +12,8 @@ from Generic import video, images
 from . import *
 
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
-           'ContoursGui', 'RotatedBoxGui','DistanceTransformGui','WatershedGui', 'ParamGui']
+           'ContoursGui', 'RotatedBoxGui','DistanceTransformGui','WatershedGui', 'ParamGui',
+           'CannyGui']
 
 '''
 ------------------------------------------------------------------------------
@@ -254,7 +255,18 @@ class InrangeGui(ParamGui):
         self.im = cv2.inRange(self.im0, self.param_dict['bottom'][0],
                               self.param_dict['top'][0])
 
+class CannyGui(ParamGui):
 
+    def __init__(self, img):
+        self.grayscale = True
+        self.param_dict = {'p1': [1, 0, 255, 1],
+                           'p2': [1, 0, 255, 1]}
+        ParamGui.__init__(self, img)
+
+    def update(self):
+        self.im = cv2.Canny(self.im0,
+                            self.param_dict['p1'][0],
+                            self.param_dict['p2'][0])
 '''
 ------------------------------------------------------------------------------
 Double image display
