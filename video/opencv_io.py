@@ -4,6 +4,7 @@ import numpy as np
 import os
 #import pims
 import cv2
+from slicerator import Slicerator
 
 __all__ = ["WriteVideo", "ReadVideo", ]
 
@@ -102,6 +103,7 @@ class WriteVideo:
         # print('Video closed for writing')
 
 
+@Slicerator.from_class
 class ReadVideo:
     '''
     Class is designed to handle the reading of video.
@@ -153,7 +155,7 @@ class ReadVideo:
         vid.close()
     '''
 
-    def __init__(self, filename=None, grayscale=False):
+    def __init__(self, filename=None, grayscale=False, return_function=None):
         '''
         Initialise video reading object
         if filename = None user must select filename with dialogue
@@ -163,6 +165,7 @@ class ReadVideo:
                                         file_filter='*.avi;;*.MP4;;*.mp4;;*.tif;;*.*')
         self.filename = filename
         self.grayscale = grayscale
+        self.return_func = return_function
         self._detect_file_type()
         self.open_video()
         self.get_vid_props()
@@ -242,20 +245,18 @@ class ReadVideo:
         if ret:
             if self.grayscale:
                 return images.bgr_2_grayscale(img)
+            if self.return_func:
+                return self.return_func(img)
             else:
                 return img
         else:
             print('Error reading the frame. Check path and filename carefully')
 
-    def frames(self, start=None, n=None):
-        """Iterator for frames"""
-        if start != None:
-            self.set_frame(start)
-        if n == None:
-            n = self.num_frames
-        for f in range(n):
-            frame = self.read_next_frame()
-            yield frame, f
+    def __getitem__(self, item):
+        return self.find_frame(item)
+
+    def __len__(self):
+        return self.num_frames
 
     def find_frame(self, frame_num):
         '''searches for specific frame and reads it'''
