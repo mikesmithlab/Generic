@@ -1,9 +1,7 @@
 import time
-from picoscope import ps2000
 
 import numpy as np
-import time
-import matplotlib.pyplot as plt
+from picoscope import ps2000
 
 """
 Uses https://github.com/colinoflynn/pico-python
@@ -35,7 +33,7 @@ class Scope:
             self.ps.runBlock()
             self.ps.waitReady()
             data = self.ps.getDataV('A', self.nSamples, returnOverflow=False)
-            vrange = np.max(data)
+            vrange = np.max(data) * 1.5
             channelRange = self.ps.setChannel('A', 'AC', vrange, 0.0,
                                               enabled=True, BWLimited=False)
         self.ps.runBlock()
