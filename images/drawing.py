@@ -1,16 +1,17 @@
 import cv2
 import numpy as np
 import pygame
+import scipy.spatial as sp
 from matplotlib import cm
+
 from . import *
 from .colors import *
 
-import scipy.spatial as sp
-
-
 __all__ = ['draw_voronoi_cells', 'draw_polygons', 'draw_polygon',
            'draw_delaunay_tess', 'draw_circle', 'draw_circles',
-           'draw_contours', 'check_image_depth', 'pygame_draw_circles', 'add_colorbar']
+           'draw_contours', 'check_image_depth', 'pygame_draw_circles',
+           'add_colorbar',
+           'put_text']
 
 
 def add_colorbar(im, cmap=cm.viridis):
@@ -20,12 +21,17 @@ def add_colorbar(im, cmap=cm.viridis):
     for b in bins[:-1]:
         im2[int(b):, :, :] = np.multiply(cmap(b / shp[0])[:3], 255)
 
-    labels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    for lbl in labels:
-        im2 = cv2.putText(im2, str(lbl), (shp[1] // 400, int(lbl * shp[0])),
-                          cv2.FONT_HERSHEY_SIMPLEX, 2, BLACK, 2,
-                          cv2.LINE_AA)
+    labels = ['.1', '.2', '.3', '.4', '.5', '.6', '.7', '.8', '.9']
+    for i, lbl in enumerate(labels):
+        im2 = put_text(im2, lbl, (shp[1] // 400, int((i + 1) / 10 * shp[0])),
+                       font_scale=2, thickness=2)
     return np.hstack((im, im2))
+
+
+def put_text(im, text, pos, font=cv2.FONT_HERSHEY_SIMPLEX, font_scale=2,
+             color=BLACK, thickness=1, line_type=cv2.LINE_AA):
+    return cv2.putText(im, str(text), pos, font, font_scale, color, thickness,
+                       line_type)
 
 def draw_voronoi_cells(img, points):
     """
