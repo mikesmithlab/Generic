@@ -13,7 +13,7 @@ from . import *
 
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
            'ContoursGui', 'RotatedBoxGui','DistanceTransformGui','WatershedGui', 'ParamGui',
-           'CannyGui']
+           'CannyGui', 'QtImageViewer', 'QWidgetMod']
 
 '''
 ------------------------------------------------------------------------------
