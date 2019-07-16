@@ -38,6 +38,7 @@ class Slider(QWidget):
         self.slider.setRange(start, end)
         self.slider.setSliderPosition(initial)
         self.slider.valueChanged[int].connect(self.slider_changed)
+        self.slider.setTickPosition(QSlider.TicksBelow)
 
         self.val_label = QLabel(parent)
         self.val_label.setText(str(initial / dpi))
