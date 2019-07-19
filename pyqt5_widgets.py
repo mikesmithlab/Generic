@@ -19,49 +19,58 @@ class Slider(QWidget):
             start=0,
             end=10,
             dpi=1,
-            initial=0,
-            mapping=None):
-        QWidget.__init__(self, parent)
-
+            initial=0):
+        initial *= dpi
         start *= dpi
         end *= dpi
-        initial *= dpi
 
-        self.dpi = dpi
-        self.function = function
-        self.checked = True
-        self.value = initial
-        self.mapping = mapping
+        self._function = function
+        self._dpi = dpi
+        self._sliderValue = initial
+        self._value = initial
 
-        lbl = QLabel(self)
-        lbl.setText(label)
+        QWidget.__init__(self, parent)
 
-        self.slider = QSlider(Qt.Horizontal, self)
-        self.slider.setRange(start, end)
-        self.slider.setSliderPosition(initial)
-        self.slider.valueChanged[int].connect(self.slider_changed)
-        self.slider.setTickPosition(QSlider.TicksBelow)
+        lbl = QLabel(label, parent=self)
 
-        self.val_label = QLabel(parent)
-        self.val_label.setText(str(initial / dpi))
+        slider = QSlider(Qt.Horizontal, self)
+        slider.setRange(start, end)
+        slider.setSliderPosition(initial)
+        slider.valueChanged[int].connect(self.sliderCallback)
+        slider.setTickPosition(QSlider.TicksBelow)
+
+        self.lbl = QLabel(str(initial / dpi), self)
 
         self.setLayout(QHBoxLayout())
         self.layout().addWidget(lbl)
-        self.layout().addWidget(self.slider)
-        self.layout().addWidget(self.val_label)
+        self.layout().addWidget(slider)
+        self.layout().addWidget(self.lbl)
 
-    def slider_changed(self, value):
-        if self.mapping is not None:
-            value = self.mapping[value]
-        self.value = value / self.dpi
-        self.val_label.setText(str(self.value))
-        self.call_function()
+    def sliderCallback(self, value):
+        value = self.calculateValue(value)
+        if self.value() is not None:
+            self.setValue(value)
+        self.setSliderValue(value)
+        self.callFunction()
 
-    def call_function(self):
-        if self.checked:
-            self.function(self.value)
-        else:
-            self.function(None)
+    def setValue(self, value):
+        self._value = value
+
+    def value(self):
+        return self._value
+
+    def setSliderValue(self, value):
+        self._sliderValue = value
+        self.lbl.setText(str(value))
+
+    def sliderValue(self):
+        return self._sliderValue
+
+    def calculateValue(self, value):
+        return value / self._dpi
+
+    def callFunction(self):
+        self._function(self.value())
 
 
 class CheckedSlider(Slider):
@@ -71,24 +80,19 @@ class CheckedSlider(Slider):
             parent,
             label,
             function,
-            start=0,
-            end=10,
-            dpi=1,
-            initial=0):
-        Slider.__init__(self, parent, label, function, start, end, dpi,
-                        initial)
-        self.checked = False
+            **kwargs):
+        Slider.__init__(self, parent, label, function, **kwargs)
+        self.setValue(None)
+        checkbox = QCheckBox(self)
+        checkbox.stateChanged.connect(self.checkboxCallback)
+        self.layout().addWidget(checkbox)
 
-        self.cb = QCheckBox(parent)
-        self.cb.stateChanged.connect(self.cb_changed)
-        self.layout().addWidget(self.cb)
-
-    def cb_changed(self, state):
+    def checkboxCallback(self, state):
         if state == Qt.Checked:
-            self.checked = True
+            self.setValue(self.sliderValue())
         else:
-            self.checked = False
-        self.call_function()
+            self.setValue(None)
+        self.callFunction()
 
 
 class ArraySlider(Slider):
@@ -100,7 +104,11 @@ class ArraySlider(Slider):
         initial = 0
         Slider.__init__(self, parent, label, function,
                         start=start, end=end, dpi=dpi,
-                        initial=initial, mapping=array)
+                        initial=initial)
+        self.array = array
+
+    def calculateValue(self, value):
+        return self.array[value]
 
 
 class ComboBox(QWidget):
