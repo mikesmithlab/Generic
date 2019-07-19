@@ -19,7 +19,8 @@ class Slider(QWidget):
             start=0,
             end=10,
             dpi=1,
-            initial=0):
+            initial=0,
+            mapping=None):
         QWidget.__init__(self, parent)
 
         start *= dpi
@@ -30,6 +31,7 @@ class Slider(QWidget):
         self.function = function
         self.checked = True
         self.value = initial
+        self.mapping = mapping
 
         lbl = QLabel(self)
         lbl.setText(label)
@@ -49,6 +51,8 @@ class Slider(QWidget):
         self.layout().addWidget(self.val_label)
 
     def slider_changed(self, value):
+        if self.mapping is not None:
+            value = self.mapping[value]
         self.value = value / self.dpi
         self.val_label.setText(str(self.value))
         self.call_function()
@@ -84,6 +88,19 @@ class CheckedSlider(Slider):
             self.checked = True
         else:
             self.checked = False
+        self.call_function()
+
+
+class ArraySlider(Slider):
+
+    def __init__(self, parent, label, function, array):
+        start = 0
+        end = len(array) - 1
+        dpi = 1
+        initial = 0
+        Slider.__init__(self, parent, label, function,
+                        start=start, end=end, dpi=dpi,
+                        initial=initial, mapping=array)
 
 
 class ComboBox(QWidget):
