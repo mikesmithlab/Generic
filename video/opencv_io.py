@@ -200,6 +200,10 @@ class ReadVideo:
             self.current_time = self.read_vid.get(cv2.CAP_PROP_POS_MSEC)
             self.width = int(self.read_vid.get(cv2.CAP_PROP_FRAME_WIDTH))
             self.height = int(self.read_vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            if self.read_vid.get(cv2.CAP_PROP_MONOCHROME) == 0.0:
+                self.colour = 3
+            else:
+                self.colour = 1
             self.fps = self.read_vid.get(cv2.CAP_PROP_FPS)
             self.format = self.read_vid.get(cv2.CAP_PROP_FORMAT)
             self.codec = self.read_vid.get(cv2.CAP_PROP_FOURCC)
@@ -207,6 +211,7 @@ class ReadVideo:
             self.num_frames = np.shape(self.read_vid)[0]
             self.width = np.shape(self.read_vid)[2]
             self.height = np.shape(self.read_vid)[1]
+            self.colour = np.shape(self.read_vid)
             self.current_time = 0
             self.fps = 0
             self.format = 0
@@ -224,6 +229,7 @@ class ReadVideo:
             print('current_time (ms) : ', self.current_time)
             print('width : ', self.width)
             print('height : ', self.height)
+            print('colour: ', self.colour)
             print('fps : ', self.fps)
             print('format : ', self.format)
             print('codec : ', self.codec)

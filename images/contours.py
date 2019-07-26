@@ -66,20 +66,25 @@ def cut_out_object(im, contour, buffer=3, setsurroundblack=False):
     h=h+2*buffer
     #Check not outside original images
     if colordepth == 1:
-        maxx, maxy = np.shape(im)
+        maxy, maxx  = np.shape(im)
     else:
-        maxx, maxy, _ = np.shape(im)
+        maxy, maxx, _ = np.shape(im)
     if x < 0:
         x = 0
     if y < 0:
         y = 0
     if y+h > maxy:
+        print('max')
+        print(maxy)
+        print(y)
         h = maxy - y
     if x+w > maxx:
         w = maxx - x
 
     if colordepth == 1:
+        print(x,y,w,h)
         cut_img = im[y:y+h, x:x+w]
+        print(np.shape(cut_img))
         if setsurroundblack:
             cut_img[0, :] = 0
             cut_img[:, 0] = 0
