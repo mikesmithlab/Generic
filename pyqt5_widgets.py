@@ -1,9 +1,11 @@
 import sys
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal, QRectF
+from PyQt5.QtGui import QPixmap, QImage, QPainterPath, QCloseEvent, QWheelEvent
 from PyQt5.QtWidgets import (QWidget, QSlider, QCheckBox, QHBoxLayout,
                              QLabel, QComboBox, QSizePolicy, QVBoxLayout,
-                             QApplication)
+                             QApplication, QGraphicsView, QGraphicsScene, 
+                             )
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, \
     NavigationToolbar2QT
 from matplotlib.figure import Figure
@@ -28,22 +30,24 @@ class Slider(QWidget):
         self._dpi = dpi
         self._sliderValue = initial
         self._value = initial
+        self._start = start
+        self._end = end
 
         QWidget.__init__(self, parent)
 
         lbl = QLabel(label, parent=self)
 
-        slider = QSlider(Qt.Horizontal, self)
-        slider.setRange(start, end)
-        slider.setSliderPosition(initial)
-        slider.valueChanged[int].connect(self.sliderCallback)
-        slider.setTickPosition(QSlider.TicksBelow)
+        self.slider = QSlider(Qt.Horizontal, self)
+        self.slider.setRange(start, end)
+        self.slider.setSliderPosition(initial)
+        self.slider.valueChanged[int].connect(self.sliderCallback)
+        self.slider.setTickPosition(QSlider.TicksBelow)
 
         self.lbl = QLabel(str(initial / dpi), self)
 
         self.setLayout(QHBoxLayout())
         self.layout().addWidget(lbl)
-        self.layout().addWidget(slider)
+        self.layout().addWidget(self.slider)
         self.layout().addWidget(self.lbl)
 
     def sliderCallback(self, value):
@@ -62,6 +66,9 @@ class Slider(QWidget):
     def setSliderValue(self, value):
         self._sliderValue = value
         self.lbl.setText(str(value))
+        
+    def setSliderRangeValues(self, start, end):
+        self.slider.setRange(start, end)
 
     def sliderValue(self):
         return self._sliderValue
@@ -196,6 +203,7 @@ class QtImageViewer(QGraphicsView):
     rightMouseButtonReleased = pyqtSignal(float, float)
     leftMouseButtonDoubleClicked = pyqtSignal(float, float)
     rightMouseButtonDoubleClicked = pyqtSignal(float, float)
+    scrollMouseButton = pyqtSignal(float)
 
     def __init__(self):
         QGraphicsView.__init__(self)
@@ -335,6 +343,12 @@ class QtImageViewer(QGraphicsView):
                 self.updateViewer()
             self.rightMouseButtonDoubleClicked.emit(scenePos.x(), scenePos.y())
         QGraphicsView.mouseDoubleClickEvent(self, event)
+        
+    def wheelEvent(self, event: QWheelEvent):
+        self.scrollMouseButton.emit(int(event.angleDelta().y()/120))
+        QGraphicsView.wheelEvent(self, event)
+        
+                
         
 if __name__ == "__main__":
     import numpy as np

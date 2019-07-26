@@ -1,18 +1,16 @@
 from Generic.video import ReadVideo
-from Generic.pyqt5_widgets import QtImageViewer
+from Generic.pyqt5_widgets import QtImageViewer, Slider
 from Generic.images import hstack
 import numpy as np
 import sys
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, 
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout,
                                  QWidget,
                                  QVBoxLayout, QAction, QLabel)
 from qimage2ndarray import array2qimage
 
-from Generic import pyqt5_widgets
-import cv2
 
 
 class MainWindow(QtImageViewer):
@@ -22,7 +20,6 @@ class MainWindow(QtImageViewer):
         self.filename=filename
         self.setup_main_window()
         self.load_vid()
-        #self.setup_main_widget()
 
         sys.exit(app.exec_())
 
@@ -34,10 +31,12 @@ class MainWindow(QtImageViewer):
         self.win = QWidget()
         self.vbox = QVBoxLayout(self.win)
 
+
         # Create Image viewer
         self.viewer_setup()
         self.vbox.addWidget(self.viewer)
-
+        self.framenum_slider = Slider(self.win, 'frame number', self.slider_update, 0, 5, 1)
+        self.vbox.addWidget(self.framenum_slider)
 
         # Finalise window
         self.win.setWindowTitle('ParamGui')
@@ -50,20 +49,11 @@ class MainWindow(QtImageViewer):
         self.viewer.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.viewer.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.viewer.leftMouseButtonPressed.connect(self.get_coords)
+        self.viewer.scrollMouseButton.connect(self._update_frame)
         self.viewer.canZoom = True
         self.viewer.canPan = True
         self.win.resize(1024, 720)
 
-
-
-
-
-    def setup_main_widget(self):
-        pass
-        #self.setCentralWidget(self.main_widget)
-        #vbox = QVBoxLayout(self.main_widget)
-
-        #vbox.addWidget(label)
 
     def setup_menubar(self):
         exitAct = QAction('&Exit', self)
@@ -90,14 +80,26 @@ class MainWindow(QtImageViewer):
         self.readvid=ReadVideo(filename=self.filename)
         self.filename = self.readvid.filename
         self.framenum = 0
+        self.framenum_slider.setSliderRangeValues(0, self.readvid.num_frames -1)
+        self.load_frame()
 
-        self.load_frame(self.framenum)
+    def slider_update(self, val):
+        print(val)
+        self.framenum = self.framenum_slider.value()
+        self.load_frame()
 
+    def _update_frame(self, wheel_change):
+        self.framenum = self.framenum + wheel_change
+        print(self.framenum)
+        if self.framenum < 0:
+            self.framenum = 0
+        elif self.framenum >= (self.readvid.num_frames - 1):
+            self.framenum =  (self.readvid.num_frames - 1)
 
-    def load_frame(self, framenum):
-        im = self.readvid.find_frame(framenum)
-        #img = cv2.cvtColor(self._display_img(im),
-        #                   cv2.COLOR_BGR2RGB)
+        self.load_frame()
+
+    def load_frame(self):
+        im = self.readvid.find_frame(self.framenum)
         pixmap = QPixmap.fromImage(array2qimage(im))
         self.viewer.setImage(pixmap)
 

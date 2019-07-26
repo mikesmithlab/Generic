@@ -5,7 +5,7 @@ import qimage2ndarray as qim
 from PyQt5.QtCore import Qt, pyqtSignal, QRectF, QT_VERSION_STR
 from PyQt5.QtGui import QPixmap, QImage, QPainterPath, QCloseEvent
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QApplication,
-                             QSlider, QHBoxLayout, QGraphicsView, QGraphicsScene,
+                             QSlider, QHBoxLayout, 
                              QFileDialog, QCheckBox)
 from Generic.pyqt5_widgets import QtImageViewer, QWidgetMod
 from skimage import filters
