@@ -84,6 +84,7 @@ class CheckedSlider(Slider):
             self.checked = True
         else:
             self.checked = False
+            self.slider_changed(0)
 
 
 class ComboBox(QWidget):

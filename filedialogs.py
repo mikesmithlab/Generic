@@ -5,8 +5,9 @@ import glob
 
 
 def create_directory(caption='Create Directory',
-                     directory='/home/ppxjd3/Videos/'):
-    app = QApplication(sys.argv)
+                     directory='/home/ppxjd3/Videos/',parent=None):
+    if parent is None:
+        app = QApplication(sys.argv)
     output = QFileDialog.getSaveFileName(parent=None,
                                          caption=caption,
                                          directory=directory)
@@ -16,9 +17,10 @@ def create_directory(caption='Create Directory',
 
 
 def open_directory(caption='Select Directory',
-                   directory='/home/ppxjd3/Videos'):
-    app = QApplication(sys.argv)
-    output = QFileDialog.getExistingDirectory(parent=None,
+                   directory='/home/ppxjd3/Videos', parent=None):
+    if parent is None:
+        app = QApplication(sys.argv)
+    output = QFileDialog.getExistingDirectory(parent=parent,
                                               caption=caption,
                                               directory=directory)
     return output
@@ -26,7 +28,7 @@ def open_directory(caption='Select Directory',
 
 def save_filename(caption='Save File',
                   directory='/home/ppxjd3/Code/Generic/',
-                  file_filter='*.mp4;;*.avi'):
+                  file_filter='*.mp4;;*.avi',parent=None):
     """
     Choose a save filename using a dialog.
 
@@ -46,7 +48,8 @@ def save_filename(caption='Save File',
     filename: str
         The save filename including path and extension
     """
-    app = QApplication(sys.argv)
+    if parent is None:
+        app = QApplication(sys.argv)
     output = QFileDialog.getSaveFileName(parent=None,
                                          caption=caption,
                                          directory=directory,
@@ -62,7 +65,7 @@ def save_filename(caption='Save File',
 def load_filename(caption='Find a filename',
                   directory='/home/ppxjd3/Code/Generic/',
                   file_filter='*.*;;*.png;;*.jpg',
-                  remove_ext=False):
+                  remove_ext=False, parent=None):
     """
     Choose a load filename using a dialog.
 
@@ -82,7 +85,8 @@ def load_filename(caption='Find a filename',
     filename: str
         The load filename including path and extension
     """
-    app = QApplication(sys.argv)
+    if parent is None:
+        app = QApplication(sys.argv)
     filename = QFileDialog.getOpenFileName(parent=None,
                                            caption=caption,
                                            directory=directory,
@@ -141,9 +145,9 @@ class BatchProcess:
        function_of_script(filename)
     """
 
-    def __init__(self, pathfilter=None):
+    def __init__(self, pathfilter=None, parent=None):
         if pathfilter is None:
-            filename = load_filename(caption='Select file in directory')
+            filename = load_filename(caption='Select file in directory',parent=parent)
             path = os.path.split(filename)[0]
             file, extension = os.path.splitext(filename)
             extension = '*' + extension
