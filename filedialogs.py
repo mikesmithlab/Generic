@@ -6,7 +6,8 @@ import glob
 
 def create_directory(caption='Create Directory',
                      directory='/home/ppxjd3/Videos/', parent=None):
-    app = QApplication(sys.argv)
+    if parent is None:
+        app = QApplication(sys.argv)
     output = QFileDialog.getSaveFileName(parent=parent,
                                          caption=caption,
                                          directory=directory)
@@ -17,7 +18,8 @@ def create_directory(caption='Create Directory',
 
 def open_directory(caption='Select Directory',
                    directory='/home/ppxjd3/Videos', parent=None):
-    app = QApplication(sys.argv)
+    if parent is None:
+        app = QApplication(sys.argv)
     output = QFileDialog.getExistingDirectory(parent=parent,
                                               caption=caption,
                                               directory=directory)
@@ -46,7 +48,8 @@ def save_filename(caption='Save File',
     filename: str
         The save filename including path and extension
     """
-    app = QApplication(sys.argv)
+    if parent is None:
+        app = QApplication(sys.argv)
     output = QFileDialog.getSaveFileName(parent=parent,
                                          caption=caption,
                                          directory=directory,
@@ -82,7 +85,8 @@ def load_filename(caption='Find a filename',
     filename: str
         The load filename including path and extension
     """
-    app = QApplication(sys.argv)
+    if parent is None:
+        app = QApplication(sys.argv)
     filename = QFileDialog.getOpenFileName(parent=parent,
                                            caption=caption,
                                            directory=directory,
