@@ -90,9 +90,9 @@ class CheckedSlider(Slider):
             **kwargs):
         Slider.__init__(self, parent, label, function, **kwargs)
         self.setValue(None)
-        checkbox = QCheckBox(self)
-        checkbox.stateChanged.connect(self.checkboxCallback)
-        self.layout().addWidget(checkbox)
+        self.checkbox = QCheckBox(self)
+        self.checkbox.stateChanged.connect(self.checkboxCallback)
+        self.layout().addWidget(self.checkbox)
 
     def checkboxCallback(self, state):
         if state == Qt.Checked:
