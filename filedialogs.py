@@ -5,10 +5,10 @@ import glob
 
 
 def create_directory(caption='Create Directory',
-                     directory='/home/ppxjd3/Videos/',parent=None):
+                     directory='/home/ppxjd3/Videos/', parent=None):
     if parent is None:
         app = QApplication(sys.argv)
-    output = QFileDialog.getSaveFileName(parent=None,
+    output = QFileDialog.getSaveFileName(parent=parent,
                                          caption=caption,
                                          directory=directory)
     file, extension = os.path.splitext(output[0])
@@ -28,7 +28,7 @@ def open_directory(caption='Select Directory',
 
 def save_filename(caption='Save File',
                   directory='/home/ppxjd3/Code/Generic/',
-                  file_filter='*.mp4;;*.avi',parent=None):
+                  file_filter='*.mp4;;*.avi', parent=None):
     """
     Choose a save filename using a dialog.
 
@@ -50,7 +50,7 @@ def save_filename(caption='Save File',
     """
     if parent is None:
         app = QApplication(sys.argv)
-    output = QFileDialog.getSaveFileName(parent=None,
+    output = QFileDialog.getSaveFileName(parent=parent,
                                          caption=caption,
                                          directory=directory,
                                          filter=file_filter)
@@ -87,7 +87,7 @@ def load_filename(caption='Find a filename',
     """
     if parent is None:
         app = QApplication(sys.argv)
-    filename = QFileDialog.getOpenFileName(parent=None,
+    filename = QFileDialog.getOpenFileName(parent=parent,
                                            caption=caption,
                                            directory=directory,
                                            filter=file_filter)[0]
@@ -147,7 +147,7 @@ class BatchProcess:
 
     def __init__(self, pathfilter=None, parent=None):
         if pathfilter is None:
-            filename = load_filename(caption='Select file in directory',parent=parent)
+            filename = load_filename(caption='Select file in directory', parent=parent)
             path = os.path.split(filename)[0]
             file, extension = os.path.splitext(filename)
             extension = '*' + extension
