@@ -4,7 +4,8 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRectF
 from PyQt5.QtGui import QPixmap, QImage, QPainterPath, QCloseEvent, QWheelEvent
 from PyQt5.QtWidgets import (QWidget, QSlider, QCheckBox, QHBoxLayout,
                              QLabel, QComboBox, QSizePolicy, QVBoxLayout,
-                             QApplication, QGraphicsView, QGraphicsScene, 
+                             QApplication, QGraphicsView, QGraphicsScene,
+                             QLineEdit
                              )
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, \
     NavigationToolbar2QT
@@ -89,15 +90,18 @@ class CheckedSlider(Slider):
             function,
             **kwargs):
         Slider.__init__(self, parent, label, function, **kwargs)
-        self.setValue(None)
-        checkbox = QCheckBox(self)
-        checkbox.stateChanged.connect(self.checkboxCallback)
-        self.layout().addWidget(checkbox)
+        self.check=None
+        self.setValue(self.check)
+        self.checkbox = QCheckBox(self)
+        self.checkbox.stateChanged.connect(self.checkboxCallback)
+        self.layout().addWidget(self.checkbox)
 
     def checkboxCallback(self, state):
         if state == Qt.Checked:
+            self.check=True
             self.setValue(self.sliderValue())
         else:
+            self.check=False
             self.setValue(None)
         self.callFunction()
 
@@ -117,6 +121,22 @@ class ArraySlider(Slider):
     def calculateValue(self, value):
         return self.array[value]
 
+class LblEdit(QWidget):
+    def __init__(self, parent, label, initial, function):
+        QWidget.__init__(self, parent)
+        self.setLayout(QVBoxLayout())
+        self.value=str(initial)
+        self.function = function
+        self.lbl = QLabel(label, parent)
+        self.edit = QLineEdit(parent)
+        self.edit.setText(self.value)
+        self.edit.returnPressed.connect(self.edit_callback)
+        self.layout().addWidget(self.lbl)
+        self.layout().addWidget(self.edit)
+
+    def edit_callback(self):
+        self.value = int(self.edit.text())
+        self.function(self.value)
 
 class ComboBox(QWidget):
 
