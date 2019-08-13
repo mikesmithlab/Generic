@@ -26,8 +26,11 @@ fit_dict = {
             'sin_cos': ('f(x) = asin(bx)+bcos(cx)+d', 4),
             'gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2))', 3),
             'dbl_gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2)) + dexp(-(x-e)**2/(2f**2))', 6),
+            'triple_gaussian': ('f(x) = aexp(-(x-b)**2/(2c**2)) + dexp(-(x-e)**2/(2f**2)) + gexp(-(x-h)**2/(2j**2))', 9),
             'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3),
-            'axb':('f(x)=a(x)**b',2)
+            'axb':('f(x)=a(x)**b',2),
+            'lorentzian':('f(x)=(c)*(a/2)**2/((x-b)**2 + (a/2)**2)', 3),
+            'triple_lorentzian':('f(x)=(c)*(a/2)**2/((x-b)**2 + (a/2)**2) + (f)*(d/2)**2/((x-e)**2 + (d/2)**2) + (j)*(g/2)**2/((x-h)**2 + (g/2)**2)', 9)
            }
 
 '''
@@ -81,7 +84,31 @@ def double_flipped_exponential(x, a, b, c, d, e, f, g):
 '''
 Probability distributions
 '''
+def lorentzian(x, a, b, c):
+    return (c)*(a/2)/((x-b)**2 + (a/2)**2)
 
+def lorentzian_guess(x, y):
+    b = x[np.argmax(y)]
+    a = np.std(x)
+    c = np.max(y)
+    return [a, b, c]
+
+def triple_lorentzian(x, a, b, c, d, e, f, g, h, j):
+     return (c * (a / 2)**2 / ((x - b)**2 + (a / 2)**2)) \
+            + f * (d / 2)**2 / ((x - e)**2 + (d / 2)**2) \
+            + j * (g / 2)**2 / ((x - h)**2 + (g / 2)**2)
+
+def triple_lorentzian_guess(x, y):
+    c = np.max(y) / 2
+    f = np.max(y) / 2
+    j = np.max(y / 2)
+    b = np.mean(x)
+    e = np.mean(x) + np.std(x)
+    h = np.mean(x) - np.std(x)
+    a = np.std(x) / 2
+    d = np.std(x) / 2
+    g = np.std(x) / 2
+    return [a, b, c, d, e, f, g, h, j]
 
 def gaussian(x, a, b, c):
     return a*np.exp(-(x-b)**2/(2*c**2))
@@ -97,6 +124,8 @@ def gaussian_guess(x, y):
     c = 0.5*np.sqrt((1/N)*np.sum(y*(x-b)**2))
     return [a, b, c]
 
+def area_gaussian(a,c):
+    return np.sqrt(2*np.pi)*a*np.abs(c)
 
 def dbl_gaussian(x,a,b,c,d,e,f):
     return a*np.exp(-(x-b)**2/(2*c**2)) + d*np.exp(-(x-e)**2/(2*f**2))
@@ -110,6 +139,23 @@ def dbl_gaussian_guess(x, y):
     c = np.std(x)/2
     f = np.std(x)
     return [a, b, c, d, e, f]
+
+def triple_gaussian(x,a,b,c,d,e,f,g,h,j):
+    return a*np.exp(-(x-b)**2/(2*c**2)) + d*np.exp(-(x-e)**2/(2*f**2)) + g*np.exp(-(x-h)**2/(2*j**2))
+
+
+def triple_gaussian_guess(x, y):
+    a = np.max(y)/2
+    d = np.max(y)/2
+    g = np.max(y/2)
+    b = np.mean(x)
+    e = np.mean(x)+ np.std(x)
+    h = np.mean(x)- np.std(x)
+    c = np.std(x)/2
+    f = np.std(x)/2
+    j = np.std(x)/2
+
+    return [a, b, c, d, e, f, g, h, j]
 
 
 
@@ -249,6 +295,7 @@ class Fit:
         self._lower=lower
         self._upper=upper
         self._replace_none_fixed()
+        print(self._params)
 
     def _guess_params(self):
         try:
@@ -297,7 +344,6 @@ class Fit:
         self.fy = self.y[logic]
 
     def fit(self, interpolation_factor=1.0, errors=False):
-
         fit_output = optimize.curve_fit(globals()[self.fit_type],
                                         self.fx,
                                         self.fy,
@@ -375,12 +421,18 @@ class Fit:
     def plot_fit(self, filename=None, residuals=False, title=None, xlabel=None, ylabel=None, show=True, save=False):
         if filename is None:
             filename = ' '
-        if xlabel is None:
+        if self.xlabel is None and xlabel is None:
             self.xlabel=''
-        if ylabel is None:
+        elif title is not None:
+            self.xlabel = xlabel
+        if self.ylabel is None and ylabel is None:
             self.ylabel=''
-        if title is None:
+        elif ylabel is not None:
+            self.ylabel = ylabel
+        if self.title is None and title is None:
             self.title=''
+        elif title is not None:
+            self.title = title
 
         if residuals:
             self.plot_obj = Plotter(subplot=(2, 1))
