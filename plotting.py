@@ -198,13 +198,13 @@ def get_key(marker, linestyle, color):
     return key
 
 
-def histogram(data, bins=10, marker='rx', normalise=False, ax=None, show=False):
+def histogram(data, bins=10, range=(None, None), marker='rx', normalise=False, ax=None, show=False):
     """
     If you feed a sequence to bins it will use these as the binedges
     """
     if ax is None:
         fig, ax = plt.subplots()
-    freq, binedges = np.histogram(data, bins=bins, density=normalise)
+    freq, binedges = np.histogram(data, bins=bins, range=range, density=normalise)
     if normalise:
         freq = freq / np.sum(freq)
 

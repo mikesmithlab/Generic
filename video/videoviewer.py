@@ -90,13 +90,14 @@ class MainWindow(QtImageViewer):
 
     def _update_frame(self, wheel_change):
         self.framenum = self.framenum + wheel_change
-        print(self.framenum)
         if self.framenum < 0:
             self.framenum = 0
         elif self.framenum >= (self.readvid.num_frames - 1):
             self.framenum =  (self.readvid.num_frames - 1)
-
+        self.framenum_slider.sliderCallback(self.framenum)
         self.load_frame()
+
+
 
     def load_frame(self):
         im = self.readvid.find_frame(self.framenum)
@@ -113,6 +114,6 @@ class MainWindow(QtImageViewer):
         print('cursor position (x, y) = ({}, {})'.format(int(x), int(y)))
 
 if __name__ == "__main__":
-
-    main = MainWindow(filename='/media/ppzmis/data/ActiveMatter/Microscopy/190709MRaggregates/videos/test2_annotated.mp4')
+    main = MainWindow(filename='/media/NAS/ActiveMatter/bacteriadata/Alessandro/bacteriaswarm.mp4')
+    #main = MainWindow(filename='/media/ppzmis/data/ActiveMatter/Microscopy/190709MRaggregates/videos/test2_annotated.mp4')
 

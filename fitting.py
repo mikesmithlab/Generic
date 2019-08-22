@@ -30,7 +30,7 @@ fit_dict = {
             'poisson': ('f(x)=a*(b**c)*exp(-b)/c!', 3),
             'axb':('f(x)=a(x)**b',2),
             'lorentzian':('f(x)=(c)*(a/2)**2/((x-b)**2 + (a/2)**2)', 3),
-            'triple_lorentzian':('f(x)=(c)*(a/2)**2/((x-b)**2 + (a/2)**2) + (f)*(d/2)**2/((x-e)**2 + (d/2)**2) + (j)*(g/2)**2/((x-h)**2 + (g/2)**2)', 9)
+            'triple_lorentzian':('f(x)=(c)*(a/2)/((x-b)**2 + (a/2)**2) + (f)*(d/2)/((x-e)**2 + (d/2)**2) + (j)*(g/2)/((x-h)**2 + (g/2)**2)', 9)
            }
 
 '''
@@ -94,9 +94,9 @@ def lorentzian_guess(x, y):
     return [a, b, c]
 
 def triple_lorentzian(x, a, b, c, d, e, f, g, h, j):
-     return (c * (a / 2)**2 / ((x - b)**2 + (a / 2)**2)) \
-            + f * (d / 2)**2 / ((x - e)**2 + (d / 2)**2) \
-            + j * (g / 2)**2 / ((x - h)**2 + (g / 2)**2)
+     return (c * (a / 2) / ((x - b)**2 + (a / 2)**2)) \
+            + f * (d / 2) / ((x - e)**2 + (d / 2)**2) \
+            + j * (g / 2) / ((x - h)**2 + (g / 2)**2)
 
 def triple_lorentzian_guess(x, y):
     c = np.max(y) / 2
@@ -130,7 +130,6 @@ def area_gaussian(a,c):
 def dbl_gaussian(x,a,b,c,d,e,f):
     return a*np.exp(-(x-b)**2/(2*c**2)) + d*np.exp(-(x-e)**2/(2*f**2))
 
-
 def dbl_gaussian_guess(x, y):
     a = np.max(y)/2
     d = np.max(y)/2
@@ -157,7 +156,20 @@ def triple_gaussian_guess(x, y):
 
     return [a, b, c, d, e, f, g, h, j]
 
+def lorentz_dblgaussian(x, a, b, c, d,e,f,g,h,j):
+    return a*(c/2)**2/((x-b)**2 + (c/2)**2) + d*np.exp(-(x-e)**2/(2*f**2)) + g*np.exp(-(x-h)**2/(2*j**2))
 
+def lorentz_dblgaussian_guess(x, y):
+    a = np.max(y) / 2
+    d = np.max(y) / 2
+    g = np.max(y / 2)
+    b = np.mean(x)
+    e = np.mean(x) + np.std(x)
+    h = np.mean(x) - np.std(x)
+    c = np.std(x) / 2
+    f = np.std(x) / 2
+    j = np.std(x) / 2
+    return [a,b,c,d,e,f,g,h,j]
 
 '''
 sin wave fitting is incredibly sensitive to phase c so use the following form
@@ -258,8 +270,13 @@ class Fit:
     """
     
     def __init__(self, fit_type,x=None,y=None, xlabel='x',ylabel='y'):
+        self.filename = None
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.title = None
         self.fit_type = fit_type
         self.fit_string, self._num_fit_params = fit_dict[fit_type]
+
         if x is not None:
             self.add_fit_data(x=x,y=y,xlabel=xlabel,ylabel=ylabel)
 
@@ -419,11 +436,13 @@ class Fit:
         return lim
 
     def plot_fit(self, filename=None, residuals=False, title=None, xlabel=None, ylabel=None, show=True, save=False):
-        if filename is None:
+        if self.filename is None and filename is None:
             filename = ' '
+        elif filename is not None:
+            self.filename = filename
         if self.xlabel is None and xlabel is None:
             self.xlabel=''
-        elif title is not None:
+        elif xlabel is not None:
             self.xlabel = xlabel
         if self.ylabel is None and ylabel is None:
             self.ylabel=''
