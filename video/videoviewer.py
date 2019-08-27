@@ -114,6 +114,6 @@ class MainWindow(QtImageViewer):
         print('cursor position (x, y) = ({}, {})'.format(int(x), int(y)))
 
 if __name__ == "__main__":
-    main = MainWindow(filename='/media/NAS/ActiveMatter/bacteriadata/Alessandro/bacteriaswarm.mp4')
+    main = MainWindow(filename='/media/ppzmis/data/ActiveMatter/Microscopy/190820bacteriaand500nmparticles/videos/joined/StreamDIC003.mp4')
     #main = MainWindow(filename='/media/ppzmis/data/ActiveMatter/Microscopy/190709MRaggregates/videos/test2_annotated.mp4')
 

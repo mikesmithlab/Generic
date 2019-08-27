@@ -97,7 +97,7 @@ def load_filename(caption='Find a filename',
     return filename
 
 
-def get_files_directory(path, full_filenames=True):
+def get_files_directory(path, full_filenames=True, reverse_sort=False):
     """
     Gets list of files from a directory
 
@@ -121,6 +121,8 @@ def get_files_directory(path, full_filenames=True):
     file_list = get_files_directory('~/*.png')
     """
     filename_list = glob.glob(path)
+    filename_list.sort(reverse=reverse_sort)
+
     if full_filenames == True:
         return filename_list
     else:
@@ -145,7 +147,7 @@ class BatchProcess:
        function_of_script(filename)
     """
 
-    def __init__(self, pathfilter=None, parent=None):
+    def __init__(self, pathfilter=None, parent=None, reverse_sort=False):
         if pathfilter is None:
             filename = load_filename(caption='Select file in directory', parent=parent)
             path = os.path.split(filename)[0]
@@ -153,7 +155,7 @@ class BatchProcess:
             extension = '*' + extension
             pathfilter = os.path.join(path, extension)
 
-        self.filenames = get_files_directory(pathfilter)
+        self.filenames = get_files_directory(pathfilter, reverse_sort=reverse_sort)
         self.num_files = len(self.filenames)
         self.current = 0
 
