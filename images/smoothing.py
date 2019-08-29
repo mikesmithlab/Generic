@@ -1,7 +1,7 @@
 import cv2
 
 
-__all__ = ['gaussian_blur']
+__all__ = ['gaussian_blur', 'median_blur']
 
 
 def gaussian_blur(img, kernel=(3, 3)):
