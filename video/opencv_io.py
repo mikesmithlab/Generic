@@ -1,10 +1,12 @@
-from Generic import images
-from Generic import filedialogs as fd
-import numpy as np
 import os
-#import pims
+
+# import pims
 import cv2
+import numpy as np
 from slicerator import Slicerator
+
+from Generic import filedialogs as fd
+from Generic import images
 
 __all__ = ["WriteVideo", "ReadVideo", ]
 
@@ -89,6 +91,12 @@ class WriteVideo:
             print('Prob a compatability problem between codec '
                   'and format. Grayscale images are more fussy')
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
     def add_frame(self, img):
         if self.frame_size == np.shape(img):
             if np.size(self.frame_size) == 2:
@@ -169,6 +177,12 @@ class ReadVideo:
         self._detect_file_type()
         self.open_video()
         self.get_vid_props()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def _detect_file_type(self):
         _, self.ext = os.path.splitext(self.filename)
