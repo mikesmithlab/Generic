@@ -63,6 +63,11 @@ def axb(x,a,b):
     '''Simple power law'''
     return a*(x)**b
 
+def axb_guess(x, y):
+    a = (np.max(y)-np.min(y))/(np.max(x)-np.min(x))
+    b = 0
+    return [a, b]
+
 '''
 Exponential functions
 '''
@@ -315,6 +320,8 @@ class Fit:
         print(self._params)
 
     def _guess_params(self):
+        print('test')
+        print(globals()[self.fit_type])
         try:
             guess = globals()[self.fit_type + '_guess'](self.fx, self.fy)
             self._params = guess

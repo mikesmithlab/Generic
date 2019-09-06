@@ -41,7 +41,7 @@ class ReadVideoFFMPEG:
 
 class WriteVideoFFMPEG:
 
-    def __init__(self, filename, speed='superfast', bitrate='LOW4K'):
+    def __init__(self, filename, speed='superfast', bitrate='LOW4K', framerate=50.0):
         self.filename = filename
         self.frame_no = 0
         bitrates = {
@@ -52,6 +52,7 @@ class WriteVideoFFMPEG:
             'MEDIUM1080': '10000k',
             'HIGH1080': '20000k'}
         self.video_bitrate = bitrates[bitrate]
+        self.framerate=framerate
         self.preset = speed
 
     def add_frame(self, frame):
@@ -84,7 +85,7 @@ class WriteVideoFFMPEG:
                 vcodec='libx264',
                 preset=self.preset,
                 video_bitrate=self.video_bitrate,
-                r=50  # framerate
+                r=self.framerate
             )
             .overwrite_output()
             .run_async(

@@ -21,9 +21,9 @@ class Annotator:
         self.width = self.cap.width
         self.height = self.cap.height
 
-    def annotate(self, bitrate='HIGH1080'):
+    def annotate(self, bitrate='HIGH1080', framerate=50):
         self.out = video.WriteVideoFFMPEG(self.output_filename,
-                                          bitrate=bitrate)
+                                          bitrate=bitrate, framerate=framerate)
         for f in tqdm(range(self.cap.num_frames), 'Annotation '+self.parameter):
 
             frame = self.read_frame()

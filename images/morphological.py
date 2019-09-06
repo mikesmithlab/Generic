@@ -39,6 +39,8 @@ def dilate(img, kernel=(3, 3), kernel_type=None, iterations=1):
     """
     if kernel_type is not None:
         kernel = cv2.getStructuringElement(kernel_type, kernel)
+    else:
+        kernel = np.ones(kernel)
     out = cv2.dilate(img, kernel, iterations=iterations)
     return out
 
@@ -77,6 +79,8 @@ def erode(img, kernel=(3, 3), kernel_type=None, iterations=1):
     """
     if kernel_type is not None:
         kernel = cv2.getStructuringElement(kernel_type, kernel)
+    else:
+        kernel=np.ones(kernel)
     out = cv2.erode(img, kernel, iterations)
     return out
 
@@ -125,6 +129,8 @@ def opening(img, kernel=(3, 3), kernel_type=None, iterations=1):
     """
     if kernel_type is not None:
         kernel = cv2.getStructuringElement(kernel_type, kernel)
+    else:
+        kernel = np.ones(kernel)
     out = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=iterations)
     return out
 
