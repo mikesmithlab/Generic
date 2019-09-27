@@ -330,6 +330,7 @@ class FrameReadingError(Exception):
         print('check you have height and width the correct way round')
 
 
+
 if __name__ == '__main__':
     cam_num = find_camera_number()
     web_cam = Camera(cam_type=LOGITECH, cam_num=cam_num)

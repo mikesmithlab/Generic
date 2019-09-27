@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Zoom setting. values 35-105
+gphoto2 --set-config="Focal Length"=60
+
+#Autofocus, 0=off, 1=on
+gphoto2 --set-config="Autofocus"=1 
+
+#0 = Flash auto, 1= Flash off, 2 Full flash, 3 Red-eye automatic
+gphoto2 --set-config="Flash Mode"=1
+
+
