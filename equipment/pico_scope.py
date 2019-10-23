@@ -19,26 +19,31 @@ class Scope:
         sampling_interval = obs_duration / 4096
         (self.actualSamplingInterval, self.nSamples, maxSamples) = \
             self.ps.setSamplingInterval(sampling_interval, obs_duration)
-        channelRange = self.ps.setChannel('A', 'AC', 2.0, 0.0, enabled=True,
+        print('actual sampling interval = ', self.actualSamplingInterval)
+        print('nsamples = ', self.nSamples)
+        self.ps.setChannel('A', 'AC', 2.0, 0.0, enabled=True,
                                      BWLimited=False)
         self.ps.setSimpleTrigger('A', 0, 'Falling', timeout_ms=100,
                                  enabled=True)
+        self.ps.setChannel('B', 'AC', 2.0, 0.0, enabled=True, BWLimited=False)
+        self.ps.setSimpleTrigger('B', 0, 'Falling', timeout_ms=100,
+                                 enabled=True)
 
-
-    def get_V(self, refine_range=False):
+    def get_V(self, refine_range=False, channel='A'):
         s = time.time()
         if refine_range:
-            channelRange = self.ps.setChannel('A', 'AC', 2.0, 0.0,
+            channelRange = self.ps.setChannel(channel, 'AC', 2.0, 0.0,
                                               enabled=True, BWLimited=False)
             self.ps.runBlock()
             self.ps.waitReady()
-            data = self.ps.getDataV('A', self.nSamples, returnOverflow=False)
+            data = self.ps.getDataV(channel, self.nSamples,
+                                    returnOverflow=False)
             vrange = np.max(data) * 1.5
-            channelRange = self.ps.setChannel('A', 'AC', vrange, 0.0,
+            channelRange = self.ps.setChannel(channel, 'AC', vrange, 0.0,
                                               enabled=True, BWLimited=False)
         self.ps.runBlock()
         self.ps.waitReady()
-        data = self.ps.getDataV('A', self.nSamples, returnOverflow=False)
+        data = self.ps.getDataV(channel, self.nSamples, returnOverflow=False)
         times = np.arange(self.nSamples)*self.actualSamplingInterval
         return times, data, time.time() - s
 
