@@ -186,7 +186,7 @@ class ReadVideo:
 
     def _detect_file_type(self):
         _, self.ext = os.path.splitext(self.filename)
-        if self.ext in ['.MP4', '.mp4', '.avi']:
+        if self.ext in ['.MP4', '.mp4', '.m4v','.avi']:
             self.filetype = 'video'
 
         elif self.ext in ['.tif']:
@@ -198,38 +198,25 @@ class ReadVideo:
     def open_video(self):
         '''Creates a video Object for reading'''
         self.frame_num = 0
-        if self.filetype == 'video':
-            self.read_vid = cv2.VideoCapture(self.filename)
-        elif self.filetype == 'img_seq':
-            pass
-            #self.read_vid = pims.open(self.filename)
-        else:
-            print('Error in open_video')
+        self.read_vid = cv2.VideoCapture(self.filename)
 
     def get_vid_props(self, show=False):
 
-        if self.filetype is 'video':
-            self.frame_num = self.read_vid.get(cv2.CAP_PROP_POS_FRAMES)
-            self.num_frames = int(self.read_vid.get(cv2.CAP_PROP_FRAME_COUNT))
-            self.current_time = self.read_vid.get(cv2.CAP_PROP_POS_MSEC)
-            self.width = int(self.read_vid.get(cv2.CAP_PROP_FRAME_WIDTH))
-            self.height = int(self.read_vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            if self.read_vid.get(cv2.CAP_PROP_MONOCHROME) == 0.0:
-                self.colour = 3
-            else:
-                self.colour = 1
-            self.fps = self.read_vid.get(cv2.CAP_PROP_FPS)
-            self.format = self.read_vid.get(cv2.CAP_PROP_FORMAT)
-            self.codec = self.read_vid.get(cv2.CAP_PROP_FOURCC)
-        elif self.filetype is 'img_seq':
-            self.num_frames = np.shape(self.read_vid)[0]
-            self.width = np.shape(self.read_vid)[2]
-            self.height = np.shape(self.read_vid)[1]
-            self.colour = np.shape(self.read_vid)
-            self.current_time = 0
-            self.fps = 0
-            self.format = 0
-            self.codec = 0
+
+        self.frame_num = self.read_vid.get(cv2.CAP_PROP_POS_FRAMES)
+        self.num_frames = int(self.read_vid.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.current_time = self.read_vid.get(cv2.CAP_PROP_POS_MSEC)
+        self.width = int(self.read_vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.height = int(self.read_vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if self.read_vid.get(cv2.CAP_PROP_MONOCHROME) == 0.0:
+            self.colour = 3
+            self.frame_size=(self.height,self.width,3)
+        else:
+            self.colour = 1
+            self.frame_size = (self.width, self.height)
+        self.fps = self.read_vid.get(cv2.CAP_PROP_FPS)
+        self.format = self.read_vid.get(cv2.CAP_PROP_FORMAT)
+        self.codec = self.read_vid.get(cv2.CAP_PROP_FOURCC)
 
         self.file_extension = self.filename.split('.')[1]
 
@@ -254,13 +241,8 @@ class ReadVideo:
 
     def read_next_frame(self):
         '''reads the next available frame'''
-        if self.filetype == 'video':
-            ret, img = self.read_vid.read()
-        elif self.filetype == 'img_seq':
-            ret = True
-            img = self.read_vid[self.frame_num]
-        else:
-            ret = False
+        ret, img = self.read_vid.read()
+
         self.frame_num = self.frame_num + 1
         if ret:
             if self.grayscale:

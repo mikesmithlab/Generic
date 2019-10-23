@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 from math import pi, cos, sin
 from Generic import images
 import scipy.optimize as op
@@ -101,15 +100,6 @@ def cut_out_object(im, contour, buffer=3, setsurroundblack=False):
 
 
     return cut_img, (x,y,w,h)
-
-def hough_ellipse(img, a,b):
-    """
-    https://scikit-image.org/docs/dev/auto_examples/edges/plot_circular_elliptical_hough_transform.html
-    :param img: grayscale image
-    :param a: = max_size ellipse
-    :param b: = min_size ellipse
-    :return:
-    """
 
 def biggest_contour(cnts):
     pass

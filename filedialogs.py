@@ -172,7 +172,7 @@ class BatchProcess:
 
 
 if __name__ == "__main__":
-    # file = load_filename()
+    file = load_filename()
     # print('load file = ', file)
 
     # new_file = save_filename()
