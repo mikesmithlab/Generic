@@ -3,10 +3,16 @@ import time
 import numpy as np
 import serial
 
+from Generic import filedialogs
+
 
 class Lauda(serial.Serial):
 
-    def __init__(self, port):
+    def __init__(self, port=None):
+        if port is None:
+            filedialogs.load_filename('Select a serial device',
+                                      directory='/dev/serial/by-id/',
+                                      file_filter=None)
         super().__init__(port)
         self.read_all()
 
