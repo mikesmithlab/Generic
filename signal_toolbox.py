@@ -1,8 +1,42 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from scipy import fftpack, signal
 
+
+def rms(xdata, gap=40, debug=False):
+    """Takes the rms of a periodic signal using an integer number of
+    wavelengths, gap is used to avoid noise near zero crossings"""
+    zero_crossings = np.where(np.diff(np.sign(xdata)))[0]
+    zero_crossing_diff = np.diff(zero_crossings)
+    crossings = []
+    no_of_clusters = 0
+    crossings.append([])
+    for i, z in enumerate(zero_crossing_diff):
+        if z > gap:
+            crossings[no_of_clusters].append(i)
+            no_of_clusters += 1
+            if i != len(zero_crossing_diff) - 1:
+                crossings.append([])
+        else:
+            crossings[no_of_clusters].append(i)
+
+    averaged_crossings = [int(np.mean(crosses)) for crosses in crossings]
+    crossing_indices = zero_crossings[averaged_crossings]
+    data_indices_b = np.insert(crossing_indices, 0, 0)
+    data_indices_t = np.append(crossing_indices, len(xdata))
+    data_signs = [np.sign(np.mean(xdata[b:t])) for b, t in
+                  zip(data_indices_b, data_indices_t)]
+
+    start = np.argwhere(np.array(data_signs) < 0)[0]
+    end = np.argwhere(np.array(data_signs) > 0)[-1]
+
+    if debug:
+        plt.plot(xdata)
+        plt.axvline(crossing_indices[start], color='red')
+        plt.axvline(crossing_indices[end], color='red')
+
+    return np.sqrt(np.mean(xdata[start:end] ** 2))
 
 def smooth(xdata, window_len=0, window='bartlett', show=False):
     """smooth a pandas data series or numpy array using a window with requested size.
