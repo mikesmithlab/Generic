@@ -1,12 +1,30 @@
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 __all__ = ['display', 'plot', 'read_img', 'load', 'read', 'write_img', 'save', 'write',
            'get_width_and_height', 'dimensions', 'get_height', 'height',
            'get_width', 'width', 'bgr_2_grayscale', 'to_uint8', 'stack_3',
-           'get_depth', 'grayscale_2_bgr']
+           'get_depth', 'grayscale_2_bgr', 'Displayer', 'mean']
 
+
+class Displayer:
+    def __init__(self, window_name):
+        self.window_name = window_name
+        cv2.namedWindow(self.window_name, cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow(self.window_name, 1280, 720)
+
+    def update_im(self, im):
+        cv2.imshow(self.window_name, im)
+        if cv2.waitKey(100) & 0xFF == ord('q'):
+            pass
+
+
+def mean(ims):
+    im = np.stack(ims, axis=len(np.shape(ims[0])))
+    im = np.float32(im)
+    im = np.mean(im, axis=len(np.shape(ims[0])))
+    return np.uint8(im)
 
 def display(image, title=''):
     """Uses cv2 to display an image then wait for a button press"""

@@ -1,9 +1,8 @@
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from . import *
-from Generic.images.drawing import draw_circles
 
 __all__ = ['extract_biggest_object', 'find_circles', 'find_colour',
            'find_color', 'histogram_peak']
@@ -48,7 +47,7 @@ def histogram_peak(im, disp=False):
     return peak
 
 
-def find_colour(image, col):
+def find_colour(image, col, t=8, disp=False):
     """
     LAB colorspace allows finding colours somewhat independent of
     lighting conditions.
@@ -59,8 +58,8 @@ def find_colour(image, col):
     lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     b = lab[:, :, 2]
     if col == 'Blue':
-        peak = histogram_peak(b, disp=False)
-        blue = threshold(b, thresh=peak-8, mode=cv2.THRESH_BINARY)
+        peak = histogram_peak(b, disp=disp)
+        blue = threshold(b, thresh=peak - t, mode=cv2.THRESH_BINARY)
         return ~blue
 
 

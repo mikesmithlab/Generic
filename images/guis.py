@@ -1,20 +1,20 @@
 import sys
+
 import cv2
 import numpy as np
 import qimage2ndarray as qim
-from PyQt5.QtCore import Qt, pyqtSignal, QRectF, QT_VERSION_STR
-from PyQt5.QtGui import QPixmap, QImage, QPainterPath, QCloseEvent
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QApplication,
-                             QSlider, QHBoxLayout, 
-                             QFileDialog, QCheckBox)
+                             QSlider, QHBoxLayout,
+                             QCheckBox)
+
 from Generic.pyqt5_widgets import QtImageViewer, QWidgetMod
-from skimage import filters
-from Generic import video, images
 from . import *
 
 __all__ = ['CircleGui', 'ThresholdGui', 'AdaptiveThresholdGui', 'InrangeGui',
            'ContoursGui', 'RotatedBoxGui','DistanceTransformGui','WatershedGui', 'ParamGui',
-           'CannyGui']
+           'CannyGui', 'Inrange3GUI']
 
 '''
 ------------------------------------------------------------------------------
@@ -257,6 +257,27 @@ class InrangeGui(ParamGui):
     def update(self):
         self.im = cv2.inRange(self.im0, self.param_dict['bottom'][0],
                               self.param_dict['top'][0])
+
+
+class Inrange3GUI(ParamGui):
+
+    def __init__(self, img):
+        self.grayscale = False
+        self.param_dict = {'0 bottom': [1, 0, 255, 1],
+                           '0 top': [200, 0, 255, 1],
+                           '1 bottom': [1, 0, 255, 1],
+                           '1 top': [200, 0, 255, 1],
+                           '2 bottom': [1, 0, 255, 1],
+                           '2 top': [200, 0, 255, 1]}
+        ParamGui.__init__(self, img)
+
+    def update(self):
+        self.im = cv2.inRange(
+            self.im0,
+            (self.param_dict['0 bottom'][0], self.param_dict['1 bottom'][0],
+             self.param_dict['2 bottom'][0]),
+            (self.param_dict['0 top'][0], self.param_dict['1 top'][0],
+             self.param_dict['2 top'][0]))
 
 class CannyGui(ParamGui):
 

@@ -1,7 +1,9 @@
-import cv2
 from math import pi, cos, sin
-from Generic import images
+
+import cv2
 import scipy.optimize as op
+
+from Generic import images
 
 __all__ = ['find_contours',
             'find_contour_centre',
@@ -9,7 +11,15 @@ __all__ = ['find_contours',
            'cut_out_object',
            'sort_contours',
            'find_contour_corners',
-           'fit_hex']
+           'fit_hex',
+           'center_of_mass']
+
+
+def center_of_mass(im):
+    moments = cv2.moments(im)
+    cx = int(moments['m10'] / moments['m00'])
+    cy = int(moments['m01'] / moments['m00'])
+    return (cx, cy)
 
 
 def find_contours(img, hierarchy=False):

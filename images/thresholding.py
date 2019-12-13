@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
+
 from . import *
 
-
-__all__ = ['threshold', 'adaptive_threshold', 'distance_transform', 'watershed']
+__all__ = ['threshold', 'adaptive_threshold', 'inrange', 'distance_transform',
+           'watershed']
 
 
 def threshold(img, thresh=None, mode=cv2.THRESH_BINARY):
@@ -57,6 +58,10 @@ def adaptive_threshold(img, block_size=5, constant=0, mode=cv2.THRESH_BINARY):
             constant
             )
     return out
+
+
+def inrange(im, bottom_tuple, top_tuple):
+    return cv2.inRange(im, bottom_tuple, top_tuple)
 
 
 
