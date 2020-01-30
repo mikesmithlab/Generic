@@ -203,21 +203,6 @@ class ReadVideo:
     def get_vid_props(self, show=False):
 
 
-        self.frame_num = self.read_vid.get(cv2.CAP_PROP_POS_FRAMES)
-        self.num_frames = int(self.read_vid.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.current_time = self.read_vid.get(cv2.CAP_PROP_POS_MSEC)
-        self.width = int(self.read_vid.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.read_vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        if self.read_vid.get(cv2.CAP_PROP_MONOCHROME) == 0.0:
-            self.colour = 3
-            self.frame_size=(self.height,self.width,3)
-        else:
-            self.colour = 1
-            self.frame_size = (self.width, self.height)
-        self.fps = self.read_vid.get(cv2.CAP_PROP_FPS)
-        self.format = self.read_vid.get(cv2.CAP_PROP_FORMAT)
-        self.codec = self.read_vid.get(cv2.CAP_PROP_FOURCC)
-
         self.file_extension = self.filename.split('.')[1]
 
         if show:
