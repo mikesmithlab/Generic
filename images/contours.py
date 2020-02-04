@@ -5,6 +5,8 @@ import scipy.optimize as op
 
 from Generic import images
 
+import numpy as np
+
 __all__ = ['find_contours',
             'find_contour_centre',
            'rotated_bounding_rectangle',
